@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using MKE.Extenstion;
 using MKE.Matrix;
@@ -14,6 +15,7 @@ namespace MKE.Interface
     public class BaseProblem
     {
         public GeometryParallelepiped Geometry { get; set; }
+        protected ILinearAlgebra<double> _la = LinearAlgebra.Get<double>();
 
         public int ProblemSize => Geometry.LastSequenceIndex;
         public bool[] isDirichletCond { get; set; }
@@ -41,7 +43,7 @@ namespace MKE.Interface
 
                 if (isDirichletCond[j])
                 {
-                    _rightPart.ThreadSafeAdd(i, -value * _direchletData[j]);
+                    _la.Sub(ref _rightPart[i], _la.Mult(value, _direchletData[j]));
                 }
                 else
                 {
@@ -52,13 +54,13 @@ namespace MKE.Interface
             {
                 element.EvaluateLocal(AddToMatrix);
             }
-            var solve = new Los();
+            var solve = new CGSolver();
             for (var i = 0; i < _direchletData.Length; i++)
             {
                 if (isDirichletCond[i])
                     matrix[i, i] = 1;
             }
-            solve.Initialization(30000, 1e-14, FactorizationType.LUsq);
+            solve.Initialization(30000, 1e-12, FactorizationType.LUsq);
             Solution = solve.Solve(matrix, _rightPart, x);
 
             for (var i = 0; i < _direchletData.Length; i++)
@@ -81,7 +83,7 @@ namespace MKE.Interface
                     {
                         if (!isDirichletCond[v[i]])
                         {
-                            rightPart.ThreadSafeAdd(v[i], elem.Integrate(i, domain.RightFunction));
+                            _la.Add(ref rightPart[v[i]], elem.Integrate(i, domain.RightFunction));
                         }
                     }
                 }
@@ -97,7 +99,7 @@ namespace MKE.Interface
                     {
                         if (!isDirichletCond[v[i]])
                         {
-                            rightPart.ThreadSafeAdd(v[i], elem.Integrate(i, cond.F));
+                            _la.Add(ref rightPart[v[i]], elem.Integrate(i, cond.F));
                         }
                     }
                 }
@@ -109,13 +111,12 @@ namespace MKE.Interface
 
         public double GetSolution(double x, double y, double z)
         {
-            var sum = 0d;
             foreach (var element in Geometry.MapDomains.Values.SelectMany(d => d.Elements).Where(d=>d.CheckElement(x,y,z)))
             {
-                sum += element.CalcOnElement(Solution, x, y, z);
+               return element.CalcOnElement(Solution, x, y, z);
             }
 
-            return sum;
+            throw new Exception();
         }
         private double[] CalcDirichletCondition()
         {
@@ -144,7 +145,7 @@ namespace MKE.Interface
                         }
 
                         var value = elem.Integrate(i, cond.F);
-                        b.ThreadSafeAdd(portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i]), value);
+                        _la.Add(ref b[portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i])], value);
                         tempIndices[portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i])] = elem.LocalToGlobalEnumeration[i];
                     }
                 }

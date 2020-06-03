@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Security.Cryptography;
@@ -20,6 +21,9 @@ using MKE.Interface;
 using MKE.Matrix;
 using MKE.Point;
 using MKE.Solver;
+using Newtonsoft.Json;
+using System.Dynamic;
+using JsonConverter = System.Text.Json.Serialization.JsonConverter;
 
 namespace MKE
 {
@@ -27,25 +31,59 @@ namespace MKE
     {
         static void Main(string[] args)
         {
-            var portrait = new SparsePortrait();
-
             var GeometryExperement1 = new GeometryParallelepiped();
             GeometryExperement1.MapXAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
-            GeometryExperement1.MapYAxisLines.Add(1, new AxisLines(0, 1, 1, 1, 0));
-            GeometryExperement1.MapZAxisLines.Add(1, new AxisLines(0, 1, 1, 1, 0));
+            GeometryExperement1.MapYAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
+            GeometryExperement1.MapZAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
+            GeometryExperement1.MapXAxisLines.Add(2, new AxisLines(1, 2, 1, 2, 0));
+
             GeometryExperement1.MapDomains.Add(1,
                                                new HierarchicalDomain3D<ParallelepipedElement>()
-                                               { DomainIndex = 1,RightFunction = (x,y,z)=>0,GeometryParallelepiped = GeometryExperement1, Order = 1, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-         //   GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) =>x, Surface = Surface.Top, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-          //  GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x, Surface = Surface.Bottom, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-         //   GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x, Surface = Surface.Back, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x, Surface = Surface.Front, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-         //   GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x, Surface = Surface.Left, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-         //   GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x, Surface = Surface.Right, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+                                               {
+                                                   DomainIndex = 1,
+                                                   Gamma = (x, y, z) => 1,
+                                                   Lambda = (x, y, z) => 1,
+                                                   RightFunction = (x, y, z) => -2 + x * x,
+                                                   GeometryParallelepiped = GeometryExperement1,
+                                                   Order = 2,
+                                                   XAxisIndex = 1,
+                                                   YAxisIndex = 1,
+                                                   ZAxisIndex = 1
+                                               });
+
+            GeometryExperement1.MapDomains.Add(2,
+                                               new HierarchicalDomain3D<ParallelepipedElement>()
+                                               {
+                                                   DomainIndex = 2,
+                                                   Gamma = (x, y, z) => 1,
+                                                   Lambda = (x, y, z) => 1,
+                                                   RightFunction = (x, y, z) => -2 + x * x,
+                                                   GeometryParallelepiped = GeometryExperement1,
+                                                   Order = 3,
+                                                   XAxisIndex = 2,
+                                                   YAxisIndex = 1,
+                                                   ZAxisIndex = 1
+                                               });
+
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Top, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Bottom, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Back, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Front, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Left, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Top, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Bottom, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Back, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Front, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            GeometryExperement1.NeumannConditions.Add(new NeumannCondition() { F = (x, y, z) => 2 * x, Surface = Surface.Right, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            var ia = JsonConvert.SerializeObject(GeometryExperement1, Formatting.None,
+                                                 new JsonSerializerSettings()
+                                                 {
+                                                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                                 });
             GeometryExperement1.GeneratePoints();
-            var problem = new BaseProblem {Geometry = GeometryExperement1};
+            var problem = new BaseProblem { Geometry = GeometryExperement1 };
             problem.SolveProblem();
-           var s= problem.GetSolution(0.25, 0.25, 0.25);
+            Console.WriteLine(problem.GetSolution(0.25, 0.25, 0.25));
             //for (int i = 0; i < 100; i++)
             //{
             //    var (matrix1, pr, n, _maxiter, eps) = ReadMatrixFromFile("matrixes/1");
@@ -60,48 +98,7 @@ namespace MKE
 
             Console.ReadKey();
         }
-        protected static (double[],bool[]) CalcDirichletCondition(GeometryParallelepiped geometry)
-        {
 
-            var portrait = new SparsePortrait();
-            foreach (var elem in geometry.DirichletConditions.SelectMany(x => x.Elements))
-            {
-                portrait.Add(elem.LocalToGlobalEnumeration.Values, elem.LocalToGlobalEnumeration.Values);
-            }
-
-            var matrix = new SparseMatrixReal(portrait.GetMappedLinks());
-            var b = new double[matrix.Rows];
-            var tempIndices = new int[matrix.Rows];
-            foreach (var cond in geometry.DirichletConditions)
-            {
-                foreach (var elem in cond.Elements)
-                {
-                    var mass = elem.GetMassMatrix();
-
-                    for (int i = 0; i < mass.RowsCount; i++)
-                    {
-                        for (int j = 0; j < mass.ColumnsCount; j++)
-                            matrix.ThreadSafeAdd(portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i]), portrait.PremutationColumnIndices.ElementAt(elem.LocalToGlobalEnumeration[j]), mass[i, j]);
-
-                        var value = elem.Integrate(i, cond.F);
-                        b.ThreadSafeAdd(portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i]), value);
-                        tempIndices[portrait.PremutationRowIndices.ElementAt(elem.LocalToGlobalEnumeration[i])] = elem.LocalToGlobalEnumeration[i];
-                    }
-                }
-            }
-            var solver = new CGSolver();
-            solver.Initialization(1000, 1e-15, FactorizationType.LUsq);
-            var tempRightPart= solver.Solve(matrix, b, new double[matrix.Rows]).ToArray();
-            var right = new double[geometry.LastSequenceIndex];
-            var booleanMask = new bool[geometry.LastSequenceIndex];
-            for (var i = 0; i < tempRightPart.Length; i++)
-            {
-                booleanMask[tempIndices[i]] = true;
-                right[tempIndices[i]] = tempRightPart[i];
-            }
-
-            return (right,booleanMask);
-        }
         private static (IMatrix<Complex>, Complex[], int, int, double) ReadMatrixFromFile(string path)
         {
             int n, _maxiter;

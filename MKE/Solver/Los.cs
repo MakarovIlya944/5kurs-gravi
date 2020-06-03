@@ -129,32 +129,9 @@ namespace MKE.Solver
             normR = Math.Sqrt(normR) / normF;
             norm_p = p.ScalarMultiply(p);
             var k = 1;
-            var restatr = 100;
             for (k = 1; k < MaxIteration && normR > Eps; k++)
             {
-                if (k % restatr == 0)
-                {
-                    Matrix.Multiply(x, r, 1); //  mult(x, r);
-                    for (var i = 0; i < rightSide.Length; i++)
-                    {
-                        r[i] = b[i] - r[i];
-                    }
-
-                    matrix.Lx(r); //  Lx(r);
-                    for (var i = 0; i < r.Length; i++)
-                    {
-                        var elem = r[i];
-                        z[i] = elem;
-                        normR += elem * elem;
-                    }
-
-                    matrix.Ux(z); // Ux(z);
-                    Matrix.Multiply(z, p, 1); //mult(z, p);
-                    matrix.Lx(p);
-                    norm_p = p.ScalarMultiply(p);
-
-                }
-                alpha = p.ScalarMultiply(r) / norm_p;
+               alpha = p.ScalarMultiply(r) / norm_p;
                 normR = 0.0;
                 for (var i = 0; i < b.Length; i++)
                 {

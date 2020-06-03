@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 using MKE.BasisFunction;
 using MKE.Domain;
 using MKE.ElementFragments;
@@ -33,11 +34,8 @@ namespace MKE.Point
         public int YAxisIndex { get; set; }
 
         public int ZAxisIndex { get; set; }
-
-        public int TypeCondition { get; set; }
-
-        public List<IElement> Elements { get; set; } = new List<IElement>();
-
+        public string Function { get; set; }
+        [JsonIgnore] public List<IElement> Elements { get; set; } = new List<IElement>();
         public bool Check(Point3D point, GeometryParallelepiped geometry)
         {
             switch (Surface)
@@ -74,12 +72,12 @@ namespace MKE.Point
 
     public class DirichletCondition : BaseCondition
     {
-        public Func<double, double, double, double> F { get; set; }
+        [JsonIgnore]public Func<double, double, double, double> F { get; set; }
     }
 
     public class NeumannCondition : BaseCondition
     {
-        public Func<double, double, double, double> F { get; set; }
+        [JsonIgnore] public Func<double, double, double, double> F { get; set; }
     }
 
     public class GeometryParallelepiped
@@ -139,6 +137,7 @@ namespace MKE.Point
                                                    tempPoints[(k, j, i + 1)], tempPoints[(k + 1, j, i + 1)],
                                                    tempPoints[(k, j + 1, i + 1)], tempPoints[(k + 1, j + 1, i + 1)],
                                                }, 9)
+                            { Lambda = value.Lambda, Gamma = value.Gamma }
                                               );
                         }
                     }
@@ -195,7 +194,7 @@ namespace MKE.Point
 
                 foreach (var cond in DirichletConditions.Where(cond => cond.Check(pointO, this)))
                 {
-                    var element = FillElementForCondition(surface, pointA, pointB, pointC, pointD,cond.Surface);
+                    var element = FillElementForCondition(surface, pointA, pointB, pointC, pointD, cond.Surface);
                     cond.Elements.Add(element);
                 }
                 foreach (var cond in NeumannConditions.Where(cond => cond.Check(pointO, this)))
@@ -206,9 +205,9 @@ namespace MKE.Point
             }
         }
 
-        private IElement FillElementForCondition(SurfaceSquare surfaceSquare, NumberedPoint3D pointA, NumberedPoint3D pointB, NumberedPoint3D pointC, NumberedPoint3D pointD,Surface surface)
+        private IElement FillElementForCondition(SurfaceSquare surfaceSquare, NumberedPoint3D pointA, NumberedPoint3D pointB, NumberedPoint3D pointC, NumberedPoint3D pointD, Surface surface)
         {
-            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() {pointA, pointB, pointC, pointD}, 9, surface);
+            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() { pointA, pointB, pointC, pointD }, 9, surface);
 
             var fragments = element.TemplateElementInformation;
             var temporaryDictForEdge = new Dictionary<Edge, int>();

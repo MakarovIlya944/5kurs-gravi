@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MKE.Utils;
+using Newtonsoft.Json;
 
 namespace MKE.Point
 {
@@ -75,7 +76,7 @@ namespace MKE.Point
 
     public class AxisLines
     {
-        public List<double> Axises { get; private set; }
+        [JsonIgnore] public List<double> Axises { get; private set; }
 
         public double Left { get; private set; }
 
@@ -86,6 +87,8 @@ namespace MKE.Point
         private double Q { get; set; }
 
         private int InnerDerive { get; set; }
+
+        public AxisLines(){}
 
         public AxisLines(double left, double right, double q, int n, int innerDerive)
         {
