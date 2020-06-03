@@ -20,25 +20,25 @@ namespace MKE
             using (StreamReader r = new StreamReader("problem.json"))
             {
                 string json = r.ReadToEnd();
-                 var GeometryExperement1 = JsonConvert.DeserializeObject<GeometryParallelepiped>(json);
-                 GeometryExperement1.InitAfterSerialize();
+                var GeometryExperement1 = JsonConvert.DeserializeObject<GeometryParallelepiped>(json);
+                GeometryExperement1.InitAfterSerialize();
 
-                 Console.Write(JsonConvert.SerializeObject(GeometryExperement1, Formatting.Indented,
-                                                           new JsonSerializerSettings()
-                                                           {
-                                                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                                                           }));
-                 GeometryExperement1.GeneratePoints();
-                 var problem = new BaseProblem { Geometry = GeometryExperement1 };
-                 problem.SolveProblem();
-                 var h = 1d/ Convert.ToDouble(GeometryExperement1.StepsT);
-                 for (var i = 1; i <= GeometryExperement1.StepsT; i++)
-                 {
-                     var x = GeometryExperement1.FuncTransformX(h*i);
-                     var y = GeometryExperement1.FuncTransformY(h * i);
-                     var z = GeometryExperement1.FuncTransformZ(h * i);
-                     Console.WriteLine($"{x}\t{y}\t{z}\t{problem.GetSolution(x, y, z)}");
-                 }
+                Console.Write(JsonConvert.SerializeObject(GeometryExperement1, Formatting.Indented,
+                                                          new JsonSerializerSettings()
+                                                          {
+                                                              ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                                          }));
+                GeometryExperement1.GeneratePoints();
+                var problem = new BaseProblem { Geometry = GeometryExperement1 };
+                problem.SolveProblem();
+                var h = 1d / Convert.ToDouble(GeometryExperement1.StepsT);
+                for (var i = 1; i <= GeometryExperement1.StepsT; i++)
+                {
+                    var x = GeometryExperement1.FuncTransformX(h * i);
+                    var y = GeometryExperement1.FuncTransformY(h * i);
+                    var z = GeometryExperement1.FuncTransformZ(h * i);
+                    Console.WriteLine($"{x}\t{y}\t{z}\t{problem.GetSolution(x, y, z)}");
+                }
             }
             //var GeometryExperement1 = new GeometryParallelepiped();
             //GeometryExperement1.MapXAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
@@ -84,7 +84,7 @@ namespace MKE
             //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Back, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
             //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Front, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
             //GeometryExperement1.NeumannConditions.Add(new NeumannCondition() { Function = "2.0 * X", Surface = Surface.Right, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            
+
             //for (int i = 0; i < 100; i++)
             //{
             //    var (matrix1, pr, n, _maxiter, eps) = ReadMatrixFromFile("matrixes/1");

@@ -19,6 +19,13 @@ namespace MKE.Interface
         (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrix(Func<double, double> lambda, Func<double, double> gamma, int order, double h);
         (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrix(Func<double, double, double> lambda, Func<double, double, double> gamma, int order, double hu, double hv);
         (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrix(Func<double, double, double, double> lambda, Func<double, double, double, double> gamma, int order, double hu, double hv, double hw);
+
+        (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated3d(double lambda, double gamma, int order, double hu, double hv, double hw);
+
+        (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated2d(double lambda, double gamma, int order, double hu, double hv);
+
+        (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated1d(double lambda, double gamma, int order, double hu);
+
         TemplateElementInformation Get3DFragments(int order);
 
         TemplateElementInformation Get2DFragments(int order);

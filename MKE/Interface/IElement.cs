@@ -42,6 +42,7 @@ namespace MKE.Interface
         public Dictionary<int, int> LocalToGlobalEnumeration { get; } = new Dictionary<int, int>();
         public Dictionary<int, bool> SkipPoint { get; } = new Dictionary<int, bool>();
         public IEnumerable<Func<double, double, double>> BasisFunctions { get; private set; }
+        public bool Precalculated { get; set; } = true;
 
         public TemplateElementInformation TemplateElementInformation { get; private set; }
         public SquaredElement(int order, IBasisFunction basis, IEnumerable<NumberedPoint3D> points, int integrateOrder, Surface surface)
@@ -85,16 +86,32 @@ namespace MKE.Interface
             var hy = rightBackTopPoint.Y - leftFrontBottomPoint.Y;
             var hz = rightBackTopPoint.Z - leftFrontBottomPoint.Z;
 
-            return Surface switch
+            if (!Precalculated)
             {
-                Surface.Front => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hz).Item2,
-                Surface.Back => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hz).Item2,
-                Surface.Top => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hy).Item2,
-                Surface.Bottom => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hy).Item2,
-                Surface.Left => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hy, hz).Item2,
-                Surface.Right => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hy, hz).Item2,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                return Surface switch
+                {
+                    Surface.Front => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hz).Item2,
+                    Surface.Back => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hz).Item2,
+                    Surface.Top => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hy).Item2,
+                    Surface.Bottom => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hx, hy).Item2,
+                    Surface.Left => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hy, hz).Item2,
+                    Surface.Right => Basis.GetMatrix((x, y) => 1, (x, y) => 1, Order, hy, hz).Item2,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+            else
+            {
+                return Surface switch
+                {
+                    Surface.Front => Basis.GetMatrixPreCalculated2d(1, 1, Order, hx, hz).Item2,
+                    Surface.Back => Basis.GetMatrixPreCalculated2d(1, 1, Order, hx, hz).Item2,
+                    Surface.Top => Basis.GetMatrixPreCalculated2d(1, 1, Order, hx, hy).Item2,
+                    Surface.Bottom => Basis.GetMatrixPreCalculated2d(1, 1, Order, hx, hy).Item2,
+                    Surface.Left => Basis.GetMatrixPreCalculated2d(1, 1, Order, hy, hz).Item2,
+                    Surface.Right => Basis.GetMatrixPreCalculated2d(1, 1, Order, hy, hz).Item2,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
         }
         public void EvaluateLocal(Action<int, int, double> A)
         {
@@ -132,6 +149,7 @@ namespace MKE.Interface
         public Func<double, double, double, double> Lambda { get; set; }
         public Func<double, double, double, double> Gamma { get; set; }
 
+        public bool Precalculated { get; set; } = true;
         public ParallelepipedElement(int order, IBasisFunction basis, IEnumerable<NumberedPoint3D> points, int integrateOrder)
         {
             Order = order;
@@ -183,8 +201,11 @@ namespace MKE.Interface
             Func<double, double> uTox = (x) => (x * hx + leftFrontBottomPoint.X);
             Func<double, double> vToy = (x) => (x * hy + leftFrontBottomPoint.Y);
             Func<double, double> wToz = (x) => (x * hz + leftFrontBottomPoint.Z);
-            (ReadonlyStorageMatrix G, ReadonlyStorageMatrix M) =
-                Basis.GetMatrix((x, y, z) => Lambda(uTox(x), vToy(y), wToz(z)), (x, y, z) => Gamma(uTox(x), vToy(y), wToz(z)), Order, hx, hy, hz);
+            var centered = (rightBackTopPoint - leftFrontBottomPoint / 2);
+            (ReadonlyStorageMatrix G, ReadonlyStorageMatrix M) = !Precalculated ?
+                Basis.GetMatrix((x, y, z) => Lambda(uTox(x), vToy(y), wToz(z)), (x, y, z) => Gamma(uTox(x), vToy(y), wToz(z)), Order, hx, hy, hz)
+            :
+                Basis.GetMatrixPreCalculated3d(Lambda(centered.X, centered.Y, centered.Z), Gamma(centered.X, centered.Y, centered.Z), Order, hx, hy, hz);
 
             for (int i = 0; i < BasisFunctions.Count(); i++)
             {

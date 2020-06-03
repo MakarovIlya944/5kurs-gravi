@@ -142,7 +142,7 @@ namespace MKE.Point
                 value.InitFunction();
             }
             var parsedFx = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionX).Compile();
-            FuncTransformX = (x) => parsedFx(new DummyT(x)); 
+            FuncTransformX = (x) => parsedFx(new DummyT(x));
             var parsedFy = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionY).Compile();
             FuncTransformY = (x) => parsedFy(new DummyT(x));
             var parsedFz = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionZ).Compile();
@@ -229,9 +229,9 @@ namespace MKE.Point
 
         public Dictionary<Vertex, int> Vertexes = new Dictionary<Vertex, int>(); //исходная нумерация вершин в новую
 
-        public Dictionary<Edge, List<(int, bool)>> Edges = new Dictionary<Edge, List<(int, bool)>>(); //ребро в исходной нумерации в номера доп точек на нём
+        public Dictionary<Edge, (int, List<(int, bool)>)> Edges = new Dictionary<Edge, (int, List<(int, bool)>)>(); //ребро в исходной нумерации в номера доп точек на нём
 
-        public Dictionary<SurfaceSquare, List<(int, bool)>> SurfaceSquares = new Dictionary<SurfaceSquare, List<(int, bool)>>(); //грань в исходной нумерации в номера доп точек на ней
+        public Dictionary<SurfaceSquare, (int, List<(int, bool)>)> SurfaceSquares = new Dictionary<SurfaceSquare, (int, List<(int, bool)>)>(); //грань в исходной нумерации в номера доп точек на ней
 
         public List<int> InnerPoints { get; set; } = new List<int>(); //номера внутренних точек
 
@@ -301,8 +301,8 @@ namespace MKE.Point
                         temporaryDictForEdge.Add(tempEdge, 0);
                     }
 
-                    element.LocalToGlobalEnumeration.Add(i, Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item1);
-                    element.SkipPoint.Add(Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item1, Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item2);
+                    element.LocalToGlobalEnumeration.Add(i, Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item1);
+                    element.SkipPoint.Add(Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item1, Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item2);
                 }
                 else if (fragments.InnerIndexes.Contains(i))
                 {
@@ -321,8 +321,8 @@ namespace MKE.Point
                         temporaryDictForSurface.Add(tempSurface, 0);
                     }
 
-                    element.LocalToGlobalEnumeration.Add(i, SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item1);
-                    element.SkipPoint.Add(SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item1, SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item2);
+                    element.LocalToGlobalEnumeration.Add(i, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1);
+                    element.SkipPoint.Add(SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item2);
                 }
             }
 
@@ -377,27 +377,27 @@ namespace MKE.Point
 
                             if (!Edges.ContainsKey(tempEdge)) //если список всех ребер не содержит его, то добавить
                             {
-                                Edges.Add(tempEdge, new List<(int, bool)>());
-                                Edges[tempEdge].Add((_sequence.Current, false));
+                                Edges.Add(tempEdge, (value.Order, new List<(int, bool)>()));
+                                Edges[tempEdge].Item2.Add((_sequence.Current, false));
                                 element.SkipPoint.Add(_sequence.Current, false);
                                 element.LocalToGlobalEnumeration.Add(i, _sequence.Current);
                                 _sequence.MoveNext();
                             }
                             else
                             {
-                                if (Edges[tempEdge].Count <= temporaryDictForEdge[tempEdge]) //если в списке всех доп точек для данного ребра их меньше, чем в текущем ребре, тогда добавить новые точки
+                                if (Edges[tempEdge].Item2.Count <= temporaryDictForEdge[tempEdge]) //если в списке всех доп точек для данного ребра их меньше, чем в текущем ребре, тогда добавить новые точки
                                 {
                                     //если порядок отличается, то все новые точки, должны помечаться как те , которые можно пропустить
-                                    Edges[tempEdge].Add(tempEdge.MinOrder > Edges.First(x => x.Key.Equals(tempEdge)).Key.MinOrder ? (_sequence.Current, true) : (_sequence.Current, false));
+                                    Edges[tempEdge].Item2.Add(tempEdge.MinOrder > Edges[tempEdge].Item1 ? (_sequence.Current, true) : (_sequence.Current, false));
                                     element.LocalToGlobalEnumeration.Add(i, _sequence.Current);
                                     _sequence.MoveNext();
                                 }
                                 else
                                 {
-                                    element.LocalToGlobalEnumeration.Add(i, Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item1);
+                                    element.LocalToGlobalEnumeration.Add(i, Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item1);
                                 }
 
-                                element.SkipPoint.Add(Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item1, Edges[tempEdge][temporaryDictForEdge[tempEdge]].Item2);
+                                element.SkipPoint.Add(Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item1, Edges[tempEdge].Item2[temporaryDictForEdge[tempEdge]].Item2);
                             }
                         }
                         else if (fragments.Surfaces.ContainsKey(i))
@@ -420,17 +420,17 @@ namespace MKE.Point
 
                             if (!SurfaceSquares.ContainsKey(tempSurface))
                             {
-                                SurfaceSquares.Add(tempSurface, new List<(int, bool)>());
-                                SurfaceSquares[tempSurface].Add((_sequence.Current, false));
+                                SurfaceSquares.Add(tempSurface, (value.Order, new List<(int, bool)>()));
+                                SurfaceSquares[tempSurface].Item2.Add((_sequence.Current, false));
                                 element.SkipPoint.Add(_sequence.Current, false);
                                 element.LocalToGlobalEnumeration.Add(i, _sequence.Current);
                                 _sequence.MoveNext();
                             }
                             else
                             {
-                                if (SurfaceSquares[tempSurface].Count <= temporaryDictForSurface[tempSurface])
+                                if (SurfaceSquares[tempSurface].Item2.Count <= temporaryDictForSurface[tempSurface])
                                 {
-                                    SurfaceSquares[tempSurface].Add(tempSurface.MinOrder > SurfaceSquares.First(x => x.Key.Equals(tempSurface)).Key.MinOrder
+                                    SurfaceSquares[tempSurface].Item2.Add(tempSurface.MinOrder > SurfaceSquares[tempSurface].Item1
                                                                         ? (_sequence.Current, true)
                                                                         : (_sequence.Current, false));
 
@@ -439,10 +439,10 @@ namespace MKE.Point
                                 }
                                 else
                                 {
-                                    element.LocalToGlobalEnumeration.Add(i, SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item1);
+                                    element.LocalToGlobalEnumeration.Add(i, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1);
                                 }
 
-                                element.SkipPoint.Add(SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item1, SurfaceSquares[tempSurface][temporaryDictForSurface[tempSurface]].Item2);
+                                element.SkipPoint.Add(SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item2);
                             }
                         }
                         else if (fragments.InnerIndexes.Contains(i))
@@ -466,7 +466,7 @@ namespace MKE.Point
             var a = element.Points.ElementAt(fragments.Vertices[0].Index);
             var b = element.Points.ElementAt(fragments.Vertices[1].Index);
             var edge1 = new Edge(a.Number, b.Number, 1);
-            if (!Edges.ContainsKey(edge1)) Edges.Add(edge1, new List<(int, bool)>());
+            if (!Edges.ContainsKey(edge1)) Edges.Add(edge1, (1, new List<(int, bool)>()));
 
             if (element.Points.Count() < 2)
             {
@@ -479,10 +479,10 @@ namespace MKE.Point
             var edge2 = new Edge(a.Number, c.Number, 1);
             var edge4 = new Edge(b.Number, d.Number, 1);
             var edge6 = new Edge(c.Number, d.Number, 1);
-            if (!Edges.ContainsKey(edge2)) Edges.Add(edge2, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge4)) Edges.Add(edge4, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge6)) Edges.Add(edge6, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface1)) SurfaceSquares.Add(surface1, new List<(int, bool)>());
+            if (!Edges.ContainsKey(edge2)) Edges.Add(edge2, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge4)) Edges.Add(edge4, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge6)) Edges.Add(edge6, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface1)) SurfaceSquares.Add(surface1, (1, new List<(int, bool)>()));
 
             if (element.Points.Count() < 4)
             {
@@ -506,19 +506,19 @@ namespace MKE.Point
             var edge10 = new Edge(b1.Number, d1.Number, 1);
             var edge11 = new Edge(c1.Number, d1.Number, 1);
             var edge12 = new Edge(d.Number, d1.Number, 1);
-            if (!Edges.ContainsKey(edge3)) Edges.Add(edge3, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge5)) Edges.Add(edge5, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge7)) Edges.Add(edge7, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge8)) Edges.Add(edge8, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge9)) Edges.Add(edge9, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge10)) Edges.Add(edge10, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge11)) Edges.Add(edge11, new List<(int, bool)>());
-            if (!Edges.ContainsKey(edge12)) Edges.Add(edge12, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface2)) SurfaceSquares.Add(surface2, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface3)) SurfaceSquares.Add(surface3, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface4)) SurfaceSquares.Add(surface4, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface5)) SurfaceSquares.Add(surface5, new List<(int, bool)>());
-            if (!SurfaceSquares.ContainsKey(surface6)) SurfaceSquares.Add(surface6, new List<(int, bool)>());
+            if (!Edges.ContainsKey(edge3)) Edges.Add(edge3, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge5)) Edges.Add(edge5, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge7)) Edges.Add(edge7, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge8)) Edges.Add(edge8, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge9)) Edges.Add(edge9, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge10)) Edges.Add(edge10, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge11)) Edges.Add(edge11, (1, new List<(int, bool)>()));
+            if (!Edges.ContainsKey(edge12)) Edges.Add(edge12, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface2)) SurfaceSquares.Add(surface2, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface3)) SurfaceSquares.Add(surface3, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface4)) SurfaceSquares.Add(surface4, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface5)) SurfaceSquares.Add(surface5, (1, new List<(int, bool)>()));
+            if (!SurfaceSquares.ContainsKey(surface6)) SurfaceSquares.Add(surface6, (1, new List<(int, bool)>()));
         }
     }
 }
