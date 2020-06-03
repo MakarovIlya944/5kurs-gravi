@@ -23,9 +23,16 @@ namespace MKE.Interface
 
         public void SolveProblem()
         {
+
+            Console.WriteLine("Start solve problem");
+            Console.WriteLine("ExtendsElementWeight");
             Geometry.ExtendsElementWeight();
+            Console.WriteLine($"Problem size = {ProblemSize}");
+            Console.WriteLine("FillConditionsElement");
             Geometry.FillConditionsElement();
+            Console.WriteLine("CalcDirichletCondition");
             var _direchletData = CalcDirichletCondition();
+            Console.WriteLine("CalcRightPart");
             var _rightPart = CalcRightPart();
             var portrait = new SparsePortrait();
             foreach (var element in Geometry.MapDomains.Values.SelectMany(domain => domain.Elements))
@@ -50,10 +57,13 @@ namespace MKE.Interface
                     matrix.ThreadSafeAdd(i, j, value);
                 }
             }
+            Console.WriteLine("Create Matrix");
+
             foreach (var element in Geometry.MapDomains.Values.SelectMany(d => d.Elements))
             {
                 element.EvaluateLocal(AddToMatrix);
             }
+
             var solve = new CGSolver();
             for (var i = 0; i < _direchletData.Length; i++)
             {
@@ -61,7 +71,9 @@ namespace MKE.Interface
                     matrix[i, i] = 1;
             }
             solve.Initialization(30000, 1e-12, FactorizationType.LUsq);
+            Console.WriteLine("Start Solve Slae");
             Solution = solve.Solve(matrix, _rightPart, x);
+            Console.WriteLine("End Solve Slae");
 
             for (var i = 0; i < _direchletData.Length; i++)
             {

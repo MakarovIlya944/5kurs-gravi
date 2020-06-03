@@ -78,17 +78,19 @@ namespace MKE.Point
     {
         [JsonIgnore] public List<double> Axises { get; private set; }
 
-        public double Left { get; private set; }
+        public double Left { get; set; }
 
-        public double Right { get; private set; }
+        public double Right { get; set; }
 
-        public int N { get; private set; }
+        private int NDerived { get; set; }
 
-        private double Q { get; set; }
+        private double QDerived { get; set; }
 
-        private int InnerDerive { get; set; }
+        public int N { get; set; }
+        public double Q { get; set; }
+        public int InnerDerive { get; set; }
 
-        public AxisLines(){}
+        public AxisLines() { }
 
         public AxisLines(double left, double right, double q, int n, int innerDerive)
         {
@@ -106,9 +108,16 @@ namespace MKE.Point
                 throw new ArgumentException("innerDerive can`t be less zero");
             }
 
-            N = DeriveN(n, innerDerive);
-            Q = DeriveQ(q, innerDerive);
-            Axises = GenerateAxises(left, right, N, Q);
+            N = n;
+            Q = q;
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            NDerived = DeriveN(N, InnerDerive);
+            QDerived = DeriveQ(Q, InnerDerive);
+            Axises = GenerateAxises(Left, Right, NDerived, QDerived);
         }
 
         private double DeriveQ(double q, int innerDerive)

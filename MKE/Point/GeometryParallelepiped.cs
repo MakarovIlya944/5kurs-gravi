@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using System.Text.Json.Serialization;
 using MKE.BasisFunction;
 using MKE.Domain;
 using MKE.ElementFragments;
 using MKE.Interface;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MKE.Point
 {
+    [JsonConverter(typeof(StringEnumConverter))]
     public enum Surface
     {
         Front, //XZ where y smaller
@@ -72,16 +75,44 @@ namespace MKE.Point
 
     public class DirichletCondition : BaseCondition
     {
-        [JsonIgnore]public Func<double, double, double, double> F { get; set; }
+        [JsonIgnore] public Func<double, double, double, double> F { get; set; }
+
+        public void InitFunction()
+        {
+            var parsedF = DynamicExpressionParser.ParseLambda<Point3D, double>(ParsingConfig.Default, false, Function).Compile();
+            F = (x, y, z) => parsedF(new Point3D(x, y, z));
+        }
     }
 
     public class NeumannCondition : BaseCondition
     {
         [JsonIgnore] public Func<double, double, double, double> F { get; set; }
+        public void InitFunction()
+        {
+            var parsedF = DynamicExpressionParser.ParseLambda<Point3D, double>(ParsingConfig.Default, false, Function).Compile();
+            F = (x, y, z) => parsedF(new Point3D(x, y, z));
+        }
     }
 
+    public class DummyT
+    {
+        public double T { get; set; }
+
+        public DummyT(double x)
+        {
+            T = x;
+        }
+    }
     public class GeometryParallelepiped
     {
+        public string FunctionForSolutionX { get; set; }
+        public string FunctionForSolutionY { get; set; }
+        public string FunctionForSolutionZ { get; set; }
+        public int StepsT { get; set; }
+        [JsonIgnore] public Func<double, double> FuncTransformX { get; set; }
+        [JsonIgnore] public Func<double, double> FuncTransformY { get; set; }
+        [JsonIgnore] public Func<double, double> FuncTransformZ { get; set; }
+
         public Dictionary<int, AxisLines> MapXAxisLines { get; set; } = new Dictionary<int, AxisLines>();
 
         public Dictionary<int, AxisLines> MapYAxisLines { get; set; } = new Dictionary<int, AxisLines>();
@@ -90,6 +121,33 @@ namespace MKE.Point
 
         public HashSet<NumberedPoint3D> Points { get; set; } = new HashSet<NumberedPoint3D>(new ComparerPoint()); //в исходной нумерации
 
+        public void InitAfterSerialize()
+        {
+            foreach (var (key, value) in MapXAxisLines)
+            {
+                value.Initialize();
+            }
+            foreach (var (key, value) in MapYAxisLines)
+            {
+                value.Initialize();
+            }
+            foreach (var (key, value) in MapZAxisLines)
+            {
+                value.Initialize();
+            }
+            DirichletConditions.ForEach(x => x.InitFunction());
+            NeumannConditions.ForEach(x => x.InitFunction());
+            foreach (var (key, value) in MapDomains)
+            {
+                value.InitFunction();
+            }
+            var parsedFx = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionX).Compile();
+            FuncTransformX = (x) => parsedFx(new DummyT(x)); 
+            var parsedFy = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionY).Compile();
+            FuncTransformY = (x) => parsedFy(new DummyT(x));
+            var parsedFz = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionZ).Compile();
+            FuncTransformZ = (x) => parsedFz(new DummyT(x));
+        }
         public void GeneratePoints()
         {
             var z = 0;
@@ -145,6 +203,8 @@ namespace MKE.Point
 
                 Points.UnionWith(tempPoints.Values);
             }
+
+            Console.WriteLine($"Vertex Count = {Points.Count}\t Element Count = {MapDomains.Values.SelectMany(x => x.Elements).Count()}");
         }
 
         public Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>> MapDomains { get; set; } = new Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>>();
@@ -203,6 +263,8 @@ namespace MKE.Point
                     cond.Elements.Add(element);
                 }
             }
+            Console.WriteLine($"Boundary Element Count = {DirichletConditions.Sum(x => x.Elements.Count) + NeumannConditions.Sum(x => x.Elements.Count)}");
+
         }
 
         private IElement FillElementForCondition(SurfaceSquare surfaceSquare, NumberedPoint3D pointA, NumberedPoint3D pointB, NumberedPoint3D pointC, NumberedPoint3D pointD, Surface surface)

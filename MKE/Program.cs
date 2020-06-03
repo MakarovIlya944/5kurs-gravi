@@ -1,89 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Numerics;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using MathNet.Numerics;
-using MathNet.Numerics.Integration;
-using MKE.BasisFunction;
 using MKE.Domain;
-using MKE.ElementFragments;
-using MKE.Extenstion;
 using MKE.Interface;
 using MKE.Matrix;
 using MKE.Point;
-using MKE.Solver;
 using Newtonsoft.Json;
-using System.Dynamic;
-using JsonConverter = System.Text.Json.Serialization.JsonConverter;
-
 namespace MKE
 {
     class Program
     {
         static void Main(string[] args)
         {
-            var GeometryExperement1 = new GeometryParallelepiped();
-            GeometryExperement1.MapXAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
-            GeometryExperement1.MapYAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
-            GeometryExperement1.MapZAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
-            GeometryExperement1.MapXAxisLines.Add(2, new AxisLines(1, 2, 1, 2, 0));
+            using (StreamReader r = new StreamReader("problem.json"))
+            {
+                string json = r.ReadToEnd();
+                 var GeometryExperement1 = JsonConvert.DeserializeObject<GeometryParallelepiped>(json);
+                 GeometryExperement1.InitAfterSerialize();
 
-            GeometryExperement1.MapDomains.Add(1,
-                                               new HierarchicalDomain3D<ParallelepipedElement>()
-                                               {
-                                                   DomainIndex = 1,
-                                                   Gamma = (x, y, z) => 1,
-                                                   Lambda = (x, y, z) => 1,
-                                                   RightFunction = (x, y, z) => -2 + x * x,
-                                                   GeometryParallelepiped = GeometryExperement1,
-                                                   Order = 2,
-                                                   XAxisIndex = 1,
-                                                   YAxisIndex = 1,
-                                                   ZAxisIndex = 1
-                                               });
+                 Console.Write(JsonConvert.SerializeObject(GeometryExperement1, Formatting.Indented,
+                                                           new JsonSerializerSettings()
+                                                           {
+                                                               ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                                                           }));
+                 GeometryExperement1.GeneratePoints();
+                 var problem = new BaseProblem { Geometry = GeometryExperement1 };
+                 problem.SolveProblem();
+                 var h = 1d/ Convert.ToDouble(GeometryExperement1.StepsT);
+                 for (var i = 1; i <= GeometryExperement1.StepsT; i++)
+                 {
+                     var x = GeometryExperement1.FuncTransformX(h*i);
+                     var y = GeometryExperement1.FuncTransformY(h * i);
+                     var z = GeometryExperement1.FuncTransformZ(h * i);
+                     Console.WriteLine($"{x}\t{y}\t{z}\t{problem.GetSolution(x, y, z)}");
+                 }
+            }
+            //var GeometryExperement1 = new GeometryParallelepiped();
+            //GeometryExperement1.MapXAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
+            //GeometryExperement1.MapYAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
+            //GeometryExperement1.MapZAxisLines.Add(1, new AxisLines(0, 1, 1, 2, 0));
+            //GeometryExperement1.MapXAxisLines.Add(2, new AxisLines(1, 2, 1, 2, 0));
 
-            GeometryExperement1.MapDomains.Add(2,
-                                               new HierarchicalDomain3D<ParallelepipedElement>()
-                                               {
-                                                   DomainIndex = 2,
-                                                   Gamma = (x, y, z) => 1,
-                                                   Lambda = (x, y, z) => 1,
-                                                   RightFunction = (x, y, z) => -2 + x * x,
-                                                   GeometryParallelepiped = GeometryExperement1,
-                                                   Order = 3,
-                                                   XAxisIndex = 2,
-                                                   YAxisIndex = 1,
-                                                   ZAxisIndex = 1
-                                               });
+            //GeometryExperement1.MapDomains.Add(1,
+            //                                   new HierarchicalDomain3D<ParallelepipedElement>()
+            //                                   {
+            //                                       DomainIndex = 1,
+            //                                       GammaFunction = "1.0",
+            //                                       LambdaFunction = "1.0",
+            //                                       Function = "-2.0 + X * X",
+            //                                       GeometryParallelepiped = GeometryExperement1,
+            //                                       Order = 2,
+            //                                       XAxisIndex = 1,
+            //                                       YAxisIndex = 1,
+            //                                       ZAxisIndex = 1
+            //                                   });
 
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Top, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Bottom, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Back, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Front, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Left, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Top, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Bottom, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Back, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { F = (x, y, z) => x * x, Surface = Surface.Front, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            GeometryExperement1.NeumannConditions.Add(new NeumannCondition() { F = (x, y, z) => 2 * x, Surface = Surface.Right, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
-            var ia = JsonConvert.SerializeObject(GeometryExperement1, Formatting.None,
-                                                 new JsonSerializerSettings()
-                                                 {
-                                                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-                                                 });
-            GeometryExperement1.GeneratePoints();
-            var problem = new BaseProblem { Geometry = GeometryExperement1 };
-            problem.SolveProblem();
-            Console.WriteLine(problem.GetSolution(0.25, 0.25, 0.25));
+            //GeometryExperement1.MapDomains.Add(2,
+            //                                   new HierarchicalDomain3D<ParallelepipedElement>()
+            //                                   {
+            //                                       DomainIndex = 2,
+            //                                       GammaFunction = "1.0",
+            //                                       LambdaFunction = "1.0",
+            //                                       Function = "-2.0 + X * X",
+            //                                       GeometryParallelepiped = GeometryExperement1,
+            //                                       Order = 3,
+            //                                       XAxisIndex = 2,
+            //                                       YAxisIndex = 1,
+            //                                       ZAxisIndex = 1
+            //                                   });
+
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Top, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Bottom, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Back, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Front, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Left, XAxisIndex = 1, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Top, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Bottom, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Back, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.DirichletConditions.Add(new DirichletCondition() { Function = "X * X", Surface = Surface.Front, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            //GeometryExperement1.NeumannConditions.Add(new NeumannCondition() { Function = "2.0 * X", Surface = Surface.Right, XAxisIndex = 2, YAxisIndex = 1, ZAxisIndex = 1 });
+            
             //for (int i = 0; i < 100; i++)
             //{
             //    var (matrix1, pr, n, _maxiter, eps) = ReadMatrixFromFile("matrixes/1");
