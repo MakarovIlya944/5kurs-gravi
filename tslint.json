@@ -1,0 +1,62 @@
+{
+  "linterOptions": { "exclude": ["**/*.json"] },
+  "defaultSeverity": "error",
+  "extends": ["tslint:recommended"],
+  "jsRules": {},
+  "rules": {
+    "member-access": false,
+    "variable-name": {
+      "options": ["check-format", "allow-leading-underscore", "allow-pascal-case"],
+      "severity": "warning"
+    },
+    "max-classes-per-file": false,
+    "member-ordering": false,
+    "comment-format": false,
+    "curly": [true, "ignore-same-line"],
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "no-empty-interface": { "severity": "warning" },
+    "trailing-comma": {
+      "options": { "esSpecCompliant": true }
+    },
+    "typedef-whitespace": {
+      "options": [
+        {
+          "call-signature": "nospace",
+          "index-signature": "nospace",
+          "parameter": "nospace",
+          "property-declaration": "nospace",
+          "variable-declaration": "nospace"
+        },
+        {
+          "call-signature": "onespace",
+          "index-signature": "onespace",
+          "parameter": "onespace",
+          "property-declaration": "onespace",
+          "variable-declaration": "onespace"
+        }
+      ],
+      "severity": "warning"
+    },
+    "space-before-function-paren": [true, { "anonymous": "always", "named": "never", "asyncArrow": "always" }],
+    "no-trailing-whitespace": { "severity": "warning" },
+    "whitespace": { "severity": "warning" },
+    "array-type": false,
+    "max-line-length": false,
+    "no-bitwise": false,
+    "object-literal-sort-keys": false,
+    "interface-over-type-literal": { "severity": "warning" },
+    "no-empty": false,
+    "no-conditional-assignment": false,
+    "no-angle-bracket-type-assertion": false,
+    "prefer-const": { "severity": "warning" },
+    "no-unused-expression": { "severity": "warning" },
+    "no-switch-case-fall-through": true,
+    "forin": { "severity": "warning" },
+    "one-variable-per-declaration": { "severity": "warning" },
+    "object-literal-shorthand": { "severity": "warning" },
+    "object-literal-key-quotes": { "severity": "none" },
+    "no-floating-promises": [true, "PromiseResolve"],
+    "radix": { "severity": "none" }
+  },
+  "rulesDirectory": []
+}
