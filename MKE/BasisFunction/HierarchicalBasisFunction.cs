@@ -745,14 +745,14 @@ namespace MKE.BasisFunction
                 yield break;
             }
 
-            yield return u => (2 * u - 1) * (10 * (u - 10) * u + 1);
+            yield return u => (2 * u - 1) * (10 * (u - 1) * u + 1);
 
             if (order == 4)
             {
                 yield break;
             }
 
-            yield return u => 1 + 10 * (-1 + u) * u * (2 + 7 * (u - 1) * u);
+            yield return u => 1 + 10 * (u - 1) * u * (2 + 7 * (u - 1) * u);
 
             if (order == 5)
             {

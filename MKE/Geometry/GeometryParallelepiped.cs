@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
 using MKE.BasisFunction;
+using MKE.Condition;
 using MKE.Domain;
+using MKE.Element;
 using MKE.ElementFragments;
 using MKE.Interface;
+using MKE.Point;
+using MKE.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace MKE.Point
+namespace MKE.Geometry
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum Surface
@@ -28,81 +31,6 @@ namespace MKE.Point
         Right, //YZ where x bigger
     }
 
-    public class BaseCondition
-    {
-        public Surface Surface { get; set; }
-
-        public int XAxisIndex { get; set; }
-
-        public int YAxisIndex { get; set; }
-
-        public int ZAxisIndex { get; set; }
-        public string Function { get; set; }
-        [JsonIgnore] public List<IElement> Elements { get; set; } = new List<IElement>();
-        public bool Check(Point3D point, GeometryParallelepiped geometry)
-        {
-            switch (Surface)
-            {
-                case Surface.Front:
-                    return geometry.MapXAxisLines[XAxisIndex].Left <= point.X && point.X <= geometry.MapXAxisLines[XAxisIndex].Right &&
-                           geometry.MapZAxisLines[ZAxisIndex].Left <= point.Z && point.Z <= geometry.MapZAxisLines[ZAxisIndex].Right &&
-                           Math.Abs(geometry.MapYAxisLines[YAxisIndex].Left - point.Y) < 1e-14;
-                case Surface.Back:
-                    return geometry.MapXAxisLines[XAxisIndex].Left <= point.X && point.X <= geometry.MapXAxisLines[XAxisIndex].Right &&
-                           geometry.MapZAxisLines[ZAxisIndex].Left <= point.Z && point.Z <= geometry.MapZAxisLines[ZAxisIndex].Right &&
-                           Math.Abs(geometry.MapYAxisLines[YAxisIndex].Right - point.Y) < 1e-14;
-                case Surface.Top:
-                    return geometry.MapXAxisLines[XAxisIndex].Left <= point.X && point.X <= geometry.MapXAxisLines[XAxisIndex].Right &&
-                           geometry.MapYAxisLines[YAxisIndex].Left <= point.Y && point.Y <= geometry.MapYAxisLines[YAxisIndex].Right &&
-                           Math.Abs(geometry.MapZAxisLines[ZAxisIndex].Right - point.Z) < 1e-14;
-                case Surface.Bottom:
-                    return geometry.MapXAxisLines[XAxisIndex].Left <= point.X && point.X <= geometry.MapXAxisLines[XAxisIndex].Right &&
-                           geometry.MapYAxisLines[YAxisIndex].Left <= point.Y && point.Y <= geometry.MapYAxisLines[YAxisIndex].Right &&
-                           Math.Abs(geometry.MapZAxisLines[ZAxisIndex].Left - point.Z) < 1e-14;
-                case Surface.Left:
-                    return geometry.MapZAxisLines[ZAxisIndex].Left <= point.Z && point.Z <= geometry.MapZAxisLines[ZAxisIndex].Right &&
-                           geometry.MapYAxisLines[YAxisIndex].Left <= point.Y && point.Y <= geometry.MapYAxisLines[YAxisIndex].Right &&
-                           Math.Abs(geometry.MapXAxisLines[XAxisIndex].Left - point.X) < 1e-14;
-                case Surface.Right:
-                    return geometry.MapZAxisLines[ZAxisIndex].Left <= point.Z && point.Z <= geometry.MapZAxisLines[ZAxisIndex].Right &&
-                           geometry.MapYAxisLines[YAxisIndex].Left <= point.Y && point.Y <= geometry.MapYAxisLines[YAxisIndex].Right &&
-                           Math.Abs(geometry.MapXAxisLines[XAxisIndex].Right - point.X) < 1e-14;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-    }
-
-    public class DirichletCondition : BaseCondition
-    {
-        [JsonIgnore] public Func<double, double, double, double> F { get; set; }
-
-        public void InitFunction()
-        {
-            var parsedF = DynamicExpressionParser.ParseLambda<Point3D, double>(ParsingConfig.Default, false, Function).Compile();
-            F = (x, y, z) => parsedF(new Point3D(x, y, z));
-        }
-    }
-
-    public class NeumannCondition : BaseCondition
-    {
-        [JsonIgnore] public Func<double, double, double, double> F { get; set; }
-        public void InitFunction()
-        {
-            var parsedF = DynamicExpressionParser.ParseLambda<Point3D, double>(ParsingConfig.Default, false, Function).Compile();
-            F = (x, y, z) => parsedF(new Point3D(x, y, z));
-        }
-    }
-
-    public class DummyT
-    {
-        public double T { get; set; }
-
-        public DummyT(double x)
-        {
-            T = x;
-        }
-    }
     public class GeometryParallelepiped
     {
         public string FunctionForSolutionX { get; set; }
@@ -121,6 +49,37 @@ namespace MKE.Point
 
         public HashSet<NumberedPoint3D> Points { get; set; } = new HashSet<NumberedPoint3D>(new ComparerPoint()); //в исходной нумерации
 
+
+        public Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>> MapDomains { get; set; } = new Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>>();
+
+        public List<DirichletCondition> DirichletConditions { get; set; } = new List<DirichletCondition>();
+
+        public List<NeumannCondition> NeumannConditions { get; set; } = new List<NeumannCondition>();
+
+
+        private static IEnumerator<int> GetSequence()
+        {
+            var i = 0;
+
+            while (true)
+            {
+                yield return i;
+
+                i++;
+            }
+        }
+
+        public Dictionary<Vertex, int> Vertexes = new Dictionary<Vertex, int>(); //исходная нумерация вершин в новую
+
+        public Dictionary<Edge, (int, List<(int, bool)>)> Edges = new Dictionary<Edge, (int, List<(int, bool)>)>(); //ребро в исходной нумерации в номера доп точек на нём
+
+        public Dictionary<SurfaceSquare, (int, List<(int, bool)>)> SurfaceSquares = new Dictionary<SurfaceSquare, (int, List<(int, bool)>)>(); //грань в исходной нумерации в номера доп точек на ней
+
+        public List<int> InnerPoints { get; set; } = new List<int>(); //номера внутренних точек
+
+        private readonly IEnumerator<int> _sequence = GetSequence();
+
+        public int LastSequenceIndex { get; set; }
         public void InitAfterSerialize()
         {
             foreach (var (key, value) in MapXAxisLines)
@@ -139,7 +98,7 @@ namespace MKE.Point
             NeumannConditions.ForEach(x => x.InitFunction());
             foreach (var (key, value) in MapDomains)
             {
-                value.InitFunction();
+                value.InitializationFunction();
             }
             var parsedFx = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionX).Compile();
             FuncTransformX = (x) => parsedFx(new DummyT(x));
@@ -194,7 +153,7 @@ namespace MKE.Point
                                                    tempPoints[(k, j + 1, i)], tempPoints[(k + 1, j + 1, i)],
                                                    tempPoints[(k, j, i + 1)], tempPoints[(k + 1, j, i + 1)],
                                                    tempPoints[(k, j + 1, i + 1)], tempPoints[(k + 1, j + 1, i + 1)],
-                                               }, 9)
+                                               }, 6)
                             { Lambda = value.Lambda, Gamma = value.Gamma }
                                               );
                         }
@@ -206,39 +165,6 @@ namespace MKE.Point
 
             Console.WriteLine($"Vertex Count = {Points.Count}\t Element Count = {MapDomains.Values.SelectMany(x => x.Elements).Count()}");
         }
-
-        public Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>> MapDomains { get; set; } = new Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>>();
-
-        public List<DirichletCondition> DirichletConditions { get; set; } = new List<DirichletCondition>();
-
-        public List<NeumannCondition> NeumannConditions { get; set; } = new List<NeumannCondition>();
-
-        //public List<MixedCondition> MixedConditions { get; set; } = new List<MixedCondition>();
-
-        private static IEnumerator<int> GetSequence()
-        {
-            var i = 0;
-
-            while (true)
-            {
-                yield return i;
-
-                i++;
-            }
-        }
-
-        public Dictionary<Vertex, int> Vertexes = new Dictionary<Vertex, int>(); //исходная нумерация вершин в новую
-
-        public Dictionary<Edge, (int, List<(int, bool)>)> Edges = new Dictionary<Edge, (int, List<(int, bool)>)>(); //ребро в исходной нумерации в номера доп точек на нём
-
-        public Dictionary<SurfaceSquare, (int, List<(int, bool)>)> SurfaceSquares = new Dictionary<SurfaceSquare, (int, List<(int, bool)>)>(); //грань в исходной нумерации в номера доп точек на ней
-
-        public List<int> InnerPoints { get; set; } = new List<int>(); //номера внутренних точек
-
-        private readonly IEnumerator<int> _sequence = GetSequence();
-
-        public int LastSequenceIndex { get; set; }
-
         public void FillConditionsElement()
         {
             var tempPoints = Points.ToDictionary(x => x.Number, y => y);
@@ -269,7 +195,7 @@ namespace MKE.Point
 
         private IElement FillElementForCondition(SurfaceSquare surfaceSquare, NumberedPoint3D pointA, NumberedPoint3D pointB, NumberedPoint3D pointC, NumberedPoint3D pointD, Surface surface)
         {
-            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() { pointA, pointB, pointC, pointD }, 9, surface);
+            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() { pointA, pointB, pointC, pointD }, 6, surface);
 
             var fragments = element.TemplateElementInformation;
             var temporaryDictForEdge = new Dictionary<Edge, int>();

@@ -13,9 +13,4 @@ namespace MKE.Interface
         IPoint Multiply(double x);
         IPoint Divide(double x);
     }
-
-    public interface IPointNumbered:IPoint
-    {
-        int Number { get; }
-    }
 }

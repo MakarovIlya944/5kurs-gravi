@@ -7,9 +7,11 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Text;
 using MKE.Domain;
+using MKE.Geometry;
 using MKE.Interface;
 using MKE.Matrix;
 using MKE.Point;
+using MKE.Problem;
 using Newtonsoft.Json;
 namespace MKE
 {
@@ -31,13 +33,15 @@ namespace MKE
                 GeometryExperement1.GeneratePoints();
                 var problem = new BaseProblem { Geometry = GeometryExperement1 };
                 problem.SolveProblem();
+                Console.Clear();
                 var h = 1d / Convert.ToDouble(GeometryExperement1.StepsT);
                 for (var i = 1; i <= GeometryExperement1.StepsT; i++)
                 {
                     var x = GeometryExperement1.FuncTransformX(h * i);
                     var y = GeometryExperement1.FuncTransformY(h * i);
                     var z = GeometryExperement1.FuncTransformZ(h * i);
-                    Console.WriteLine($"{x}\t{y}\t{z}\t{problem.GetSolution(x, y, z)}");
+                    //Console.WriteLine($"{x}\t{y}\t{z}\t{problem.GetSolution(x, y, z)}");
+                    Console.WriteLine($"{problem.GetSolution(x, y, z)}");
                 }
             }
             //var GeometryExperement1 = new GeometryParallelepiped();

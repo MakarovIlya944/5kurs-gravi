@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace MKE.Solver {
+namespace MKE.Utils {
     public interface ILinearAlgebra<T>
     {
         T Cast(double a);

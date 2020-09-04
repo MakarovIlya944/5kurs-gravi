@@ -5,18 +5,13 @@ namespace MKE.Interface
 {
     public interface IDomain
     {
-        
-    }
-
-    public enum Parameter
-    {
-        Lambda,
-        Sigma,
-        Gamma
-    }
-    public class FemDomain
-    {
-        public IEnumerable<IElement> Elements;
-        public Dictionary<Parameter, double> Parameters;
+        int DomainIndex { get; set; }
+        int XAxisIndex { get; set; }
+        int YAxisIndex { get; set; }
+        int ZAxisIndex { get; set; }
+        List<IElement> Elements { get; set; }
+        string Function { get; set; }
+        string LambdaFunction { get; set; }
+        string GammaFunction { get; set; }
     }
 }

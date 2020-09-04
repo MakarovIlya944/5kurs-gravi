@@ -2,7 +2,7 @@
 using System.Numerics;
 using Quasar.Native;
 
-namespace MKE.Solver {
+namespace MKE.Utils {
     public class LinearAlgebra : ILinearAlgebra<double>, ILinearAlgebra<Complex>
     {
         public static ILinearAlgebra<T> Get<T>() => (ILinearAlgebra<T>)new LinearAlgebra();
