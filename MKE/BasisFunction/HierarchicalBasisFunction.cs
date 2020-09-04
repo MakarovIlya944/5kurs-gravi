@@ -14,155 +14,56 @@ namespace MKE.BasisFunction
 {
     public class HierarchicalBasisFunction : IBasisFunction
     {
-        private static Dictionary<int, ImmutableArray<Func<double, double>>> PreCompiledFunction1D = CreatePreCompiledFunction1d();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>> PreCompiledFunction1D = CreatePreCompiledFunction1d();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> PreCompiledFunction2D = CreatePreCompiledFunction2d();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> PreCompiledFunction2D = CreatePreCompiledFunction2d();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> PreCompiledFunction3D = CreatePreCompiledFunction3d();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> PreCompiledFunction3D = CreatePreCompiledFunction3d();
 
-        private static Dictionary<int, Dictionary<int, TemplateElementInformation>> TemplateInformationDictionary = CreateTemplateInformationDictionary();
+        private static Dictionary<int, Dictionary<int, Lazy<TemplateElementInformation>>> TemplateInformationDictionary = CreateTemplateInformationDictionary();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double>>> PreCompiledFunction1DDerive = CreatePreCompiledFunction1dDerive();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>> PreCompiledFunction1DDerive = CreatePreCompiledFunction1dDerive();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> PreCompiledFunction2DDeriveU = CreatePreCompiledFunction2dDeriveU();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> PreCompiledFunction2DDeriveU = CreatePreCompiledFunction2dDeriveU();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> PreCompiledFunction2DDeriveV = CreatePreCompiledFunction2dDeriveV();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> PreCompiledFunction2DDeriveV = CreatePreCompiledFunction2dDeriveV();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> PreCompiledFunction3DDeriveU = CreatePreCompiledFunction3dDeriveU();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> PreCompiledFunction3DDeriveU = CreatePreCompiledFunction3dDeriveU();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> PreCompiledFunction3DDeriveV = CreatePreCompiledFunction3dDeriveV();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> PreCompiledFunction3DDeriveV = CreatePreCompiledFunction3dDeriveV();
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> PreCompiledFunction3DDeriveW = CreatePreCompiledFunction3dDeriveW();
-        public static Dictionary<int, Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>> PreCalculatedMatrix = CreatePreCalculatedMatrix();
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> PreCompiledFunction3DDeriveW = CreatePreCompiledFunction3dDeriveW();
+
+        public static Dictionary<int, Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>> PreCalculatedMatrix =
+            CreatePreCalculatedMatrix();
+
         #region Precompilation
-        private static Dictionary<int, Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>> CreatePreCalculatedMatrix()
-        {
-            var dict = new Dictionary<int, Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>();
 
-            var innerDict = new Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>();
+        private static Dictionary<int, Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>> CreatePreCalculatedMatrix()
+        {
+            var dict = new Dictionary<int, Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>>();
+
+            var innerDict = new Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>();
 
             for (int j = 0; j <= 5; j++)
             {
-                innerDict.Add(j, GetMatrixPreCalculated2d(j));
+                innerDict.Add(j, new Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>(GetMatrixPreCalculated2d(j)));
             }
 
             dict.Add(2, innerDict);
-            innerDict = new Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>();
+            innerDict = new Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>();
 
             for (int j = 0; j <= 5; j++)
             {
-                innerDict.Add(j, GetMatrixPreCalculated3d(j));
+                innerDict.Add(j, new Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>(GetMatrixPreCalculated3d(j)));
             }
 
             dict.Add(3, innerDict);
-            innerDict = new Dictionary<int, (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>();
+            innerDict = new Dictionary<int, Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>>();
 
             for (int j = 0; j <= 5; j++)
             {
-                innerDict.Add(j, GetMatrixPreCalculated1d(j));
-            }
-
-            dict.Add(1, innerDict);
-
-            return dict;
-        }
-        private static Dictionary<int, ImmutableArray<Func<double, double>>> CreatePreCompiledFunction1dDerive()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis1dExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> CreatePreCompiledFunction2dDeriveU()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis2dUExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> CreatePreCompiledFunction2dDeriveV()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis2dVExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> CreatePreCompiledFunction3dDeriveU()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis3dUExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> CreatePreCompiledFunction3dDeriveV()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis3dVExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> CreatePreCompiledFunction3dDeriveW()
-        {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double, double>>>();
-
-            for (int i = 0; i <= 5; i++)
-            {
-                innerDict.Add(i, GetDeriveBasis3dWExpression(i).Select(x => x.Compile()).ToImmutableArray());
-            }
-
-            return innerDict;
-        }
-
-        private static Dictionary<int, Dictionary<int, TemplateElementInformation>> CreateTemplateInformationDictionary()
-        {
-            var dict = new Dictionary<int, Dictionary<int, TemplateElementInformation>>();
-
-            var innerDict = new Dictionary<int, TemplateElementInformation>();
-
-            for (int j = 0; j <= 5; j++)
-            {
-                innerDict.Add(j, Get2DFragmentsInner(j));
-            }
-
-            dict.Add(2, innerDict);
-            innerDict = new Dictionary<int, TemplateElementInformation>();
-
-            for (int j = 0; j <= 5; j++)
-            {
-                innerDict.Add(j, Get3DFragmentsInner(j));
-            }
-
-            dict.Add(3, innerDict);
-            innerDict = new Dictionary<int, TemplateElementInformation>();
-
-            for (int j = 0; j <= 5; j++)
-            {
-                innerDict.Add(j, Get1DFragmentsInner(j));
+                innerDict.Add(j, new Lazy<(ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix)>(GetMatrixPreCalculated1d(j)));
             }
 
             dict.Add(1, innerDict);
@@ -170,37 +71,142 @@ namespace MKE.BasisFunction
             return dict;
         }
 
-        private static Dictionary<int, ImmutableArray<Func<double, double>>> CreatePreCompiledFunction1d()
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>> CreatePreCompiledFunction1dDerive()
         {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double>>>();
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>>();
 
             for (int i = 0; i <= 5; i++)
             {
-                innerDict.Add(i, GetBasis1dExpression(i).Select(x => x.Compile()).ToImmutableArray());
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double>>>(GetDeriveBasis1dExpression(i).Select(x => x.Compile()).ToImmutableArray()));
             }
 
             return innerDict;
         }
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double>>> CreatePreCompiledFunction2d()
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> CreatePreCompiledFunction2dDeriveU()
         {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double>>>();
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>>();
 
             for (int i = 0; i <= 5; i++)
             {
-                innerDict.Add(i, GetBasis2dExpression(i).Select(x => x.Compile()).ToImmutableArray());
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double>>>(GetDeriveBasis2dUExpression(i).Select(x => x.Compile()).ToImmutableArray()));
             }
 
             return innerDict;
         }
 
-        private static Dictionary<int, ImmutableArray<Func<double, double, double, double>>> CreatePreCompiledFunction3d()
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> CreatePreCompiledFunction2dDeriveV()
         {
-            var innerDict = new Dictionary<int, ImmutableArray<Func<double, double, double, double>>>();
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>>();
 
             for (int i = 0; i <= 5; i++)
             {
-                innerDict.Add(i, GetBasis3dExpression(i).Select(x => x.Compile()).ToImmutableArray());
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double>>>(GetDeriveBasis2dVExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> CreatePreCompiledFunction3dDeriveU()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>>();
+
+            for (int i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double, double>>>(GetDeriveBasis3dUExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> CreatePreCompiledFunction3dDeriveV()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>>();
+
+            for (int i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double, double>>>(GetDeriveBasis3dVExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> CreatePreCompiledFunction3dDeriveW()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>>();
+
+            for (var i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double, double>>>(GetDeriveBasis3dWExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Dictionary<int, Lazy<TemplateElementInformation>>> CreateTemplateInformationDictionary()
+        {
+            var dict = new Dictionary<int, Dictionary<int, Lazy<TemplateElementInformation>>>();
+
+            var innerDict = new Dictionary<int, Lazy<TemplateElementInformation>>();
+
+            for (int j = 0; j <= 5; j++)
+            {
+                innerDict.Add(j, new Lazy<TemplateElementInformation>(Get2DFragmentsInner(j)));
+            }
+
+            dict.Add(2, innerDict);
+            innerDict = new Dictionary<int, Lazy<TemplateElementInformation>>();
+
+            for (int j = 0; j <= 5; j++)
+            {
+                innerDict.Add(j, new Lazy<TemplateElementInformation>(Get3DFragmentsInner(j)));
+            }
+
+            dict.Add(3, innerDict);
+            innerDict = new Dictionary<int, Lazy<TemplateElementInformation>>();
+
+            for (int j = 0; j <= 5; j++)
+            {
+                innerDict.Add(j, new Lazy<TemplateElementInformation>(Get1DFragmentsInner(j)));
+            }
+
+            dict.Add(1, innerDict);
+
+            return dict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>> CreatePreCompiledFunction1d()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double>>>>();
+
+            for (int i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double>>>(GetBasis1dExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>> CreatePreCompiledFunction2d()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double>>>>();
+
+            for (int i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double>>>(GetBasis2dExpression(i).Select(x => x.Compile()).ToImmutableArray()));
+            }
+
+            return innerDict;
+        }
+
+        private static Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>> CreatePreCompiledFunction3d()
+        {
+            var innerDict = new Dictionary<int, Lazy<ImmutableArray<Func<double, double, double, double>>>>();
+
+            for (int i = 0; i <= 5; i++)
+            {
+                innerDict.Add(i, new Lazy<ImmutableArray<Func<double, double, double, double>>>(GetBasis3dExpression(i).Select(x => x.Compile()).ToImmutableArray()));
             }
 
             return innerDict;
@@ -210,29 +216,29 @@ namespace MKE.BasisFunction
 
         #region Public Interface
 
-        public ImmutableArray<Func<double, double>> GetBasis1d(int order) => PreCompiledFunction1D[order];
+        public ImmutableArray<Func<double, double>> GetBasis1d(int order) => PreCompiledFunction1D[order].Value;
 
-        public ImmutableArray<Func<double, double, double>> GetBasis2d(int order) => PreCompiledFunction2D[order];
+        public ImmutableArray<Func<double, double, double>> GetBasis2d(int order) => PreCompiledFunction2D[order].Value;
 
-        public ImmutableArray<Func<double, double, double, double>> GetBasis3d(int order) => PreCompiledFunction3D[order];
+        public ImmutableArray<Func<double, double, double, double>> GetBasis3d(int order) => PreCompiledFunction3D[order].Value;
 
-        public ImmutableArray<Func<double, double>> GetDeriveBasis1d(int order) => PreCompiledFunction1DDerive[order];
+        public ImmutableArray<Func<double, double>> GetDeriveBasis1d(int order) => PreCompiledFunction1DDerive[order].Value;
 
-        public ImmutableArray<Func<double, double, double>> GetDeriveBasis2dU(int order) => PreCompiledFunction2DDeriveU[order];
+        public ImmutableArray<Func<double, double, double>> GetDeriveBasis2dU(int order) => PreCompiledFunction2DDeriveU[order].Value;
 
-        public ImmutableArray<Func<double, double, double>> GetDeriveBasis2dV(int order) => PreCompiledFunction2DDeriveV[order];
+        public ImmutableArray<Func<double, double, double>> GetDeriveBasis2dV(int order) => PreCompiledFunction2DDeriveV[order].Value;
 
-        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dU(int order) => PreCompiledFunction3DDeriveU[order];
+        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dU(int order) => PreCompiledFunction3DDeriveU[order].Value;
 
-        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dV(int order) => PreCompiledFunction3DDeriveV[order];
+        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dV(int order) => PreCompiledFunction3DDeriveV[order].Value;
 
-        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dW(int order) => PreCompiledFunction3DDeriveW[order];
+        public ImmutableArray<Func<double, double, double, double>> GetDeriveBasis3dW(int order) => PreCompiledFunction3DDeriveW[order].Value;
 
-        public TemplateElementInformation Get1DFragments(int order) => TemplateInformationDictionary[1][order];
+        public TemplateElementInformation Get1DFragments(int order) => TemplateInformationDictionary[1][order].Value;
 
-        public TemplateElementInformation Get2DFragments(int order) => TemplateInformationDictionary[2][order];
+        public TemplateElementInformation Get2DFragments(int order) => TemplateInformationDictionary[2][order].Value;
 
-        public TemplateElementInformation Get3DFragments(int order) => TemplateInformationDictionary[3][order];
+        public TemplateElementInformation Get3DFragments(int order) => TemplateInformationDictionary[3][order].Value;
 
         public (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrix(Func<double, double> lambda, Func<double, double> gamma, int order, double hu)
         {
@@ -330,19 +336,16 @@ namespace MKE.BasisFunction
         public (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated3d(double lambda, double gamma, int order,
             double hu, double hv, double hw)
         {
-            var (g1, g2, g3, m1) = PreCalculatedMatrix[3][order];
+            var (g1, g2, g3, m1) = PreCalculatedMatrix[3][order].Value;
             var g = new double[g1.RowsCount, g1.ColumnsCount];
 
             var m = new double[g1.RowsCount, g1.ColumnsCount];
 
             for (int i = 0; i < g1.RowsCount; i++)
             {
-
                 for (int j = 0; j < g1.ColumnsCount; j++)
                 {
-
                     g[i, j] = ((g1[i, j] * hv * hw / hu) + (g2[i, j] * hu * hw / hv) + (g3[i, j] * hv * hu / hw)) * lambda;
-
 
                     m[i, j] = gamma * hu * hv * hw * m1[i, j];
                 }
@@ -350,22 +353,20 @@ namespace MKE.BasisFunction
 
             return (new ReadonlyStorageMatrix(g, g1.RowsCount, g1.ColumnsCount), new ReadonlyStorageMatrix(m, g1.RowsCount, g1.ColumnsCount));
         }
+
         public (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated2d(double lambda, double gamma, int order,
             double hu, double hv)
         {
-            var (g1, g2, g3, m1) = PreCalculatedMatrix[2][order];
+            var (g1, g2, g3, m1) = PreCalculatedMatrix[2][order].Value;
             var g = new double[g1.RowsCount, g1.ColumnsCount];
 
             var m = new double[g1.RowsCount, g1.ColumnsCount];
 
             for (int i = 0; i < g1.RowsCount; i++)
             {
-
                 for (int j = 0; j < g1.ColumnsCount; j++)
                 {
-
                     g[i, j] = ((g1[i, j] * hv / hu) + (g2[i, j] * hu / hv)) * lambda;
-
 
                     m[i, j] = gamma * hu * hv * m1[i, j];
                 }
@@ -373,22 +374,20 @@ namespace MKE.BasisFunction
 
             return (new ReadonlyStorageMatrix(g, g1.RowsCount, g1.ColumnsCount), new ReadonlyStorageMatrix(m, g1.RowsCount, g1.ColumnsCount));
         }
+
         public (ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated1d(double lambda, double gamma, int order,
             double hu)
         {
-            var (g1, g2, g3, m1) = PreCalculatedMatrix[1][order];
+            var (g1, g2, g3, m1) = PreCalculatedMatrix[1][order].Value;
             var g = new double[g1.RowsCount, g1.ColumnsCount];
 
             var m = new double[g1.RowsCount, g1.ColumnsCount];
 
             for (int i = 0; i < g1.RowsCount; i++)
             {
-
                 for (int j = 0; j < g1.ColumnsCount; j++)
                 {
-
                     g[i, j] = (g1[i, j] / hu) * lambda;
-
 
                     m[i, j] = gamma * hu * m1[i, j];
                 }
@@ -396,15 +395,17 @@ namespace MKE.BasisFunction
 
             return (new ReadonlyStorageMatrix(g, g1.RowsCount, g1.ColumnsCount), new ReadonlyStorageMatrix(m, g1.RowsCount, g1.ColumnsCount));
         }
+
         #endregion
 
         #region Static stuff
+
         private static (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated3d(int order)
         {
-            var basis = PreCompiledFunction3D[order];
-            var deriveBasisU = PreCompiledFunction3DDeriveU[order];
-            var deriveBasisV = PreCompiledFunction3DDeriveV[order];
-            var deriveBasisW = PreCompiledFunction3DDeriveW[order];
+            var basis = PreCompiledFunction3D[order].Value;
+            var deriveBasisU = PreCompiledFunction3DDeriveU[order].Value;
+            var deriveBasisV = PreCompiledFunction3DDeriveV[order].Value;
+            var deriveBasisW = PreCompiledFunction3DDeriveW[order].Value;
             var g1 = new double[basis.Length, basis.Length];
             var g2 = new double[basis.Length, basis.Length];
             var g3 = new double[basis.Length, basis.Length];
@@ -446,9 +447,9 @@ namespace MKE.BasisFunction
 
         private static (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated2d(int order)
         {
-            var basis = PreCompiledFunction2D[order];
-            var deriveBasisU = PreCompiledFunction2DDeriveU[order];
-            var deriveBasisV = PreCompiledFunction2DDeriveV[order];
+            var basis = PreCompiledFunction2D[order].Value;
+            var deriveBasisU = PreCompiledFunction2DDeriveU[order].Value;
+            var deriveBasisV = PreCompiledFunction2DDeriveV[order].Value;
             var g1 = new double[basis.Length, basis.Length];
             var g2 = new double[basis.Length, basis.Length];
 
@@ -484,8 +485,8 @@ namespace MKE.BasisFunction
 
         private static (ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix, ReadonlyStorageMatrix) GetMatrixPreCalculated1d(int order)
         {
-            var basis = PreCompiledFunction1D[order];
-            var deriveBasisU = PreCompiledFunction1DDerive[order];
+            var basis = PreCompiledFunction1D[order].Value;
+            var deriveBasisU = PreCompiledFunction1DDerive[order].Value;
             var g1 = new double[basis.Length, basis.Length];
 
             var m = new double[basis.Length, basis.Length];
@@ -502,7 +503,6 @@ namespace MKE.BasisFunction
 
                     g1[i, j] = GaussLegendreRuleExtenstion
                         .Integrate((x) => basisDeriveFunctionU(x) * basisDeriveFunctionUJ(x), 0, 1, 9);
-
 
                     m[i, j] = GaussLegendreRuleExtenstion.Integrate((x) => basisI(x) * basisJ(x), 0, 1, 9);
                 }
@@ -602,7 +602,7 @@ namespace MKE.BasisFunction
             }
 
             return new TemplateElementInformation(vertex.ToDictionary(x => x.Item1, y => y.Item2), edge.ToDictionary(x => x.Item1, y => y.Item2),
-                                                  surface.ToDictionary(x => x.Item1, y => (ISurface)y.Item2), inner.ToArray());
+                                                  surface.ToDictionary(x => x.Item1, y => (ISurface) y.Item2), inner.ToArray());
         }
 
         private static TemplateElementInformation Get2DFragmentsInner(int order)
@@ -646,7 +646,7 @@ namespace MKE.BasisFunction
             }
 
             return new TemplateElementInformation(vertex.ToDictionary(x => x.Item1, y => y.Item2), edge.ToDictionary(x => x.Item1, y => y.Item2),
-                                                  surface.ToDictionary(x => x.Item1, y => (ISurface)y.Item2), inner.ToArray());
+                                                  surface.ToDictionary(x => x.Item1, y => (ISurface) y.Item2), inner.ToArray());
         }
 
         private static TemplateElementInformation Get3DFragmentsInner(int order)
@@ -709,7 +709,7 @@ namespace MKE.BasisFunction
             }
 
             return new TemplateElementInformation(vertex.ToDictionary(x => x.Item1, y => y.Item2), edge.ToDictionary(x => x.Item1, y => y.Item2),
-                                                  surface.ToDictionary(x => x.Item1, y => (ISurface)y.Item2), inner.ToArray());
+                                                  surface.ToDictionary(x => x.Item1, y => (ISurface) y.Item2), inner.ToArray());
         }
 
         private static IEnumerable<Expression<Func<double, double>>> GetDeriveBasis1dExpression(int order)
