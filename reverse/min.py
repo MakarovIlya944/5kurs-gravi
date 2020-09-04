@@ -1,25 +1,26 @@
 from forward import Forward
-from net import Net
+from builder import Build
 
 class Minimizator():
 
   solver = ''
 
   alpha = 0
-  gamma = []
+  gamma = ''
   n = ''
 
-  def __init__(self):
+  def __init__(self, **params):
     self.solver = Forward()
     self.solver.build()
-    self.n = Net()
-
-    self.alpha = 0
-    
+    self.n = Build.build(params.get('net'))
+    a = params.get('alpha')
+    self.alpha = a if a else 0
+    self.gamma = Build.build(params.get('gamma'))
 
   def minimization(self, maxSteps=1000, eps=1E-10):
     i = 0
     F = functional()
+    # TODO add logger
     while i < maxSteps and F < eps:
       F = functional()
       i += 1
