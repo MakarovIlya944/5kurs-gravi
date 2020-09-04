@@ -1,5 +1,7 @@
 from forward import Forward
 from builder import Build
+from numpy.linalg import solve
+from numpy.polynomial.legendre import leggauss
 
 class Minimizator():
 
@@ -8,6 +10,8 @@ class Minimizator():
   alpha = 0
   gamma = ''
   n = ''
+
+  gauss = 6
 
   def __init__(self, **params):
     self.solver = Forward()
@@ -27,10 +31,29 @@ class Minimizator():
 
   def functional(self):
     self.solver.calculate()
-    p = self.result()
-    y = [i*i for i in p].sum() * self.alpha
-    
+    Dg = self.result()
+
+    x = 0
+    y = sum([i*i for i in P]) * self.alpha
+    z = 0
+
+    for p in P:
+      _z = 0
+      for a in P.around(P.i):
+        _z += (P[a] - P[p]) * (P[a] - P[p])
+      _z *= self.gamma[p]
+      z += _z
+
     return 1
 
   def result(self):
-    return []
+    return Build.build()
+
+  def g(self, i):
+    x, w = leggauss(self.gauss)
+    # Translate x values from the interval [-1, 1] to [a, b]
+
+
+    t = 0.5*(x + 1)*(b - a) + a
+    gauss = sum(w * f(t)) * 0.5*(b - a)
+    return 1
