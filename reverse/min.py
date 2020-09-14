@@ -48,6 +48,7 @@ class Minimizator():
       calc.append(p)
     e = self.error(calc)
     i = 0
+    self.logger.n = maxSteps
     while i < maxSteps and e > eps:
       calc = self.solver.solve(self.net)
       e = self.error(calc)

@@ -65,19 +65,17 @@ class Solver():
     jnet = copy.deepcopy(net)
     for i, pi in net:
       for j, pj in jnet:
-        a = [self._dGz(s,i,net)*self._dGz(s,j,jnet) for s in self.receptors]
-        a = sum(a)
+        a = sum([self._dGz(s,i,net)*self._dGz(s,j,jnet) for s in self.receptors])
         if i == j:
           a += self.alpha
+          # получение соседних ячеек с i-ой
           around = net.around(i)
           a += len(around) * self.gamma[i] + sum([self.gamma[r] for r in around])
         else:
           a -= self.gamma[i]*self.gamma[j]
         A.append(a)
         # print(str(pi) + str(i) + str(pj) + str(j))
-      b = [self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]
-      b = sum(b)
-      B.append(b)
+      B.append(sum([self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
     A = array(A)
     A = A.reshape(int(K),int(K))
     B = array(B)
