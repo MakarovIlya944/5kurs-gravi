@@ -72,7 +72,7 @@ class Solver():
           around = net.around(i)
           a += len(around) * self.gamma[i] + sum([self.gamma[r] for r in around])
         else:
-          a -= self.gamma[i]*self.gamma[j]
+          a -= self.gamma[i]+self.gamma[j]
         A.append(a)
         # print(str(pi) + str(i) + str(pj) + str(j))
       B.append(sum([self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
