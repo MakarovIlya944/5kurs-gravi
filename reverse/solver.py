@@ -15,14 +15,17 @@ class Solver():
 
   alpha = 0
   gamma = {}
+  isGamma  = False
 
   gauss = 6
 
-  def __init__(self, receptors=[], net=Net(), a=0, g={}):
+  def __init__(self, receptors=[], net=Net(), a=0, g=None):
     if len(receptors) == 0:
       return
     self.alpha = a
-    self.gamma = g
+    if g:
+      self.gamma = g
+      self.isGamma = True
     self.receptors = receptors
     self.correct = net
     self.K = prod(net.n)
@@ -78,10 +81,11 @@ class Solver():
         a = sum([self._dGz(s,i,net) * self._dGz(s,j,jnet) for s in self.receptors])
         if i == j:
           a += self.alpha
-          # получение соседних ячеек с i-ой
-          around = net.around(i)
-          a += len(around) * self.gamma[i] + sum([self.gamma[r] for r in around])
-        else:
+          if self.isGamma:
+            # получение соседних ячеек с i-ой
+            around = net.around(i)
+            a += len(around) * self.gamma[i] + sum([self.gamma[r] for r in around])
+        elif self.isGamma:
           a -= (self.gamma[i]+self.gamma[j])
         A.append(a)
         # print(str(pi) + str(i) + str(pj) + str(j))

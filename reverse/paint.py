@@ -1,9 +1,10 @@
 import matplotlib.pyplot as plt
 
-def matrix(m):
+def matrix(m, max=10):
   a = m.shape
   m = m.reshape(a[0],a[2])
-  plt.matshow(m,vmax=10,vmin=0)
+  m = m.transpose()
+  plt.matshow(m,vmax=max,vmin=0)
   plt.show()
 
 def profile(x, y):

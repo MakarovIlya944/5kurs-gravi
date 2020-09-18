@@ -18,35 +18,42 @@ def main():
   # v значение по умолчанию для каждой ячейки
   # values точечные замены значений, задается как индекс ячейки: значение
   defNet = {
-    'count':(5,1,5),
-    'border':(3000,500,-1500),
-    'center': (2000,0,-500)
+    'count': (5,1,5),
+    'border': (3000,50,-1500),
+    'center': (1000,0,-500)
   }
   # начальная сетка
   net = copy(defNet)
-  net['v'] = 0.2
+  # net['v'] = 0.1
   # правильная сетка
   correct = copy(defNet)
   correct['values'] = {
-      (0,0,0): 1,
-      (1,0,0): 1,
-      (0,0,1): 1,
-      (1,0,1): 1,
+      (1,0,3): 10,
+      (2,0,3): 10,
+      (3,0,3): 10,
     }
-  receptors = [array([i*10-1000,0,0]) for i in range(700)]
-  alpha=0,
+  receptors = [array([i*50-1000,0,0]) for i in range(100)]
+  alpha=2,
   gamma=None
   # параметры гамма задаются как сетка со значениями для каждой ячейки
-  # gamma={
-  #   'count':(2,2,2),
-  #   'border':(8,8,8),
-  #   'values': {
-  #     (1,0,0): 1,
-  #     (1,0,1): 1,
-  #     (1,1,0): 1,
-  #     (1,1,1): 1,
-  #   }
-  # }
+  gamma = copy(defNet)
+  gamma={
+    'values': {
+      (1,0,3): 1,
+      (2,0,3): 1,
+      (3,0,3): 1,
+
+      (2,0,4): 0.1,
+      (2,0,2): 0.1,
+      (0,0,3): 0.01,
+      (4,0,3): 0.01,
+
+      # (1,0,2): 0.1,
+      # (4,0,2): 0.1,
+      # (1,0,3): 0.1,
+      # (4,0,3): 0.1,
+    }
+  }
 
   smile = Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
   net = smile.minimization()
@@ -56,10 +63,15 @@ def main():
 
   print(str(net))
   # profile([r[0] for r in receptors], dG)
-  matrix(net.cells)
+  m = 0
+  c = correct['values']
+  for k in c:
+    if m < c.get(k):
+      m = c.get(k)
+  matrix(net.cells, m)
 
-  # plt.plot([r[0] for r in receptors], dG, 'r', [r[0] for r in receptors], dGCorrect)
-  # plt.show()
+  plt.plot([r[0] for r in receptors], dG, 'r', [r[0] for r in receptors], dGCorrect)
+  plt.show()
 
   print('Good bye!')
 

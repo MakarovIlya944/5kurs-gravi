@@ -31,17 +31,17 @@ class Net():
 
   def around(self, key):
     r = []
-    for i in range(-1,1):
-      for j in range(-1,1):
-        for k in range(-1,1):
-          if not (i == j and j == k):
+    for i in range(-1,2):
+      for j in range(-1,2):
+        for k in range(-1,2):
+          if not (i == 0 and j == 0 and k == 0):
             r.append((key[0] + i, key[1] + j, key[2] + k))
     r = [el for el in r if self.__correctindex(el)]
     return r
 
   def __correctindex(self, key):
     for i,v in enumerate(key):
-      if v < 0 or v > self.n[i]:
+      if v < 0 or v >= self.n[i]:
         return False
     return True
 

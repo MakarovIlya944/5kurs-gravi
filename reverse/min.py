@@ -10,16 +10,16 @@ class Minimizator():
   logger = Logger(10,1)
 
   alpha = 0
-  gamma = ''
+  gamma = None
   net = ''
   correct = ''
 
   def __init__(self, **params):
     gamma = params.get('gamma')
-    gamma = gamma if gamma else {}
+    if gamma:
+      self.gamma = Build.build(params=gamma)
     self.net = Build.build(params=params.get('net'))
     self.correct = Build.build(params=params.get('correct'))
-    self.gamma = Build.build(params=gamma)
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
 
