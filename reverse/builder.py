@@ -21,7 +21,10 @@ class Build():
     v = params.get('v')
     v = v if v else 0
 
-    n = Net(count=count,border=border,v=v)
+    center = params.get('center')
+    center = center if center else (0,0,0)
+
+    n = Net(count=count,border=border,center=center,v=v)
     if values:
       for k in values:
         n[k] = values[k]

@@ -15,28 +15,11 @@ class Minimizator():
   correct = ''
 
   def __init__(self, **params):
-    net = params.get('net')
     gamma = params.get('gamma')
     gamma = gamma if gamma else {}
-    self.net = Build.build(
-      values=net.get('values'),
-      count=net.get('count'),
-      border=net.get('border'),
-      v=net.get('v')
-    )
-    net = params.get('correct')
-    self.correct = Build.build(
-      values=net.get('values'),
-      count=net.get('count'),
-      border=net.get('border'),
-      v=net.get('v')
-    )
-    self.gamma = Build.build(
-      net=gamma.get('net'),
-      values=gamma.get('values'),
-      border=gamma.get('border'),
-      v=gamma.get('v')
-    )
+    self.net = Build.build(params.get('net'))
+    self.correct = Build.build(params.get('correct'))
+    self.gamma = Build.build(params=gamma)
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
 

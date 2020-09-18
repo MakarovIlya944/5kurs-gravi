@@ -5,9 +5,11 @@ class Net():
   n = (10,10,10)
   i = [0,0,0]
   d = (100,100,100)
+  c = (0,0,0)
 
-  def __init__(self, count=(10,10,10), border=(1000,1000,1000), v=0):
+  def __init__(self, count=(10,10,10), border=(1000,1000,1000), center=(0,0,0), v=0):
     self.n = count
+    self.c = center
     self.d = tuple([border[i]/count[i] for i in range(3)])
     self.cells = ndarray(count)
     for i in range(count[0]):

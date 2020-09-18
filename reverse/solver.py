@@ -50,7 +50,7 @@ class Solver():
     dz = 0
     net = net if net else self.correct
 
-    r = array([k[i] * net.d[i] + net.d[i] / 2 for i in range(3)])
+    r = array([k[i] * net.d[i] + net.d[i] / 2 + net.c[i] for i in range(3)])
     r = i - r
     n = norm(r)
     t = self.mesh / (n**3)
@@ -65,17 +65,17 @@ class Solver():
     jnet = copy.deepcopy(net)
     for i, pi in net:
       for j, pj in jnet:
-        a = sum([self._dGz(s,i,net)*self._dGz(s,j,jnet) for s in self.receptors])
+        a = sum([pi * self._dGz(s,i,net)* pj * self._dGz(s,j,jnet) for s in self.receptors])
         if i == j:
           a += self.alpha
           # получение соседних ячеек с i-ой
           around = net.around(i)
           a += len(around) * self.gamma[i] + sum([self.gamma[r] for r in around])
         else:
-          a -= self.gamma[i]+self.gamma[j]
+          a -= (self.gamma[i]+self.gamma[j])
         A.append(a)
         # print(str(pi) + str(i) + str(pj) + str(j))
-      B.append(sum([self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
+      B.append(sum([pi * self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
     A = array(A)
     A = A.reshape(int(K),int(K))
     B = array(B)
