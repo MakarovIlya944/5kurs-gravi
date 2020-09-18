@@ -44,17 +44,27 @@ class Solver():
     gauss = sum(w * f(t)) * 0.5*(b - a)
     return 1
 
-  # if net=None dg with correct
+  # if net=None dg with correct net
   # i - source, k - cell
   def _dGz(self, i, k, net=None):
-    dz = 0
     net = net if net else self.correct
 
     r = array([k[i] * net.d[i] + net.d[i] / 2 + net.c[i] for i in range(3)])
-    r = i - r
+    r = r - i
     n = norm(r)
     t = self.mesh / (n**3)
-    return t * r[2] # only dGz
+    return t * r[2] # only z
+
+  def profile(self, net=None):
+    if not net:
+      net = self.correct
+    res = []
+    for r in self.receptors:
+      tmp = []
+      for i, p in net:
+        tmp.append(self._dGz(r, i, net) * p)
+      res.append(sum(tmp))
+    return res
 
   def solve(self, net=Net()):
     K = prod(net.n)
@@ -65,7 +75,7 @@ class Solver():
     jnet = copy.deepcopy(net)
     for i, pi in net:
       for j, pj in jnet:
-        a = sum([pi * self._dGz(s,i,net)* pj * self._dGz(s,j,jnet) for s in self.receptors])
+        a = sum([self._dGz(s,i,net) * self._dGz(s,j,jnet) for s in self.receptors])
         if i == j:
           a += self.alpha
           # получение соседних ячеек с i-ой
@@ -75,7 +85,7 @@ class Solver():
           a -= (self.gamma[i]+self.gamma[j])
         A.append(a)
         # print(str(pi) + str(i) + str(pj) + str(j))
-      B.append(sum([pi * self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
+      B.append(sum([ self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
     A = array(A)
     A = A.reshape(int(K),int(K))
     B = array(B)

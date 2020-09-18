@@ -1,7 +1,8 @@
 from min import Minimizator
 from numpy import array,ndarray
-from paint import Painter
+from paint import *
 from copy import copy
+import matplotlib.pyplot as plt
 
 # mobilenet, vg16, inseption v3 (CNN)
 # 1 profile, RNN
@@ -17,23 +18,23 @@ def main():
   # v значение по умолчанию для каждой ячейки
   # values точечные замены значений, задается как индекс ячейки: значение
   defNet = {
-    'count':(10,1,6),
-    'border':(5000,10000,-1500),
-    'center': (0,0,0)
+    'count':(5,1,5),
+    'border':(3000,500,-1500),
+    'center': (2000,0,-500)
   }
   # начальная сетка
   net = copy(defNet)
-  net['v'] = 0.1
+  net['v'] = 0.2
   # правильная сетка
   correct = copy(defNet)
   correct['values'] = {
-      (4,0,2): 1,
-      (5,0,2): 1,
-      (4,0,3): 1,
-      (5,0,3): 1,
+      (0,0,0): 1,
+      (1,0,0): 1,
+      (0,0,1): 1,
+      (1,0,1): 1,
     }
-  receptors = [array([i*12,5000,0]) for i in range(100)]
-  alpha=1,
+  receptors = [array([i*10-1000,0,0]) for i in range(700)]
+  alpha=0,
   gamma=None
   # параметры гамма задаются как сетка со значениями для каждой ячейки
   # gamma={
@@ -49,9 +50,16 @@ def main():
 
   smile = Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
   net = smile.minimization()
+  prof = smile.solver.profile
+  dG = prof(net)
+  dGCorrect = prof()
 
   print(str(net))
-  Painter.matrix(net.cells)
+  # profile([r[0] for r in receptors], dG)
+  matrix(net.cells)
+
+  # plt.plot([r[0] for r in receptors], dG, 'r', [r[0] for r in receptors], dGCorrect)
+  # plt.show()
 
   print('Good bye!')
 

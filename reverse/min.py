@@ -17,8 +17,8 @@ class Minimizator():
   def __init__(self, **params):
     gamma = params.get('gamma')
     gamma = gamma if gamma else {}
-    self.net = Build.build(params.get('net'))
-    self.correct = Build.build(params.get('correct'))
+    self.net = Build.build(params=params.get('net'))
+    self.correct = Build.build(params=params.get('correct'))
     self.gamma = Build.build(params=gamma)
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
@@ -32,11 +32,9 @@ class Minimizator():
     e = self.error(calc)
     i = 0
     self.logger.n = maxSteps
-    while i < maxSteps and e > eps:
-      calc = self.solver.solve(self.net)
-      e = self.error(calc)
-      self.logger.log(str(e))
-      i += 1
+    calc = self.solver.solve(self.net)
+    e = self.error(calc)
+    self.logger.log(str(e))
     return self.net
 
   def error(self, calc):
