@@ -1,8 +1,8 @@
-from solver import Solver
-from builder import Build
+from .solver import Solver
+from .builder import *
 from numpy.linalg import norm
 from numpy.polynomial.legendre import leggauss
-from log import Logger
+from .log import Logger
 
 class Minimizator():
 
@@ -17,9 +17,9 @@ class Minimizator():
   def __init__(self, **params):
     gamma = params.get('gamma')
     if gamma:
-      self.gamma = Build.build(params=gamma)
-    self.net = Build.build(params=params.get('net'))
-    self.correct = Build.build(params=params.get('correct'))
+      self.gamma = complex_build(params=gamma)
+    self.net = complex_build(params=params.get('net'))
+    self.correct = complex_build(params=params.get('correct'))
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
 
