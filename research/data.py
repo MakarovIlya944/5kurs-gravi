@@ -1,6 +1,6 @@
 from reverse.builder import *
 from reverse.solver import Solver
-
+from scipy import interpolate
 
 class DataCreator():
 
@@ -13,7 +13,9 @@ class DataCreator():
     return s.profile(net), net
 
   def intrepolate_net(self, receptors, dGz):
-    pass
+    # x = [0,1,2];  y = [0,3]; z = [[1,2,3], [4,5,6]]
+    
+    interpolate.interp2d(x, y, z, kind='cubic')
 
   def create_data(self, size):
     print()
