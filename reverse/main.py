@@ -24,7 +24,7 @@ def main():
   }
   # начальная сетка
   net = copy(defNet)
-  # net['v'] = 0.1
+  # net["default"] = 0.1
   # правильная сетка
   correct = copy(defNet)
   correct['values'] = {

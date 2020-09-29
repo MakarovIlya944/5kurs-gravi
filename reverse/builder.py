@@ -18,7 +18,7 @@ class Build():
     border = params['params'].get('border')
     border = border if border else (1000,1000,1000)
 
-    v = params['params'].get('v')
+    v = params['params'].get("default")
     v = v if v else 0
 
     center = params['params'].get('center')
