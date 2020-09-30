@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 class Model():
   """
@@ -16,3 +19,8 @@ class Model():
   """
   def predict(self):
     pass
+
+class ModelPyTorch(Model):
+  name = "pytorch"
+
+  def learn(self):
