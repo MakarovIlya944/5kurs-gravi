@@ -1,50 +1,44 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torch.nn.functional as F
 from .model import Model
 
 class Net(nn.Module):
-    def __init__(self):
-      super(Net, self).__init__()
-      self.conv1 = nn.Conv2d(1, 32, 3, 1)
-      self.conv2 = nn.Conv2d(32, 64, 3, 1)
-      self.dropout1 = nn.Dropout2d(0.25)
-      self.dropout2 = nn.Dropout2d(0.5)
-      self.fc1 = nn.Linear(9216, 128)
-      self.fc2 = nn.Linear(128, 10)
+  def __init__(self, d_in, d_out, h):
+    super(Net, self).__init__()
+    self.input_linear = torch.nn.Linear(d_in, h)
+    self.middle_linear = torch.nn.Linear(h, h)
+    self.output_linear = torch.nn.Linear(h, d_out)
 
-    # x represents our data
-    def forward(self, x):
-      # Pass data through conv1
-      x = self.conv1(x)
-      # Use the rectified-linear activation function over x
-      x = F.relu(x)
-
-      x = self.conv2(x)
-      x = F.relu(x)
-
-      # Run max pooling over x
-      x = F.max_pool2d(x, 2)
-      # Pass data through dropout1
-      x = self.dropout1(x)
-      # Flatten x with start_dim=1
-      x = torch.flatten(x, 1)
-      # Pass data through fc1
-      x = self.fc1(x)
-      x = F.relu(x)
-      x = self.dropout2(x)
-      x = self.fc2(x)
-
-      # Apply softmax to x
-      output = F.log_softmax(x, dim=1)
-      return output
+  # x represents our data
+  def forward(self, x):
+    y = self.input_linear(x).clamp(min=0)
+    y = self.middle_linear(y)
+    y = self.output_linear(y)
+    return y
 
 class ModelPyTorch(Model):
   name = "pytorch"
 
-  def learn(self):
-    random_data = torch.rand((1, 1, 28, 28))
+  def __init__(self, **params):
+    super().__init__()
+    self.model = Net(params['d_in'], params['d_out'], params['d_h'])
+    self.criterion = nn.MSELoss(reduction='sum')
+    self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
+    self.iteraions = params['iters']
 
-    my_nn = Net()
-    result = my_nn(random_data)
-    print (result)
+  def learn(self):
+    for t in range(self.iteraions):
+        # Forward pass: Compute predicted y by passing x to the model
+        y_pred = self.model(x)
+
+        # Compute and print loss
+        loss = criterion(y_pred, y)
+        if t % 100 == 99:
+            print(t, loss.item())
+
+        # Zero gradients, perform a backward pass, and update the weights.
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()

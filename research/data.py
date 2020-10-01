@@ -5,10 +5,14 @@ from scipy import interpolate
 class DataCreator():
 
   name = ''
-  net_random_params = {}
 
-  def create_pure_data(self, receptors):
-    net = random_build(self.net_random_params)
+  def __init__(self, **params):
+    super().__init__()
+    self.name = params['name']
+    net_random_params = params['net']
+
+  def create_pure_data(self, receptors, net_random_params):
+    net = center_build(net_random_params)
     s = Solver(receptors=receptors)
     return s.profile(net), net
 
@@ -18,7 +22,16 @@ class DataCreator():
     interpolate.interp2d(x, y, z, kind='cubic')
 
   def create_data(self, size):
-    print()
+    dGz, net = self.create_pure_data()
+    
 
 if __name__ == '__main__':
-  d = DataCreator()
+  params = {
+    'name': 'test',
+    'net': {
+
+    }
+  }
+  size = 100
+  d = DataCreator(params)
+  d.create_data(size)
