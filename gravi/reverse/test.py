@@ -1,4 +1,4 @@
-from builder import *
+from .builder import *
 import unittest
 from numpy import array
 

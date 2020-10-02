@@ -1,4 +1,4 @@
-from net import Net
+from .net import Net
 from numpy import array
 
 def simple_build(values=None):

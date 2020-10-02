@@ -1,6 +1,6 @@
-from min import Minimizator
+from .min import Minimizator
+from .paint import *
 from numpy import array,ndarray
-from paint import *
 from copy import copy
 import matplotlib.pyplot as plt
 

@@ -1,6 +1,7 @@
-from reverse.builder import *
-from reverse.solver import Solver
-from scipy import interpolate
+print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
+from ..reverse.builder import *
+from ..reverse.solver import Solver 
+from ..continous.main import interpolate
 
 class DataCreator():
 
@@ -18,26 +19,15 @@ class DataCreator():
 
   def create_pure_data(self, receptors):
     params = self.net_random_params
-    params = {
-        'width': (1,0,1),
-        'center': (1,0,1),
-        'c_value': 1,
-      }
     net = center_build(params)
     s = Solver(receptors=receptors)
     return s.profile(net), net
 
-  def intrepolate_net(self, x, y, dGz):
+  def intrepolate_net(self, x, y, receptors, dGz):
     # x = [0,1,2];  y = [0,3]; z = [[1,2,3], [4,5,6]]
-    z = []
-    l = len(x)
-    for i, _y in enumerate(y):
-      tmp = []
-      for j, _x in enumerate(x):
-        tmp.append(dGz[i*l + j])
-      z.append(tmp)
-    f = interpolate.interp2d(x, y, z, kind='cubic')
-    return [f(p) for p in self.observe_points]
+    for i, z in enumerate(dGz):
+      receptors[i].append(z)
+    return interpolate(receptors, x, y)
 
   def create_receptors(self):
     x_r = self.receptors_random_params['x']['r']
@@ -60,7 +50,7 @@ class DataCreator():
   def create_data(self, size):
     recs, x, y = self.create_receptors()
     dGz, net = self.create_pure_data(recs)
-    dGzInterpolate = self.intrepolate_net(x, y, dGz)
+    dGzInterpolate = self.intrepolate_net(x, y, recs, dGz)
 
 if __name__ == '__main__':
   params = {

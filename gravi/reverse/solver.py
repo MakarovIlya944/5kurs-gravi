@@ -1,4 +1,4 @@
-from net import Net
+from .net import Net
 from numpy import pi, array, prod, reshape
 from numpy.linalg import norm, solve
 from numpy.polynomial.legendre import leggauss

@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29920.165
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mnist", "Mnist\Mnist.csproj", "{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PainterForMnist", "PainterForMnist\PainterForMnist.csproj", "{6B5436FA-0226-4529-9AC9-BA9F5A8A11E3}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB} = {B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B68CCF3A-2C78-4E77-A942-B0E84E56C5CB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B5436FA-0226-4529-9AC9-BA9F5A8A11E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B5436FA-0226-4529-9AC9-BA9F5A8A11E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B5436FA-0226-4529-9AC9-BA9F5A8A11E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B5436FA-0226-4529-9AC9-BA9F5A8A11E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE43E66F-C6FB-4E5F-ADBF-3A40D7031FCB}
+	EndGlobalSection
+EndGlobal
