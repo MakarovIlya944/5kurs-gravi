@@ -3,6 +3,10 @@ from numpy import pi, array, prod, reshape
 from numpy.linalg import norm, solve
 from numpy.polynomial.legendre import leggauss
 import copy
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class Solver():
   receptors = []
@@ -34,8 +38,13 @@ class Solver():
       mesh *= i
     mesh /= 4 * pi
     self.mesh = mesh
+    logger.info('start calc dGz')
+    L = len(receptors)
+    l = L / 100
     for i, r in enumerate(receptors):
       self.dGz.append(0)
+      if not i % l:
+        logger.info(f'#{i}/{L} calc dGz {i/float(L)*100:.1f}%')
       for j, p in net:
         self.dGz[i] += self._dGz(r, j) * p
 

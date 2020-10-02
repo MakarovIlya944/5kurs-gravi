@@ -14,11 +14,11 @@ import logging
 #     pass
 # logging.basicConfig(filename=f'log-{strftime("%H-%M-%S", gmtime())}.txt', level=logging.DEBUG)
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('Spline')
+logger = logging.getLogger(__name__)
 
 numberLocalMatrix = 0
 
-class Spline():
+class spline():
 
     paint_K = 10
 
@@ -71,7 +71,7 @@ class Spline():
         return s
 
     def __localMatrix(h):
-        local_matrix = Spline.local_matrix * (1/h)
+        local_matrix = spline.local_matrix * (1/h)
 
         local_matrix[0][1] /= h
         local_matrix[0][3] /= h
@@ -120,16 +120,16 @@ class Spline():
             self.__elemAdd(d-1, i)
 
     def __init__(self, file, _K, _paint_K=10, w=None):
-        logger.info('Init')
+        logger.info('init')
 
-        self.__f = [Spline.__f1, Spline.__f2, Spline.__f3, Spline.__f4]
+        self.__f = [spline.__f1, spline.__f2, spline.__f3, spline.__f4]
         self.K = np.array(_K)
         self.paint_K = _paint_K
         if type(file) == str:
             points = np.loadtxt(file)
         else:
             points = file
-        logger.info(f'Read {points}')
+        logger.debug(f'Read {points}')
 
         f = [p[-1] for p in points]
         self.f = f
@@ -157,7 +157,7 @@ class Spline():
         # self.w[5]=0
         
         for _h in self.h:
-            self.__localMatrixes.append(Spline.__localMatrix(_h))
+            self.__localMatrixes.append(spline.__localMatrix(_h))
 
         N = list(accumulate(np.ones(dim-1) + np.array(K[:-1]), operator.mul))
         N.insert(0, 1)
@@ -191,7 +191,9 @@ class Spline():
             t.addW(self.w[I])
         logger.debug('-' * 45)
 
-        with open(f'{dim}d.txt','r') as f:
+        i = __file__.rfind('\\')
+        file = __file__[:i] + f'\\{dim}d.txt'
+        with open(file,'r') as f:
             lines = f.readlines()
             # Not implemented dim>10
             self.indexs = [[int(c)-1 for c in str(int(l))] for l in lines]
@@ -247,6 +249,7 @@ class Spline():
         return self.answer
 
     def Interpolate(self, x, y):
+        logger.info('Interpolate')
         K = self.paint_K
         psi = self.__psi
 

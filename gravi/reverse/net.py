@@ -1,4 +1,9 @@
 from numpy import ndarray
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class Net():
   cells = ""
   border = (1000,1000,1000)

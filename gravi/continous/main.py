@@ -1,7 +1,7 @@
 import argparse
 import logging
 import numpy as np
-from .Spline import Spline
+from .spline import spline
 from .Painter import Painter
 import matplotlib.pyplot as plt
 import math
@@ -77,7 +77,7 @@ def main():
     f = PointsFabric(dim, f, q, domains)
     clear, noise = f.generate()
 
-    s = Spline('input.txt', elements, K)
+    s = spline('input.txt', elements, K)
     s.MakeMatrix()
 
     if isSaveMatrix:
@@ -103,7 +103,7 @@ def main():
 
 def interpolate(receptors_in, x, y):
     elements = [1,1]
-    s = Spline(receptors_in, elements)
+    s = spline(receptors_in, elements)
     s.Calculate()
     return s.Interpolate(x, y)
 

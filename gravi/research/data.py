@@ -1,4 +1,3 @@
-print('__file__={0:<35} | __name__={1:<20} | __package__={2:<20}'.format(__file__,__name__,str(__package__)))
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from ..continous.main import interpolate
@@ -10,7 +9,7 @@ class DataCreator():
   receptors_random_params = {}
   observe_points = {}
 
-  def __init__(self, **params):
+  def __init__(self, params):
     super().__init__()
     self.name = params['name']
     self.net_random_params = params['net']
@@ -26,7 +25,7 @@ class DataCreator():
   def intrepolate_net(self, x, y, receptors, dGz):
     # x = [0,1,2];  y = [0,3]; z = [[1,2,3], [4,5,6]]
     for i, z in enumerate(dGz):
-      receptors[i].append(z)
+      receptors[i][2] = z
     return interpolate(receptors, x, y)
 
   def create_receptors(self):
@@ -52,7 +51,7 @@ class DataCreator():
     dGz, net = self.create_pure_data(recs)
     dGzInterpolate = self.intrepolate_net(x, y, recs, dGz)
 
-if __name__ == '__main__':
+def test():
   params = {
     'name': 'test',
     'net': {
@@ -67,12 +66,12 @@ if __name__ == '__main__':
       'x':{
         'r': 3000,
         'l': 1000,
-        'n': 100
+        'n': 10
       },
       'y':{
         'r': 0,
         'l': -2000,
-        'n': 100
+        'n': 10
       }
     },
     'points':

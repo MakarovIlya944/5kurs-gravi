@@ -1,6 +1,6 @@
 import logging
 
-logger = logging.getLogger('Element')
+logger = logging.getLogger('continous.element')
 
 class Element():
 

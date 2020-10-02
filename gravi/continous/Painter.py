@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import logging
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('Painter')
+logger = logging.getLogger('continous.painter')
 
 class Painter():
 
