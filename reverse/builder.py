@@ -29,13 +29,13 @@ def complex_build(**params):
       n[k] = values[k]
   return n
 
-def center_build(**params):
-  count = params['params'].get('count')
+def center_build(params):
+  count = params.get('count')
   count = count if count else (10,10,10)
 
-  width = array(params['params'].get('width'))
-  center = array(params['params'].get('center'))
-  c_value = params['params'].get('c_value')
+  width = array(params.get('width'))
+  center = array(params.get('center'))
+  c_value = params.get('c_value')
 
   inds = center - width
   inds_l = []
@@ -73,13 +73,13 @@ def center_build(**params):
       for z in vals[2]:
         values[(x,y,z)] = c_value
 
-  border = params['params'].get('right')
+  border = params.get('right')
   border = border if border else (1000,1000,1000)
 
-  v = params['params'].get("default")
+  v = params.get("default")
   v = v if v else 0
 
-  center = params['params'].get('left')
+  center = params.get('left')
   center = center if center else (0,0,0)
 
   n = Net(count=count,border=border,center=center,v=v)

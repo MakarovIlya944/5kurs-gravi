@@ -40,7 +40,7 @@ class TestNetBuilder(unittest.TestCase):
         continue
       inds_r.append(i)
 
-    net = center_build(params=params)
+    net = center_build(params)
     vals = [
       [i for i in range(inds_l[c_i], inds_r[c_i]+1)]
       for c_i in range(3)
