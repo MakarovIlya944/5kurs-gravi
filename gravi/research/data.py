@@ -1,6 +1,7 @@
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from ..continous.main import interpolate
+import logging
 
 class DataCreator():
 
@@ -8,6 +9,7 @@ class DataCreator():
   net_random_params = {}
   receptors_random_params = {}
   observe_points = {}
+  logger = logging.getLogger('research.data.DataCreator')
 
   def __init__(self, params):
     super().__init__()
@@ -22,10 +24,8 @@ class DataCreator():
     s = Solver(receptors=receptors)
     return s.profile(net), net
 
-  def intrepolate_net(self, x, y, receptors, dGz):
+  def intrepolate_net(self, x, y, receptors):
     # x = [0,1,2];  y = [0,3]; z = [[1,2,3], [4,5,6]]
-    for i, z in enumerate(dGz):
-      receptors[i][2] = z
     return interpolate(receptors, x, y)
 
   def create_receptors(self):
@@ -49,7 +49,46 @@ class DataCreator():
   def create_data(self, size):
     recs, x, y = self.create_receptors()
     dGz, net = self.create_pure_data(recs)
-    dGzInterpolate = self.intrepolate_net(x, y, recs, dGz)
+    for i, z in enumerate(dGz):
+      recs[i][2] = z
+    return x, y, recs
+
+class DataReader():
+  """
+  Class data-reader from diffrent sources and diffrent formats
+  """
+
+  logger = logging.getLogger('research.data.DataReader')
+  
+  def read_py_file(filename, x=None, y=None):
+    DataReader.logger.info('read_py_file: ' + filename)
+    ll = []
+    with open(filename,'r') as f:
+      ll = f.readlines()
+    ll = [l[1:-2].split(', ') for l in ll]
+    ll = [[float(n) for n in l] for l in ll]
+    if not x or not y:
+      return ll
+
+    _x = [ll[0][0], ll[0][0]]
+    _y = [ll[0][1], ll[0][1]]
+    for l in ll:
+      if l[0] < _x[0]:
+        _x[0] = l[0]
+      if l[0] > _x[1]:
+        _x[1] = l[0]
+      if l[1] < _y[0]:
+        _y[0] = l[1]
+      if l[1] > _y[1]:
+        _y[1] = l[0]
+
+    kx = (x[1] - x[0]) / (_x[1] - _x[0])
+    dx = x[0] - _x[0]
+    ky =  (y[1] - y[0]) / (_y[1] - _y[0])
+    dy = y[0] - _y[0]
+
+    ll = [[(l[0] + dx)*kx,(l[1] + dy)*ky,l[2]] for l in ll]
+    return ll
 
 def test():
   params = {
@@ -79,4 +118,9 @@ def test():
   }
   size = 100
   d = DataCreator(params)
-  d.create_data(size)
+  x, y, recs = d.create_data(size)
+
+  with open('dgz.txt', 'w') as f:
+    f.writelines([str(r) + '\n' for r in recs])
+
+  # dGzInterpolate = d.intrepolate_net(x, y, recs, dGz)

@@ -40,7 +40,7 @@ class Solver():
     self.mesh = mesh
     logger.info('start calc dGz')
     L = len(receptors)
-    l = L / 100
+    l = L / 10
     for i, r in enumerate(receptors):
       self.dGz.append(0)
       if not i % l:

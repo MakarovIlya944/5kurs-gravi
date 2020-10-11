@@ -120,7 +120,7 @@ class spline():
             self.__elemAdd(d-1, i)
 
     def __init__(self, file, _K, _paint_K=10, w=None):
-        logger.info('init')
+        logger.info('Init')
 
         self.__f = [spline.__f1, spline.__f2, spline.__f3, spline.__f4]
         self.K = np.array(_K)
@@ -262,44 +262,26 @@ class spline():
         # range local functions per element count
         rle = range(lfne)
 
-            
-        for _x in x:
-            for el_x in self.elements:
-                a = 0
-            for _y in y:
-                v = 21
+        z = [np.zeros(len(x)) for el in range(len(y))]
+        answer = self.answer[0]
+        el_i = len(self.elements) - 1
+        el_x = self.elements[el_i]
+        
+        el_j = len(el_x) - 1
+        el_y = el_x[el_j]
 
+        rng_x = range(len(x)-1, 0, -1)
+        rng_y = range(len(y)-1, 0, -1)
+        for i in rng_x:
+            _x = x[i]
+            if _x < el_x[0].mn[0]:
+                el_i -= 1
+            el_x = self.elements[el_i]
+            for j in rng_y:
+                _y = y[j]
+                if _y < el_y.mn[1]:
+                    el_j -= 1
+                el_y = el_x[el_j]
+                z[i][j] = np.sum([answer[el_y.nodes[v//lfnn]*lfnn+v%lfnn] * psi(el_y, [x[i],y[j]], v) for v in rle])
 
-
-        elem_steps = []
-        x = []
-        y = []
-        rng = range(K+1)
-
-
-        z = [np.zeros(self.kElem[1] * K + 1) for el in range(self.kElem[0] * K + 1)]
-        for i in range(self.dim):
-            tmp = np.ones(K) * (self.h[i] / K)
-            tmp = np.insert(tmp, 0, 0)[:-1]
-            tmp = list(accumulate(tmp))
-            elem_steps.append(tmp)
-
-        for el_x in self.elements:
-            _x = [_el + el_x[0].mn[0] for _el in elem_steps[0]]
-            x.extend(_x)
-        x.append(self.mx[0])
-        for el_y in self.elements[0]:
-            _y = [_el + el_y.mn[1] for _el in elem_steps[1]]
-            y.extend(_y)
-        y.append(self.mx[1])
-
-        for i,el_x in enumerate(self.elements):
-            for j,el_y in enumerate(el_x):
-                for cur_x in rng:
-                    for cur_y in rng:
-                        _I = i*K + cur_x
-                        _J = j*K + cur_y
-                        z[_I][_J] = np.sum([self.answer[el_y.nodes[v//lfnn]*lfnn+v%lfnn] * psi(el_y, [x[_I],y[_J]], v) for v in rle])
-        y, x = np.meshgrid(y, x)
-        z = np.array(z)
         return x, y, z

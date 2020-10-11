@@ -101,8 +101,7 @@ def main():
     testFunc = lambda x,y,z: x+z
     p.Paint()
 
-def interpolate(receptors_in, x, y):
-    elements = [1,1]
+def interpolate(receptors_in, x, y, elements=[1,1]):
     s = spline(receptors_in, elements)
     s.Calculate()
     return s.Interpolate(x, y)
