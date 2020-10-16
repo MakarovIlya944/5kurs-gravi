@@ -2,6 +2,7 @@ from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from ..continous.main import interpolate
 import logging
+from numpy import array,interp
 
 class DataCreator():
 
@@ -89,6 +90,59 @@ class DataReader():
 
     ll = [[(l[0] + dx)*kx,(l[1] + dy)*ky,l[2]] for l in ll]
     return ll
+
+
+def interpolate(receptors,interpolate_x,interpolate_y):
+
+  groped_x_old, groped_y_old = {}, {}
+  groped_x_new, groped_y_new = {}, {}
+
+  for _p in receptors:
+    if _p[0] in groped_y_old:
+      groped_y_old[_p[0]][_p[1]] = _p[2]
+    else:
+      groped_y_old[_p[0]] = {_p[1]: _p[2]}
+    if _p[1] in groped_x_old:
+      groped_x_old[_p[1]][_p[0]] = _p[2]
+    else:
+      groped_x_old[_p[1]] = {_p[0]: _p[2]}
+
+  for _y in groped_x_old:
+    points = []
+    values = []
+    for _x in groped_x_old[_y]:
+      points.append(_x)
+      values.append(groped_x_old[_y][_x])
+    groped_x_new[_y] = interp(interpolate_x,points, values)
+
+  for _x in groped_y_old:
+    points = []
+    values = []
+    for _y in groped_y_old[_x]:
+      points.append(_y)
+      values.append(groped_y_old[_x][_y])
+    groped_y_new[_x] = interp(interpolate_y,points, values)
+
+  z = []
+  old_x = [x for x in groped_y_new]
+  old_y = [y for y in groped_x_new]
+  sorted(old_x)
+  sorted(old_y)
+  rng_x = range(len(old_x) - 1)
+  rng_y = range(len(old_y) - 1)
+
+  for i_y, _y in enumerate(interpolate_y):
+    for i_x, _x in enumerate(interpolate_x):
+      for i in rng_x:
+        if old_x[i] <= _x and old_x[i+1] >= _x:
+          Y = groped_y_new[old_x[i]][i_y] + (groped_y_new[old_x[i+1]][i_y] - groped_y_new[old_x[i]][i_y]) * (_x - old_x[i]) / (old_x[i+1] - old_x[i])
+          break
+      for i in rng_y:
+        if old_y[i] <= _y and old_y[i+1] >= _y:
+          X = groped_x_new[old_y[i]][i_x] + (groped_x_new[old_y[i+1]][i_x] - groped_x_new[old_y[i]][i_x]) * (_y - old_y[i]) / (old_y[i+1] - old_y[i])
+          break
+      z.append((X + Y) / 2.0)
+  return z
 
 def test():
   params = {

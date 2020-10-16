@@ -270,8 +270,8 @@ class spline():
         el_j = len(el_x) - 1
         el_y = el_x[el_j]
 
-        rng_x = range(len(x)-1, 0, -1)
-        rng_y = range(len(y)-1, 0, -1)
+        rng_x = range(len(x)-1, -1, -1)
+        rng_y = range(len(y)-1, -1, -1)
         for i in rng_x:
             _x = x[i]
             if _x < el_x[0].mn[0]:
@@ -282,6 +282,6 @@ class spline():
                 if _y < el_y.mn[1]:
                     el_j -= 1
                 el_y = el_x[el_j]
-                z[i][j] = np.sum([answer[el_y.nodes[v//lfnn]*lfnn+v%lfnn] * psi(el_y, [x[i],y[j]], v) for v in rle])
+                z[j][i] = np.sum([answer[el_y.nodes[v//lfnn]*lfnn+v%lfnn] * psi(el_y, [x[i],y[j]], v) for v in rle])
 
         return x, y, z
