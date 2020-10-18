@@ -1,8 +1,9 @@
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
-from ..continous.main import interpolate
 import logging
 from numpy import array,interp
+from random import *
+import os
 
 class DataCreator():
 
@@ -10,24 +11,31 @@ class DataCreator():
   net_random_params = {}
   receptors_random_params = {}
   observe_points = {}
-  logger = logging.getLogger('research.data.DataCreator')
+  logger = logging.getLogger(__name__ + '.DataCreator')
+  log_step = 1
 
   def __init__(self, params):
     super().__init__()
+    seed()
     self.name = params['name']
     self.net_random_params = params['net']
     self.receptors_random_params = params['receptors']
-    self.observe_points = params['points']
+    self.observe_points = params.get('points')
 
   def create_pure_data(self, receptors):
-    params = self.net_random_params
-    net = center_build(params)
+    net = center_build(self.randomize())
     s = Solver(receptors=receptors)
     return s.profile(net), net
 
-  def intrepolate_net(self, x, y, receptors):
-    # x = [0,1,2];  y = [0,3]; z = [[1,2,3], [4,5,6]]
-    return interpolate(receptors, x, y)
+  def randomize(self):
+    params = dict(self.net_random_params)
+    n = params['count']
+    if not params.get('center'):
+      params['center'] = tuple([randint(0, k-1) for k in n])
+    if not params.get('width'):
+      params['width'] = tuple([randint(0, k-1) for k in n])
+    params['c_value'] = random() * params['c_value']
+    return params
 
   def create_receptors(self):
     x_r = self.receptors_random_params['x']['r']
@@ -47,19 +55,53 @@ class DataCreator():
         receptors.append([_x,_y,0])
     return receptors, x, y
 
-  def create_data(self, size):
+  def create_data(self):
     recs, x, y = self.create_receptors()
     dGz, net = self.create_pure_data(recs)
     for i, z in enumerate(dGz):
       recs[i][2] = z
-    return x, y, recs
+    return x, y, recs,net
+    
+  def create_dataset(self, n):
+    if self.observe_points:
+      is_interpolated = True
+      observe_x = self.observe_points[0]
+      observe_y = self.observe_points[1]
+    else:
+      is_interpolated = False
+  
+    self.logger.info('create_interpolated_dataset' if is_interpolated else 'created_dataset')
+    log_step = int(n * self.log_step)
+    
+    for i in range(n):
+      
+      filename= os.path.abspath('.') + f'/data/{self.name}/{i}'
+      x, y, r,net = self.create_data()
+      if is_interpolated:
+        z = interpolate(r, observe_x, observe_y)
+      else:
+        z = [el[2] for el in r]
+      with open(filename+'_in', 'w') as f:
+        j = 0
+        for _y in y:
+          for _x in x:
+            f.write(str(z[j]) + '\n')
+            j += 1
+      with open(filename + '_out', 'w') as f:
+        for p in net:
+          f.write(str(p[1]) + '\n')
+      with open(filename + '_out_config', 'w') as f:        
+        f.write(' '.join([str(k) for k in net.n]))
+      if not n % log_step:
+        self.logger.info(f'set #{i} created')
+    return len(z), len(net)
 
 class DataReader():
   """
   Class data-reader from diffrent sources and diffrent formats
   """
 
-  logger = logging.getLogger('research.data.DataReader')
+  logger = logging.getLogger(__name__ + '.DataReader')
   
   def read_py_file(filename, x=None, y=None):
     DataReader.logger.info('read_py_file: ' + filename)
@@ -91,6 +133,23 @@ class DataReader():
     ll = [[(l[0] + dx)*kx,(l[1] + dy)*ky,l[2]] for l in ll]
     return ll
 
+  def read_folder(path):
+    i = 0
+    filename = path + f'/{i}'
+    X, Y, C = [], [], []
+    while os.path.exists(filename + '_in'):
+      with open(filename + '_in', 'r') as f:
+        ll = f.readlines()
+      X.append([float(l) for l in ll])
+      with open(filename + '_out', 'r') as f:
+        ll = f.readlines()
+      Y.append([float(l) for l in ll])
+      with open(filename + '_out_config', 'r') as f:
+        ll = f.readlines()[0].split(' ')
+      C.append([int(l) for l in ll])
+      i += 1
+      filename = path + f'/{i}'
+    return X, Y, C
 
 def interpolate(receptors,interpolate_x,interpolate_y):
 
@@ -143,38 +202,3 @@ def interpolate(receptors,interpolate_x,interpolate_y):
           break
       z.append((X + Y) / 2.0)
   return z
-
-def test():
-  params = {
-    'name': 'test',
-    'net': {
-      'count': (5,1,5),
-      'right': (3000,50,-1500),
-      'left': (1000,0,-500),
-      'width': (1,0,1),
-      'center': (1,0,1),
-      'c_value': 1,
-      },
-    'receptors':{
-      'x':{
-        'r': 3000,
-        'l': 1000,
-        'n': 10
-      },
-      'y':{
-        'r': 0,
-        'l': -2000,
-        'n': 10
-      }
-    },
-    'points':
-    []
-  }
-  size = 100
-  d = DataCreator(params)
-  x, y, recs = d.create_data(size)
-
-  with open('dgz.txt', 'w') as f:
-    f.writelines([str(r) + '\n' for r in recs])
-
-  # dGzInterpolate = d.intrepolate_net(x, y, recs, dGz)

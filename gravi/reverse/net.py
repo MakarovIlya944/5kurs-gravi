@@ -77,6 +77,12 @@ class Net():
 
     return (self.i, self.cells[self.i[0]][self.i[1]][self.i[2]])
 
+  def __len__(self):
+    l = 1
+    for i in self.n:
+      l *= i
+    return l
+
   def __str__(self):
     s = ''
     for i, m in enumerate(self.cells):

@@ -11,7 +11,7 @@ class Model():
   """
   Learn model to ./models/<name>/models/<datetime>
   """
-  def learn(self, input, output):
+  def learn(self):
     pass
 
   """
