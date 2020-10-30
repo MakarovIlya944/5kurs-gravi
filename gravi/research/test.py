@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 from .data import DataReader
+from mpl_toolkits.mplot3d import axes3d, Axes3D
 
 def show_nets(name, params):
   x,y,c = DataReader.read_folder('data/' + name)
@@ -20,5 +21,17 @@ def show_nets(name, params):
 
 def show_3d(name):
   x,y,c = DataReader.read_folder('data/' + name)
+
+  dx, dy, dz = 5, 5, 5
   for i in range(len(c)):
-    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    m = max(y[i])
+    for j, v in enumerate(y[i]):
+      ax.scatter(j % c[i][0] * dx, j % (c[i][0] * c[i][1]) // c[i][1] * dy, j // (c[i][0] * c[i][1])  * -dz, marker='o', c=[[0.1,0.1,v/m]])
+
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+
+    plt.show()

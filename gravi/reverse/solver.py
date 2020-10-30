@@ -37,13 +37,13 @@ class Solver():
       mesh *= i
     mesh /= 4 * pi
     self.mesh = mesh
-    logger.info('calculating receptors dGz')
+    logger.debug('calculating receptors dGz')
     L = len(receptors)
     l = int(L * log_config['solver'])
     for i, r in enumerate(receptors):
       self.dGz.append(0)
       if not i % l:
-        logger.info(f'#{i}/{L} dGz {i/float(L)*100:.1f}%')
+        logger.debug(f'#{i}/{L} dGz {i/float(L)*100:.1f}%')
       for j, p in net:
         self.dGz[i] += self._dGz(r, j) * p
 

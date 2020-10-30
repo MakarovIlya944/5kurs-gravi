@@ -22,17 +22,17 @@ def get_logger(name):
     return logger
 
 log_config = {
-    'solver': 0.2,
-    'data_creation': 0.5
+    'solver': 0.5,
+    'data_creation': 1 / 10
 }
 
 prepare_data_default_params = {
       'net': {
-        'count': (5,5,5),
+        'count': (6,6,10),
         'right': (3000,1000,-1500),
         'left': (1000,0,-500),
         'width': {
-           'max': (2,2,2),
+           'max': (3,3,2),
            'min': (0,0,0)
         },
         'center': {

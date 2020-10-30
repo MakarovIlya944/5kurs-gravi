@@ -1,3 +1,4 @@
+from os import name
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from numpy import array,interp
@@ -37,6 +38,7 @@ class DataCreator():
     if p.get('min'):
       min_p = tuple([max(min_p[i], p['min'][i]) for i in range(3)])
     params['center'] = tuple([randint(min_p[i], max_p[i]) for i in range(3)])
+    self.logger.debug('center:' + str(params['center']))
 
     p = params.get('width')
     max_p = tuple([k-1 for k in n])
@@ -45,7 +47,8 @@ class DataCreator():
       max_p = tuple([min(max_p[i], p['max'][i]) for i in range(3)])
     if p.get('min'):
       min_p = tuple([max(min_p[i], p['min'][i]) for i in range(3)])
-    params['width'] = tuple([randint(0, k-1) for k in n])
+    params['width'] = tuple([randint(min_p[i], max_p[i]) for i in range(3)])
+    self.logger.debug('width:' + str(params['width']))
 
     params['c_value'] = random() * params['c_value']
     return params
@@ -83,7 +86,7 @@ class DataCreator():
     else:
       is_interpolated = False
   
-    self.logger.info('creating interpolated dataset' if is_interpolated else 'creating dataset')
+    self.logger.info(('creating interpolated dataset' if is_interpolated else 'creating dataset') + name)
     log_step = int(n * log_config['data_creation'])
     
     for i in range(n):
@@ -146,6 +149,14 @@ class DataReader():
     ll = [[(l[0] + dx)*kx,(l[1] + dy)*ky,l[2]] for l in ll]
     return ll
 
+
+  """
+  Read dataset from <path> folder.
+  Return:
+  X - input data: z-value of receptors ordered by y,x
+  Y - output data: solidity of net cells, ordered by y,x
+  C - net dimensions
+  """
   def read_folder(path):
     i = 0
     filename = path + f'/{i}'
