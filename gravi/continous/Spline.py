@@ -8,13 +8,9 @@ import operator
 from mpl_toolkits.mplot3d import Axes3D
 from time import gmtime, strftime
 import numpy as np
-import logging
+from config import get_logger
 
-# with open(f'log-{strftime("%H-%M-%S", gmtime())}.txt','w') as f:
-#     pass
-# logging.basicConfig(filename=f'log-{strftime("%H-%M-%S", gmtime())}.txt', level=logging.DEBUG)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 numberLocalMatrix = 0
 
@@ -120,7 +116,6 @@ class spline():
             self.__elemAdd(d-1, i)
 
     def __init__(self, file, _K, _paint_K=10, w=None):
-        logger.info('Init')
 
         self.__f = [spline.__f1, spline.__f2, spline.__f3, spline.__f4]
         self.K = np.array(_K)
@@ -199,17 +194,14 @@ class spline():
             self.indexs = [[int(c)-1 for c in str(int(l))] for l in lines]
 
     def Calculate(self):
-        logger.info('Calculate')
         self.MakeMatrix()
         self.Solve()
 
     def MakeMatrix(self):
-        logger.info('MakeMatrix')
         self.__elemAdd(self.dim, self.elements)
 
     def AppendLocalMatrix(self, el):
         global numberLocalMatrix
-        logger.info('MakeLocalMatrix')
         dim = self.dim
         nums = range(pow(4, dim))
         psi = self.__psi
@@ -244,12 +236,10 @@ class spline():
             numberLocalMatrix += 1
 
     def Solve(self):
-        logger.info('Solve')
         self.answer = np.linalg.lstsq(self.A, self.F, rcond=None)
         return self.answer
 
     def Interpolate(self, x, y):
-        logger.info('Interpolate')
         K = self.paint_K
         psi = self.__psi
 

@@ -1,8 +1,10 @@
 from .solver import Solver
 from .builder import *
 from numpy.linalg import norm
-from numpy.polynomial.legendre import leggauss
-from .log import Logger
+
+from config import get_logger
+
+logger = get_logger(__name__)
 
 class Minimizator():
 

@@ -4,6 +4,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 import datetime
 from .model import Model
+from config import get_logger
+
+logger = get_logger(__name__)
 
 class Net(nn.Module):
   def __init__(self, layers):
@@ -22,6 +25,8 @@ class Net(nn.Module):
 class ModelPyTorch(Model):
   name = "pytorch"
 
+  log_step = 100
+
   def __init__(self, params):
     super().__init__()
     self.model = Net(params['layers'])
@@ -36,7 +41,7 @@ class ModelPyTorch(Model):
 
       # Compute and print loss
       loss = self.criterion(y_pred, y)
-      if t % 100 == 99:
+      if t % self.log_step == self.log_step - 1:
           print(t, loss.item())
 
       # Zero gradients, perform a backward pass, and update the weights.

@@ -1,9 +1,9 @@
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
-import logging
 from numpy import array,interp
 from random import *
 import os
+from config import get_logger, log_config
 
 class DataCreator():
 
@@ -11,8 +11,7 @@ class DataCreator():
   net_random_params = {}
   receptors_random_params = {}
   observe_points = {}
-  logger = logging.getLogger(__name__ + '.DataCreator')
-  log_step = 1
+  logger = get_logger(__name__ + '.DataCreator')
 
   def __init__(self, params):
     super().__init__()
@@ -30,10 +29,24 @@ class DataCreator():
   def randomize(self):
     params = dict(self.net_random_params)
     n = params['count']
-    if not params.get('center'):
-      params['center'] = tuple([randint(0, k-1) for k in n])
-    if not params.get('width'):
-      params['width'] = tuple([randint(0, k-1) for k in n])
+    p = params.get('center')
+    max_p = tuple([k-1 for k in n])
+    min_p = (0,0,0)
+    if p.get('max'):
+      max_p = tuple([min(max_p[i], p['max'][i]) for i in range(3)])
+    if p.get('min'):
+      min_p = tuple([max(min_p[i], p['min'][i]) for i in range(3)])
+    params['center'] = tuple([randint(min_p[i], max_p[i]) for i in range(3)])
+
+    p = params.get('width')
+    max_p = tuple([k-1 for k in n])
+    min_p = (0,0,0)
+    if p.get('max'):
+      max_p = tuple([min(max_p[i], p['max'][i]) for i in range(3)])
+    if p.get('min'):
+      min_p = tuple([max(min_p[i], p['min'][i]) for i in range(3)])
+    params['width'] = tuple([randint(0, k-1) for k in n])
+
     params['c_value'] = random() * params['c_value']
     return params
 
@@ -70,8 +83,8 @@ class DataCreator():
     else:
       is_interpolated = False
   
-    self.logger.info('create_interpolated_dataset' if is_interpolated else 'created_dataset')
-    log_step = int(n * self.log_step)
+    self.logger.info('creating interpolated dataset' if is_interpolated else 'creating dataset')
+    log_step = int(n * log_config['data_creation'])
     
     for i in range(n):
       
@@ -101,10 +114,10 @@ class DataReader():
   Class data-reader from diffrent sources and diffrent formats
   """
 
-  logger = logging.getLogger(__name__ + '.DataReader')
+  logger = get_logger(__name__ + '.DataReader')
   
   def read_py_file(filename, x=None, y=None):
-    DataReader.logger.info('read_py_file: ' + filename)
+    DataReader.logger.info('reading_py_file: ' + filename)
     ll = []
     with open(filename,'r') as f:
       ll = f.readlines()

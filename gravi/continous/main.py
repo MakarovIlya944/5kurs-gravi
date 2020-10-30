@@ -1,13 +1,10 @@
-import argparse
-import logging
 import numpy as np
 from .spline import spline
 from .Painter import Painter
 import matplotlib.pyplot as plt
-import math
+from config import get_logger
 
-logging.basicConfig(filename='log.txt', level=logging.WARNING)
-logger = logging.getLogger('Main')
+logger = get_logger(__name__)
 
 class PointsFabric():
 

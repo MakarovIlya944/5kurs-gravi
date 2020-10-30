@@ -2,6 +2,7 @@
 using MathNet.Numerics.Optimization;
 using Mnist.Functions;
 using Mnist.Pictures;
+using Newtonsoft.Json;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,37 @@ namespace Mnist
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World! Version 5\n");
+            Console.WriteLine("Hello World! Version gravi\n");
+            if (args.Length == 0)
+                throw new Exception("Empty argumets");
+
+            string path;
+            bool isSave = true;
+            switch (args[0])
+            {
+                case "learn":
+                    if (args.Length < 2)
+                        throw new Exception("Not enought args for learn");
+                    path = args[1];
+                    if (args.Length == 3)
+                        isSave = bool.Parse(args[2]);
+                    using (StreamReader r = new StreamReader("model.json"))
+                    {
+                        string json = r.ReadToEnd();
+                        ModelConfig c = JsonConvert.DeserializeObject<ModelConfig>(json);
+                        int inputSize = 784;
+                        width = new List<int>() { inputSize, inputSize / 2 };
+                        modelPath = Path.Combine(basePath, @"ready\newModel");
+                        Train();
+                    }
+                    break;
+                case "predict":
+
+                    break;
+                default:
+                    break;
+            }
+
             //int inputSize = 784;
             //width = new List<int>() { inputSize, inputSize / 2 };
             //modelPath = Path.Combine(basePath, @"ready\newModel");
@@ -41,14 +72,12 @@ namespace Mnist
             PredictManyModels(@"D:\Projects\Mnist\NeuralNet\Ready\Models");
             //modelPath = @"D:\Projects\Mnist\NeuralNet\Ready\Models\0_len_hidden\model_2";
             Console.WriteLine("Good bye World!");
-            Console.ReadLine();
         }
 
         private static void SavePredict(List<int[]> res, string path)
         {
             double all, truly, falsly, trfa;
-            using (StreamWriter file =
-new StreamWriter(Path.Combine(path, $"predict.txt")))
+            using (StreamWriter file = new StreamWriter(Path.Combine(path, $"predict.txt")))
             {
                 file.WriteLine("#: t/f\t\tt%\t\tf%\t\tt/f");
                 for (int j = 0; j < 10; j++)

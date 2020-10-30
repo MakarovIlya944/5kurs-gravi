@@ -17,3 +17,8 @@ def show_nets(name, params):
       axs[j, k].set_title(str(i))
   plt.tight_layout()
   plt.show()
+
+def show_3d(name):
+  x,y,c = DataReader.read_folder('data/' + name)
+  for i in range(len(c)):
+    

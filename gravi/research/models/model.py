@@ -9,7 +9,7 @@ class Model():
   name = "base"
 
   """
-  Learn model to ./models/<name>/models/<datetime>
+  Learn model
   """
   def learn(self):
     pass
@@ -18,4 +18,16 @@ class Model():
   Predict from ./models/<name>/input/ to ./models/<name>/output/
   """
   def predict(self):
+    pass
+  
+  """
+  Save model to ./models/<name>/<datetime>
+  """
+  def save(self):
+    pass
+  
+  """
+  Load model from <path>
+  """
+  def load(self):
     pass
