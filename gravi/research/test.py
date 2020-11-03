@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-import os
 from .data import DataReader
 from mpl_toolkits.mplot3d import axes3d, Axes3D
+from .models.pytorch import ModelPyTorch
 
 def show_nets(name, params):
   x,y,c = DataReader.read_folder('data/' + name)
@@ -35,3 +35,8 @@ def show_3d(name):
     ax.set_zlabel('Z Label')
 
     plt.show()
+
+def test_nn():
+  mp = ModelPyTorch()
+  print(mp.model)
+  print(mp.model.parameters())

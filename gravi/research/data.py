@@ -2,9 +2,11 @@ from os import name
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from numpy import array,interp
+from torch import from_numpy, Tensor
 from random import *
 import os
 from config import get_logger, log_config
+import json
 
 class DataCreator():
 
@@ -78,7 +80,7 @@ class DataCreator():
       recs[i][2] = z
     return x, y, recs,net
     
-  def create_dataset(self, n):
+  def read_dataset(self, n):
     if self.observe_points:
       is_interpolated = True
       observe_x = self.observe_points[0]
@@ -157,7 +159,7 @@ class DataReader():
   Y - output data: solidity of net cells, ordered by y,x
   C - net dimensions
   """
-  def read_folder(path):
+  def read_folder(path, out_format='default'):
     i = 0
     filename = path + f'/{i}'
     X, Y, C = [], [], []
@@ -173,7 +175,35 @@ class DataReader():
       C.append([int(l) for l in ll])
       i += 1
       filename = path + f'/{i}'
-    return X, Y, C
+    DataReader.logger.info(f'X: {len(X)}x{len(X[0])} Y: {len(Y)}x{len(Y[0])} C: {len(C)}x{len(C[0])}')
+    if out_format == 'default':
+      return X, Y, C
+    elif out_format == 'tensor':
+      return Tensor(array(X)), Tensor(array(Y)), Tensor(array(C))
+    else:
+      DataReader.logger.error('Unexpected out format type')
+      raise KeyError('Unexpected out format type')
+
+class Configurator():
+  """
+  Class reader configs for datasets and models
+  """
+
+  logger = get_logger(__name__ + '.Configurator')
+
+  def get_dataset_config(name):
+    Configurator.__read_file(name, 'dataset')
+
+  def get_model_config(name):
+    return Configurator.__read_file(name, 'model')
+
+  def __read_file(name, file_type):
+    path = os.path.abspath('.') + f'/configs/{file_type}/{name}.json'
+    if not os.path.exists(path):
+      Configurator.logger.error(f'{file_type} config {name} not exist')
+      raise FileNotFoundError(f'{file_type} config {name} not exist')
+    with open(path, 'rb') as f:
+      return json.load(f)
 
 def interpolate(receptors,interpolate_x,interpolate_y):
 

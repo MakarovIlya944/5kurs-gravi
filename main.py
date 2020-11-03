@@ -1,12 +1,13 @@
 from gravi.research.main import learn,prepare_data
-from gravi.research.test import show_3d
+from gravi.research.test import test_nn
 import sys
 from config import get_logger
 
 logger = get_logger('main')
 
 def test(name):
-  show_3d(name)
+  # show_3d(name)
+  test_nn()
 
 def main():
   logger.info("Start")
@@ -21,11 +22,11 @@ def main():
       learn(i, o, sys.argv[2])
     elif sys.argv[1] == 'test':
       test(sys.argv[2])
-  except IndexError as ex:
+  except IndexError:
     print('Invalid args number')
     print('data <dataset name> <dataset size>\tWill be save dataset to ./data/<dataset name>')
-    print('learn <dataset name>\tWill be save model to ./models/<model type>/<date>')
-    print('predict <dataset name>\tWill be save model to ./models/<model type>/<date>')
+    print('learn <dataset name>\t\t\tWill be save model to ./models/<model type>/<date>')
+    print('predict <dataset name>\t\t\tWill be save model to ./models/<model type>/<date>')
 
 if __name__ == '__main__':
   main()
