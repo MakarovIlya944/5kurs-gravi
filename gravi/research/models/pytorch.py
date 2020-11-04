@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import random_split
 from config import get_logger, log_config
 
 logger = ''
@@ -38,14 +37,14 @@ class ModelPyTorch():
     self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
     self.iteraions = params['iters']
 
-  def learn(self, x, y, man_seed=42):
+  def learn(self, x, y):
     self.log_step *= self.iteraions
     l = len(x)
-    l = random_split(x, [l*0.1, l*0.9], generator=torch.Generator().manual_seed(man_seed))
+    l = torch.split(x, [int(l*0.1), int(l*0.9)])
     train_x = l[0]
     val_x = l[1]
     l = len(y)
-    l = random_split(y, [l*0.1, l*0.9], generator=torch.Generator().manual_seed(man_seed))
+    l = torch.split(y, [int(l*0.1), int(l*0.9)])
     train_y = l[0]
     val_y = l[1]
     for t in range(self.iteraions):
@@ -55,9 +54,9 @@ class ModelPyTorch():
       y_pred_val = self.model(val_x)
       loss_val = self.criterion(y_pred_val, val_y)
 
-      if (loss_val.item() - self.prev_loss) < Configurator.pytorch_train_eps:
-        logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
-        break
+      # if (loss_val.item() - self.prev_loss) < Configurator.pytorch_train_eps:
+      #   logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
+      #   break
       self.prev_loss = loss_val.item()
       if t % self.log_step == self.log_step - 1:
         logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
