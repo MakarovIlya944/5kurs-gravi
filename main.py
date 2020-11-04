@@ -1,5 +1,5 @@
 from gravi.research.main import learn,prepare_data
-from gravi.research.test import test_nn
+from gravi.research.test import *
 import sys
 from config import get_logger
 
@@ -7,7 +7,7 @@ logger = get_logger('main')
 
 def test(name):
   # show_3d(name)
-  test_nn()
+  show_loss(name)
 
 def main():
   tmp = ' '.join(sys.argv)
