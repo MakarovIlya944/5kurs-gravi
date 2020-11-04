@@ -4,7 +4,7 @@ _log_format = f"%(asctime)s|%(levelname)s|%(name)s/%(filename)s/%(funcName)s|%(m
 
 def get_file_handler(name):
   file_handler = logging.FileHandler(name)
-  file_handler.setLevel(logging.WARNING)
+  file_handler.setLevel(logging.DEBUG)
   file_handler.setFormatter(logging.Formatter(_log_format))
   file_handler.name = 'file_log'
   return file_handler
