@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import datetime
 from config import get_logger, log_config
 
-logger = get_logger(__name__)
+logger = ''
 
 class Net(nn.Module):
   def __init__(self, layers):
@@ -30,8 +30,9 @@ class ModelPyTorch():
     super().__init__()
     self.log_step = log_config['pytorch']
     self.model = Net(params['layers'])
+    global logger
+    logger = get_logger(__name__,params['model_config_name']+ '.log')
     self.criterion = nn.MSELoss()
-    logger.debug(self.model.parameters())
     self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
     self.iteraions = params['iters']
 

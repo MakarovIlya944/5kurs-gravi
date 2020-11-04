@@ -2,7 +2,7 @@ from os import name
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
 from numpy import array,interp
-from torch import from_numpy, Tensor
+from torch import Tensor
 from random import *
 import os
 from config import get_logger, log_config
@@ -192,7 +192,7 @@ class Configurator():
   logger = get_logger(__name__ + '.Configurator')
 
   def get_dataset_config(name):
-    Configurator.__read_file(name, 'dataset')
+    return Configurator.__read_file(name, 'dataset')
 
   def get_model_config(name):
     return Configurator.__read_file(name, 'model')

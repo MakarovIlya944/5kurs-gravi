@@ -10,16 +10,23 @@ def test(name):
   test_nn()
 
 def main():
-  logger.info("Start")
+  tmp = ' '.join(sys.argv)
+  logger.info('Start: ' + tmp)
   try:
     if sys.argv[1] == 'data':
-      prepare_data(int(sys.argv[3]), sys.argv[2])
+      config_name = sys.argv[2]
+      if len(sys.argv) > 4:
+        config_name = sys.argv[4]
+      prepare_data(int(sys.argv[3]), sys.argv[2], config_name)
     elif sys.argv[1] == 'learn':
       with open(f'data/{sys.argv[2]}/0_in', 'r') as f:
         i = len(f.readlines())
       with open(f'data/{sys.argv[2]}/0_out', 'r') as f:
         o = len(f.readlines())
-      learn(i, o, sys.argv[2])
+      config_name = sys.argv[2]
+      if len(sys.argv) > 3:
+        config_name = sys.argv[3]
+      learn(i, o, sys.argv[2], config_name)
     elif sys.argv[1] == 'test':
       test(sys.argv[2])
   except IndexError:
