@@ -14,12 +14,13 @@ namespace Mnist.Gravi
             List<Vector<double>> signals = new List<Vector<double>>();
             List<Vector<double>> answers = new List<Vector<double>>();
             int i = 0;
-            string file = Path.Combine(path, "\\" + i.ToString());
+            string file = Path.Combine(path, i.ToString());
             while (File.Exists(file + "_in"))
             {
-                signals.Add(Vector<double>.Build.DenseOfEnumerable(File.ReadAllLines(file + "_in").Select(x => Double.Parse(x))));
-                answers.Add(Vector<double>.Build.DenseOfEnumerable(File.ReadAllLines(file + "_out").Select(x => Double.Parse(x))));
+                signals.Add(Vector<double>.Build.DenseOfEnumerable(File.ReadAllLines(file + "_in").Select(x => x.Replace('.', ',')).Select(x => Double.Parse(x))));
+                answers.Add(Vector<double>.Build.DenseOfEnumerable(File.ReadAllLines(file + "_out").Select(x => x.Replace('.', ',')).Select(x => Double.Parse(x))));
                 i++;
+                file = Path.Combine(path, i.ToString());
             }
             
             return new Data(signals.ToArray(), answers.ToArray());

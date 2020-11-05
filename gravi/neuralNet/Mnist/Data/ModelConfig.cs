@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Mnist
@@ -15,12 +16,21 @@ namespace Mnist
     public class ModelConfig
     {
         public int iters;
+        public int batch;
         public List<LayerConfig> layers;
         public float lr;
+        public List<int> ToList()
+        {
+            return layers.Select(x => x.w).ToList();
+        }
     }
 
     public class LayerConfig
     {
         public int w;
+        public override string ToString()
+        {
+            return w.ToString();
+        }
     }
 }

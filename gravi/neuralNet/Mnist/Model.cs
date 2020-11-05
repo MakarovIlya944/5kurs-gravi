@@ -41,6 +41,11 @@ namespace Mnist
             layers = new List<Layer>();
         }
 
+        public Model(ModelConfig c, double center = 0, double offset = 1E-1)
+        {
+            layers = LayerBuilder.BuildFromConfig(c, mOffset: offset, mCenter: center);
+        }
+
         public Model(int deep, int[] width, double init, double b, int inputSize = 2, int outputSize = 1, bool randomize = false, double center = 0, double offset = 1E-1, double reluCoef = 1E-1, double sigmoidCoef = 1E-1)
         {
             Sigmoid f1 = new Sigmoid(sigmoidCoef);

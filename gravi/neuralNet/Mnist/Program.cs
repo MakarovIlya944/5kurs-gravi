@@ -36,28 +36,29 @@ namespace Mnist
             if (args.Length == 0)
                 throw new Exception("Empty argumets");
 
-            string path;
-            bool isSave = true;
+            string basePath, modelConfigName, modelName, datasetName;
             switch (args[0])
             {
                 case "learn":
                     if (args.Length < 2)
                         throw new Exception("Not enought args for learn");
-                    path = args[1];
+                    basePath = Path.Combine(Directory.GetCurrentDirectory(), @"configs/model/");
+                    datasetName = args[1];
+                    modelConfigName = args[1];
                     if (args.Length == 3)
-                        isSave = bool.Parse(args[2]);
-                    using (StreamReader r = new StreamReader("model.json"))
-                    {
-                        string json = r.ReadToEnd();
-                        ModelConfig c = JsonConvert.DeserializeObject<ModelConfig>(json);
-                        int inputSize = 784;
-                        width = new List<int>() { inputSize, inputSize / 2 };
-                        modelPath = Path.Combine(basePath, @"ready\newModel");
-                        Train();
-                    }
+                        modelConfigName = args[2];
+                    ModelConfig c = ReadLearnConfig(basePath + modelConfigName + ".json");
+                    width = c.ToList();
+
+                    allData = Gravi.GraviConverter.OpenFolder(Path.Combine(Directory.GetCurrentDirectory(), $"data\\{datasetName}" ));
+
+                    modelName = DateTime.UtcNow.ToString(@"MM-dd-hh-mm") + $"-{modelConfigName}-{datasetName}";
+                    basePath = Path.Combine(Directory.GetCurrentDirectory(), @"models/spider/");
+                    modelPath = Path.Combine(basePath, modelName);
+                    Train(c);
+
                     break;
                 case "predict":
-
                     break;
                 default:
                     break;
@@ -69,9 +70,18 @@ namespace Mnist
             //Train();
             //Predict();
             //TrainManyModels(modelPath);
-            PredictManyModels(@"D:\Projects\Mnist\NeuralNet\Ready\Models");
+            //PredictManyModels(@"D:\Projects\Mnist\NeuralNet\Ready\Models");
             //modelPath = @"D:\Projects\Mnist\NeuralNet\Ready\Models\0_len_hidden\model_2";
             Console.WriteLine("Good bye World!");
+        }
+
+        private static ModelConfig ReadLearnConfig(string configName)
+        {
+            using (StreamReader r = new StreamReader(configName))
+            {
+                string json = r.ReadToEnd();
+                return JsonConvert.DeserializeObject<ModelConfig>(json);
+            }
         }
 
         private static void SavePredict(List<int[]> res, string path)
@@ -272,6 +282,22 @@ new System.IO.StreamWriter(Path.Combine(path, $"times.txt")))
                 item.InputDataSize = data.InputDataSize;
             }
             return m.Predict(data).Row(0);
+        }
+
+        public static double Train(ModelConfig c)
+        {
+            var startTime = System.Diagnostics.Stopwatch.StartNew();
+            Data data = allData.Take(trainDataSize);
+            ILossFunction<double> loss = new L2Loss();
+
+            Model m = new Model(c, trainMatrixRandomCenter, trainMatrixRandomOffset);
+            m.LogEpoch = logEpoch;
+            m.LogBatch = logBatch;
+
+            m.Train(data, c.iters, c.batch, c.lr, loss);
+            m.Save(modelPath);
+            startTime.Stop();
+            return startTime.ElapsedMilliseconds;
         }
 
         public static double Train()

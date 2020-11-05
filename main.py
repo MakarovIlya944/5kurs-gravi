@@ -32,7 +32,7 @@ def main():
   except IndexError:
     print('Invalid args number')
     print('data <dataset name> <dataset size>\tWill be save dataset to ./data/<dataset name>')
-    print('learn <dataset name>\t\t\tWill be save model to ./models/<model type>/<date>')
+    print('learn <dataset name> [<model config name>]\t\t\tWill be save model to ./models/<model type>/<date>')
     print('predict <dataset name>\t\t\tWill be save model to ./models/<model type>/<date>')
 
 if __name__ == '__main__':
