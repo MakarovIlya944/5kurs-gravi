@@ -51,6 +51,8 @@ namespace Mnist
                     width = c.ToList();
 
                     allData = Gravi.GraviConverter.OpenFolder(Path.Combine(Directory.GetCurrentDirectory(), $"data\\{datasetName}" ));
+                    
+                    logger.Info($"in: {allData.AllSignal.RowCount}x{allData.AllSignal.ColumnCount} out: {allData.AllAnswer.RowCount}x{allData.AllAnswer.ColumnCount}. row x column");
 
                     modelName = DateTime.UtcNow.ToString(@"MM-dd-hh-mm") + $"-{modelConfigName}-{datasetName}";
                     basePath = Path.Combine(Directory.GetCurrentDirectory(), @"models/spider/");
