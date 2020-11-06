@@ -2,6 +2,7 @@
   "iters": 300,
   "lr": 0.05,
   "batch": 100,
+  "trainDatasetPart": 0.9,
   "layers": [
     {
       "w": 400

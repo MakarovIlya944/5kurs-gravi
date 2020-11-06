@@ -289,7 +289,7 @@ new System.IO.StreamWriter(Path.Combine(path, $"times.txt")))
         public static double Train(ModelConfig c)
         {
             var startTime = System.Diagnostics.Stopwatch.StartNew();
-            Data data = allData.Take(trainDataSize);
+            Data data = allData.Take((int)(allData.input * c.trainDatasetPart));
             ILossFunction<double> loss = new L2Loss();
 
             Model m = new Model(c, trainMatrixRandomCenter, trainMatrixRandomOffset);

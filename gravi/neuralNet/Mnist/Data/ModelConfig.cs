@@ -17,6 +17,7 @@ namespace Mnist
     {
         public int iters;
         public int batch;
+        public float trainDatasetPart;
         public List<LayerConfig> layers;
         public float lr;
         public List<int> ToList()
