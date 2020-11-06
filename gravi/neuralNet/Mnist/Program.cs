@@ -16,10 +16,10 @@ namespace Mnist
         private static Logger logger = LogManager.GetLogger("console");
 
         public static string basePath = @"D:\Projects\Mnist\";
-        public static Data allData = MnistConverter.OpenMnist( Path.Combine(basePath, @"data\train-labels.idx1-ubyte"), Path.Combine(basePath, @"data\train-images.idx3-ubyte"), 1);
-        public static Data allPredictData = MnistConverter.OpenMnist(Path.Combine(basePath, @"data\t10k-labels.idx1-ubyte"), Path.Combine(basePath, @"data\t10k-images.idx3-ubyte"), 1);
-        public static string modelPath = Path.Combine(basePath, @"ready");
-        public static int trainDataSize = 60000;
+        public static Data allData;//= MnistConverter.OpenMnist( Path.Combine(basePath, @"data\train-labels.idx1-ubyte"), Path.Combine(basePath, @"data\train-images.idx3-ubyte"), 1);
+        public static Data allPredictData;// = MnistConverter.OpenMnist(Path.Combine(basePath, @"data\t10k-labels.idx1-ubyte"), Path.Combine(basePath, @"data\t10k-images.idx3-ubyte"), 1);
+        public static string modelPath;// = Path.Combine(basePath, @"ready");
+        public static int trainDataSize;// = 60000;
         public static List<int> width;
         public static int trainEpoch = 6;
         public static int trainBatch = 120;
