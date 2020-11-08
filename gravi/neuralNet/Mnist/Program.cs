@@ -13,9 +13,9 @@ namespace Mnist
 {
     public class Program
     {
-        private static Logger logger = LogManager.GetLogger("console");
+        private static Logger logger = LogManager.GetLogger("f");
 
-        public static string basePath = @"D:\Projects\Mnist\";
+        public static string basePath;//= @"D:\Projects\Mnist\";
         public static Data allData;//= MnistConverter.OpenMnist( Path.Combine(basePath, @"data\train-labels.idx1-ubyte"), Path.Combine(basePath, @"data\train-images.idx3-ubyte"), 1);
         public static Data allPredictData;// = MnistConverter.OpenMnist(Path.Combine(basePath, @"data\t10k-labels.idx1-ubyte"), Path.Combine(basePath, @"data\t10k-images.idx3-ubyte"), 1);
         public static string modelPath;// = Path.Combine(basePath, @"ready");
@@ -49,9 +49,20 @@ namespace Mnist
                         modelConfigName = args[2];
                     ModelConfig c = ReadLearnConfig(basePath + modelConfigName + ".json");
                     width = c.ToList();
+                    try
+                    {
+                        allData = Gravi.GraviConverter.OpenFolder(Path.Combine(Directory.GetCurrentDirectory(), $"data/{datasetName}" ));
+                    }
+                    catch (Exception x)
+                    {
+                        logger.Error(x.Message);
+                        throw;
+                    }
 
-                    allData = Gravi.GraviConverter.OpenFolder(Path.Combine(Directory.GetCurrentDirectory(), $"data\\{datasetName}" ));
-                    
+                    logger.Info("Data readed!");
+                    logger.Debug($"Signal: {allData.signal.Length}x{allData.signal[0].Count}");
+                    logger.Debug($"Answer: {allData.answer.Length}x{allData.answer[0].Count}");
+
                     logger.Info($"in: {allData.AllSignal.RowCount}x{allData.AllSignal.ColumnCount} out: {allData.AllAnswer.RowCount}x{allData.AllAnswer.ColumnCount}. row x column");
 
                     modelName = DateTime.UtcNow.ToString(@"MM-dd-hh-mm") + $"-{modelConfigName}-{datasetName}";
