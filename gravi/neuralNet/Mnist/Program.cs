@@ -13,7 +13,7 @@ namespace Mnist
 {
     public class Program
     {
-        private static Logger logger = LogManager.GetLogger("f");
+        private static Logger logger = LogManager.GetLogger("console");
 
         public static string basePath;//= @"D:\Projects\Mnist\";
         public static Data allData;//= MnistConverter.OpenMnist( Path.Combine(basePath, @"data\train-labels.idx1-ubyte"), Path.Combine(basePath, @"data\train-images.idx3-ubyte"), 1);

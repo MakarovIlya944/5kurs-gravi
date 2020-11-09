@@ -27,6 +27,8 @@ def main():
       if len(sys.argv) > 3:
         config_name = sys.argv[3]
       learn(i, o, sys.argv[2], config_name)
+    elif sys.argv[1] == 'predict':
+      test(sys.argv[2])
     elif sys.argv[1] == 'test':
       test(sys.argv[2])
   except IndexError:

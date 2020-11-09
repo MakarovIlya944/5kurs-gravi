@@ -15,7 +15,7 @@ namespace Mnist
     public class Model : IModel<double>
     {
         public List<Layer> layers;
-        public static Logger loggerPredict = LogManager.GetLogger("predict"), loggerTrain = LogManager.GetLogger("train"), logger = LogManager.GetLogger("f");
+        public static Logger loggerPredict = LogManager.GetLogger("predict"), loggerTrain = LogManager.GetLogger("train"), logger = LogManager.GetLogger("console");
 
         public int Deep
         {
