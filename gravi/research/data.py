@@ -114,6 +114,15 @@ class DataCreator():
         self.logger.info(f'set #{i} created')
     return len(z), len(net)
 
+  def save_predicted(predicted_data):
+    DataCreator.logger.info(f'Save predicted data {predicted_data["name"]}')
+    filename= os.path.abspath('.') + f'/result/{predicted_data["name"]}.json'
+    data = predicted_data['data']
+    for d in data:
+      d['l2_diff'] = d['l2_diff'].tolist()
+    with open(filename, 'w') as f:
+      f.write(json.dumps(data))
+
 class DataReader():
   """
   Class data-reader from diffrent sources and diffrent formats
@@ -197,6 +206,9 @@ class Configurator():
 
   def get_model_config(name):
     return Configurator.__read_file(name, 'model')
+
+  def get_predict_config(name):
+    return Configurator.__read_file(name, 'predict')
 
   def __read_file(name, file_type):
     path = os.path.abspath('.') + f'/configs/{file_type}/{name}.json'

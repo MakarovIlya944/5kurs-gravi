@@ -18,9 +18,8 @@
       "program": "${workspaceFolder}/main.py",
       "console": "integratedTerminal",
       "args": [
-        "learn",
-        "test_3",
-        "test_3"
+        "predict",
+        "big"
       ]
     }
   ]

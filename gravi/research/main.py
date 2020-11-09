@@ -1,6 +1,7 @@
 from .data import DataCreator, DataReader, Configurator
 from datetime import datetime
 from .models.pytorch import ModelPyTorch
+import numpy.linalg as l
 import os
 from config import get_logger
 
@@ -46,3 +47,27 @@ def prepare_data(size, name, config_name, params=None):
   d = DataCreator(params)
   len_i, len_o = d.read_dataset(size)
   return len_i, len_o
+
+def predict(predict_name, is_save=False):
+  predict_params = Configurator.get_predict_config(predict_name)
+  dataset_name = predict_params[0]['dataset']
+  for d in predict_params:
+    if d['dataset'] != dataset_name:
+      raise AssertionError('Diffrent datasets not implemented')
+  X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor')
+  Y = Y.detach().numpy()
+  for d in predict_params:
+    model_params = Configurator.get_model_config(d['config'])
+    model_params['model_config_name'] = d['name']
+    mp = ModelPyTorch(model_params, True)
+    path = os.path.abspath('.') + '/models/pytorch/' + d['name']
+    mp.load(path)
+    logger.info(f"ModelPyTorch model {d['name']} begin predict")
+    _Y = mp.predict(X).detach().numpy()
+    d['l2_diff'] = l.norm(Y - _Y)
+    d['predicted'] = _Y
+    logger.info(f"ModelPyTorch model {d['name']} end predict")
+  predicted = {'name':predict_name, 'data': predict_params }
+  if is_save:
+    DataCreator.save_predicted(predicted)
+  return predicted

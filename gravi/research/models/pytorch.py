@@ -27,15 +27,16 @@ class ModelPyTorch():
   name = "pytorch"
   prev_loss = -1
 
-  def __init__(self, params):
+  def __init__(self, params, is_predict=False):
     super().__init__()
-    self.log_step = log_config['pytorch']
-    self.model = Net(params['layers'])
     global logger
     logger = get_logger(__name__, params['model_config_name'] + '.log')
-    self.criterion = nn.MSELoss()
-    self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
-    self.iteraions = params['iters']
+    self.model = Net(params['layers'])
+    if not is_predict:
+      self.log_step = log_config['pytorch']
+      self.criterion = nn.MSELoss()
+      self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
+      self.iteraions = params['iters']
 
   def learn(self, x, y):
     self.log_step *= self.iteraions
@@ -68,10 +69,12 @@ class ModelPyTorch():
       loss_train.backward()
       self.optimizer.step()
 
+  def predict(self, x):
+    return self.model(x)
+
   def save(self, path):
     torch.save(self.model.state_dict(), path)
 
-  def load(self, path, params):
-    self.model = Net(params)
+  def load(self, path):
     self.model.load_state_dict(torch.load(path))
     self.model.eval()

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "11-04-23-43_big_1-big_1000",
+    "config": "big_1",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-04-23-43_big_2-big_1000",
+    "config": "big_2",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-04-23-43_big_3-big_1000",
+    "config": "big_3",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-04-23-43_big_4-big_1000",
+    "config": "big_4",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-08-16-13_big_5-big_1000",
+    "config": "big_5",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-08-16-21_big_6-big_1000",
+    "config": "big_6",
+    "dataset": "big_1000"
+  }
+]
