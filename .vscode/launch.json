@@ -19,7 +19,9 @@
       "console": "integratedTerminal",
       "args": [
         "predict",
-        "big"
+        "big",
+        "1",
+        "1"
       ]
     }
   ]
