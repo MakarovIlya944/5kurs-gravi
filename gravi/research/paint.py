@@ -16,7 +16,7 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
       vm = max(true_y)
 
       if paint_3d:
-        temp, points, true, calc, pred = [], [], [], [], []
+        points, true, calc, pred = [], [], [], []
         for i in range(c[2]):
           true_z = true_y[i*c[0]*c[1]:(i+1)*c[0]*c[1]]
           pred_z = pred_y[i*c[0]*c[1]:(i+1)*c[0]*c[1]]
@@ -24,20 +24,37 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
           calc.append([cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
           true.append([true_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
           pred.append([pred_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
-        if paint_show == 'true':
-          temp = true
-        elif paint_show == 'pred':
-          temp = pred
-        elif paint_show == 'calc':
-          temp = calc
+        if paint_show == 'mix':
+          pred = np.array(pred)
+          for i,p in np.ndenumerate(pred):
+            if p > 1e-2:
+              pred[i] = int((p/vm)*255)
+            else:
+              pred[i] = int(0)
+          true = np.array(true)
+          for i,p in np.ndenumerate(true):
+            if p > 1e-2:
+              true[i] = int((p/vm)*255)
+            else:
+              true[i] = int(0)
+          x, y, z, filled_2, fcolors_2 = strange_magic(pred.astype(np.int32), true.astype(np.int32))
         else:
-          raise Exception("Wrong type of show")
-        for i,ppp in enumerate(temp):
-          for j,pp in enumerate(ppp):
-            for k,p in enumerate(pp):
-              if p > 1e-2:
-                points.append((k, j, i, int((p/vm)*255)))
-        x, y, z, filled_2, fcolors_2 = strange_magic(points, c)
+          if paint_show == 'true':
+            points = true
+          elif paint_show == 'pred':
+            points = pred
+          elif paint_show == 'calc':
+            points = calc
+          else:
+            raise Exception(f"Wrong {paint_show} type of show")
+          points = np.array(points)
+          for i,p in np.ndenumerate(points):
+            if p > 1e-2:
+              points[i] = int((p/vm)*255)
+            else:
+              points[i] = int(0)
+          x, y, z, filled_2, fcolors_2 = strange_magic(points.astype(np.int32))
+
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         ax.voxels(x, y, z, filled_2, facecolors=fcolors_2)
@@ -51,13 +68,14 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
 
           j = i // 4
           k = i % 4
-          m = [cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)]
-          if paint_show == 'true':
+          if paint_show == 'calc':
+            m = [cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)]
+          elif paint_show == 'true':
             m = [true_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)]
           elif paint_show == 'pred':
             m = [pred_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)]
           else:
-            raise Exception("Wrong type of show")
+            raise Exception(f"Wrong {paint_show} type of show")
           axs[j, k].matshow(m,vmax=vm,vmin=0,cmap="Reds")
           axs[j, k].set_title(f'z: {-i}')
         plt.tight_layout()
@@ -71,17 +89,22 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
     plt.bar(x,y,tick_label=labels)
   plt.show()
 
-def strange_magic(points, c):
-  # build up the numpy logo
-  n_voxels = np.zeros(c, dtype=bool)
+def strange_magic(pred_p, true_p=None):
+  facecolors = pred_p.astype(str)
+  # np.unicode_, 16
   basecolor = '#FF0000'
-  facecolors = np.where(n_voxels, basecolor + 'FF', '#00000000')
-  for p in points:
-    alpha = str(hex(p[3]))[2:]
-    if p[3] < 16:
+  for i, p in np.ndenumerate(pred_p):
+    alpha = str(hex(p))[2:]
+    if p < 16:
       alpha = '0' + alpha
-    facecolors[p[0]][p[1]][p[2]] = basecolor + alpha
-  filled = np.ones(n_voxels.shape)
+    facecolors[i] = basecolor + alpha
+  if not true_p is None:
+    basecolor = '#0000FF'
+    for i, p in np.ndenumerate(true_p):
+      if p > 16:
+        alpha = str(hex(p))[2:]
+        facecolors[i] = basecolor + alpha
+  filled = np.ones(facecolors.shape)
 
   # upscale the above voxel image, leaving gaps
   filled_2 = explode(filled)
