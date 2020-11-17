@@ -6,6 +6,7 @@
 venv/**
 data/**
 models/**
+result/**
 
 # User-specific files
 *.rsuser
