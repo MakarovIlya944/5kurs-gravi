@@ -23,6 +23,59 @@ class Net(nn.Module):
       x = self.relu(x)
     return x
 
+class CNN_Net(nn.Module):
+  """
+  w = (w - k + 2p) / s + 1
+  """
+  default_cnn = {
+    'conv':{
+      'k':5,
+      's':1,
+      'p':2
+    },
+    'pool':{
+      'k':2,
+      's':2
+    }
+  }
+
+  def __init__(self, layers):
+    super(CNN_Net, self).__init__()
+
+    self._layers = []
+    self.relu = nn.ReLU()
+    rng = range(len(layers)-1)
+    for i in rng:
+      if layers[i].get('type') and layers[i].get('type') == "cnn":
+        params = dict(self.default_cnn, **{'conv':layers[i]['conv'], 'pool':layers[i]['pool']})
+        layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], params)
+      elif layers[i].get('type') and layers[i].get('type') == "drop":
+        layer = nn.Dropout()
+      elif layers[i].get('type') and layers[i].get('type') == "reshape":
+        layer = self.reshape
+      else:
+        layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
+      self._layers.append(layer)
+    self.layers = nn.ModuleList(self._layers)
+
+  def reshape(self, x):
+    return x.reshape(x.size(0), -1) 
+
+  def _conv_layer_set(self, in_c, out_c, **params):
+    conv = params['conv']
+    pool = params['pool']
+    conv_layer = nn.Sequential( 
+      nn.Conv2d(in_c, out_c, kernel_size=conv['k'], stride=conv['s'], padding=conv['p']), 
+      nn.ReLU(), 
+      nn.MaxPool2d(kernel_size=pool['k'], stride=pool['s'])
+    ) 
+    return conv_layer
+  
+  def forward(self, x):
+    for l in self.layers:
+      x = l(x)
+    return x
+
 class ModelPyTorch():
   name = "pytorch"
   prev_loss = 1e+100

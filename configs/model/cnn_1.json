@@ -1,0 +1,40 @@
+{
+  "iters": 1000,
+  "lr": 0.01,
+  "batch": 100,
+  "trainDatasetPart": 0.9,
+  "layers": [
+    {
+      "type": "cnn",
+      "in": 1,
+      "out": 32,
+      "conv": {
+        "k": 5,
+        "s": 1,
+        "p": 2
+      },
+      "pool": {
+        "k": 2,
+        "s": 2
+      }
+    },
+    {
+      "type": "cnn",
+      "in": 32,
+      "out": 64
+    },
+    {
+      "type": "reshape"
+    },
+    {
+      "type": "drop",
+      "w": 5
+    },
+    {
+      "w": 5
+    },
+    {
+      "w": 5
+    }
+  ]
+}
