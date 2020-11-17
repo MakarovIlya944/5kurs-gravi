@@ -25,7 +25,7 @@ class Net(nn.Module):
 
 class ModelPyTorch():
   name = "pytorch"
-  prev_loss = -1
+  prev_loss = 1e+100
 
   def __init__(self, params, is_predict=False):
     super().__init__()
@@ -57,9 +57,9 @@ class ModelPyTorch():
       y_pred_val = self.model(val_x)
       loss_val = self.criterion(y_pred_val, val_y)
 
-      # if (loss_val.item() - self.prev_loss) < Configurator.pytorch_train_eps:
-      #   logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
-      #   break
+      if (loss_val.item() - self.prev_loss) > Configurator.pytorch_train_eps:
+        logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
+        break
       self.prev_loss = loss_val.item()
       if t % self.log_step == self.log_step - 1:
         logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')

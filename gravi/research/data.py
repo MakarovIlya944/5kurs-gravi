@@ -199,7 +199,7 @@ class Configurator():
   """
 
   logger = get_logger(__name__ + '.Configurator')
-  pytorch_train_eps = 1e-5
+  pytorch_train_eps = 5e-2
 
   def get_dataset_config(name):
     return Configurator.__read_file(name, 'dataset')
