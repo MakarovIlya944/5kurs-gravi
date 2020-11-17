@@ -28,5 +28,10 @@
     "name": "11-08-16-21_big_6-big_1000",
     "config": "big_6",
     "dataset": "big_1000"
+  },
+  {
+    "name": "11-17-16-16_big_7-big_2_1000",
+    "config": "big_7",
+    "dataset": "big_1000"
   }
 ]
