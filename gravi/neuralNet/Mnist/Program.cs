@@ -72,6 +72,9 @@ namespace Mnist
 
                     break;
                 case "predict":
+                    if (args.Length < 2)
+                        throw new Exception("Not enought args for learn");
+
                     break;
                 default:
                     break;
@@ -89,6 +92,15 @@ namespace Mnist
         }
 
         private static ModelConfig ReadLearnConfig(string configName)
+        {
+            using (StreamReader r = new StreamReader(configName))
+            {
+                string json = r.ReadToEnd();
+                return JsonConvert.DeserializeObject<ModelConfig>(json);
+            }
+        }
+
+        private static PredictConfig ReadPredictConfig(string configName)
         {
             using (StreamReader r = new StreamReader(configName))
             {
