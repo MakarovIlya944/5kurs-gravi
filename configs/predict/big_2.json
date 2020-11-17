@@ -2,6 +2,11 @@
   {
     "name": "11-17-16-16_big_7-big_2_1000",
     "config": "big_7",
-    "dataset": "big_2_1000"
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-17-19-08_big_7-big_2_1000",
+    "config": "big_7",
+    "dataset": "big_1000"
   }
 ]

@@ -37,15 +37,17 @@ class ModelPyTorch():
       self.criterion = nn.MSELoss()
       self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
       self.iteraions = params['iters']
+      self.trainDatsetPart = params['trainDatasetPart']
 
   def learn(self, x, y):
     self.log_step *= self.iteraions
     l = len(x)
-    l = torch.split(x, [int(l*0.1), int(l*0.9)])
+    k = self.trainDatsetPart
+    divideDataset = [int(l*k), l - int(l*k)]
+    l = torch.split(x, divideDataset)
     train_x = l[0]
     val_x = l[1]
-    l = len(y)
-    l = torch.split(y, [int(l*0.1), int(l*0.9)])
+    l = torch.split(y, divideDataset)
     train_y = l[0]
     val_y = l[1]
     for t in range(self.iteraions):
