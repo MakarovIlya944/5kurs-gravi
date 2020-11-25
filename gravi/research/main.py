@@ -12,23 +12,27 @@ def research(size, dataset_name):
   learn(i, o, dataset_name)
 
 def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
+  shape = 'default'
   if not model_params:
     model_params = Configurator.get_model_config(model_config_name)
-    tmp = model_params['layers'][0]['w']
-    if tmp != len_i:
-      logger.error(f'input dim in config {tmp} not equal {len_i}')
-      raise AssertionError(f'input dim in config {tmp} not equal {len_i}')
-    tmp = model_params['layers'][-1]['w']
-    if tmp != len_o:
-      logger.error(f'output dim in config {tmp} not equal {len_o}')
-      raise AssertionError(f'output dim in config {tmp} not equal {len_o}')
+    if model_params.get('type') and model_params['type'] == "cnn":
+      shape = [1,model_params['shape']['w'],model_params['shape']['h']]
+    else:
+      tmp = model_params['layers'][0]['w']
+      if tmp != len_i:
+        logger.error(f'input dim in config {tmp} not equal {len_i}')
+        raise AssertionError(f'input dim in config {tmp} not equal {len_i}')
+      tmp = model_params['layers'][-1]['w']
+      if tmp != len_o:
+        logger.error(f'output dim in config {tmp} not equal {len_o}')
+        raise AssertionError(f'output dim in config {tmp} not equal {len_o}')
   model_params['model_config_name'] = model_config_name
   base_path = os.path.abspath('.') +  f'/models/'
   date = '/' + datetime.now().strftime('%m-%d-%H-%M') + '_' + model_config_name + '-' + dataset_name
 
   mp = ModelPyTorch(model_params)
   logger.info("ModelPyTorch model begin learn")
-  X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor')
+  X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor',shape=shape)
   mp.learn(X, Y)
   logger.info("ModelPyTorch model end learn")
   mp.save(base_path + mp.name + date)

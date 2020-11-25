@@ -47,8 +47,7 @@ class CNN_Net(nn.Module):
     rng = range(len(layers)-1)
     for i in rng:
       if layers[i].get('type') and layers[i].get('type') == "cnn":
-        params = dict(self.default_cnn, **{'conv':layers[i]['conv'], 'pool':layers[i]['pool']})
-        layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], params)
+        layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
       elif layers[i].get('type') and layers[i].get('type') == "drop":
         layer = nn.Dropout()
       elif layers[i].get('type') and layers[i].get('type') == "reshape":
@@ -62,21 +61,26 @@ class CNN_Net(nn.Module):
       else:
         layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
       self._layers.append(layer)
+    i = len(layers)-1
+    if layers[i].get('type') and layers[i].get('type') == "cnn":
+      layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
+      self._layers.append(layer)
     self.layers = nn.ModuleList(self._layers)
 
-  def _conv_layer_set(self, in_c, out_c, **params):
+  def _conv_layer_set(self, in_c, out_c, params):
     conv = params['conv']
     pool = params['pool']
     conv_layer = nn.Sequential( 
       nn.Conv2d(in_c, out_c, kernel_size=conv['k'], stride=conv['s'], padding=conv['p']), 
       nn.ReLU(), 
-      nn.MaxPool2d(kernel_size=pool['k'], stride=pool['s'])
+      nn.MaxPool2d(kernel_size=pool['k'], stride=pool['s'], padding=pool['p'])
     ) 
     return conv_layer
   
   def forward(self, x):
-    for l in self.layers:
-      x = l(x)
+    i = 0
+    for i in range(len(self.layers)):
+      x = self.layers[i](x)
     return x
 
 class ModelPyTorch():
@@ -87,9 +91,15 @@ class ModelPyTorch():
     super().__init__()
     global logger
     logger = get_logger(__name__, params['model_config_name'] + '.log')
-    self.model = Net(params['layers'])
+    if params.get('type') and params['type'] == "cnn":
+      self.model = CNN_Net(params['layers'])
+    else:
+      self.model = Net(params['layers'])
     if not is_predict:
-      self.allIters = params['runAllIters']
+      if params.get('runAllIters'):
+        self.allIters = params['runAllIters']
+      else:
+        self.allIters = True
       self.log_step = log_config['pytorch']
       self.criterion = nn.MSELoss()
       self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])

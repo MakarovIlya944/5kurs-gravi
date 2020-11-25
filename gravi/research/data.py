@@ -168,7 +168,7 @@ class DataReader():
   Y - output data: solidity of net cells, ordered by y,x
   C - net dimensions
   """
-  def read_folder(path, out_format='default'):
+  def read_folder(path, out_format='default', shape='default'):
     i = 0
     filename = path + f'/{i}'
     X, Y, C = [], [], []
@@ -184,7 +184,16 @@ class DataReader():
       C.append([int(l) for l in ll])
       i += 1
       filename = path + f'/{i}'
-    DataReader.logger.info(f'X: {len(X)}x{len(X[0])} Y: {len(Y)}x{len(Y[0])} C: {len(C)}x{len(C[0])}')
+    msg = f'X: {len(X)}x{len(X[0])} Y: {len(Y)}x{len(Y[0])} C: {len(C)}x{len(C[0])}'
+    if shape != 'default':
+      shape = tuple([len(C)] + shape)
+      shape_out = tuple([len(C), C[0][2], C[0][0], C[0][1]])
+      X = array(X).reshape(shape)
+      Y = array(Y).reshape(shape_out)
+      shape = 'x'.join([str(s) for s in shape])
+      shape_out = 'x'.join([str(s) for s in shape_out])
+      msg = f'X: {shape} Y: {shape_out} C: {len(C)}x{len(C[0])}'
+    DataReader.logger.info(msg)
     if out_format == 'default':
       return X, Y, C
     elif out_format == 'tensor':
