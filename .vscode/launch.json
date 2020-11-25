@@ -19,8 +19,8 @@
       "console": "integratedTerminal",
       "args": [
         "learn",
-        "thin",
-        "thin_1"
+        "big_1000",
+        "cnn_1"
       ]
     }
   ]
