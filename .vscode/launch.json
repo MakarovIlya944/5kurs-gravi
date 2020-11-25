@@ -18,12 +18,9 @@
       "program": "${workspaceFolder}/main.py",
       "console": "integratedTerminal",
       "args": [
-        "predict",
-        "big",
-        "6",
-        "11",
-        "mix",
-        "3d"
+        "learn",
+        "thin",
+        "thin_1"
       ]
     }
   ]

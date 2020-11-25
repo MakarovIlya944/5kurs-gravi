@@ -52,14 +52,17 @@ class CNN_Net(nn.Module):
       elif layers[i].get('type') and layers[i].get('type') == "drop":
         layer = nn.Dropout()
       elif layers[i].get('type') and layers[i].get('type') == "reshape":
-        layer = self.reshape
+        if layers[i].get('w') and layers[i].get('h'):
+          w = layers[i].get('w')
+          h = layers[i].get('h')
+          d = layers[i].get('d')
+          layer = lambda x: torch.reshape(x, (w,h,d))
+        else:
+          layer = lambda x: torch.reshape(x, (-1,))
       else:
         layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
       self._layers.append(layer)
     self.layers = nn.ModuleList(self._layers)
-
-  def reshape(self, x):
-    return x.reshape(x.size(0), -1) 
 
   def _conv_layer_set(self, in_c, out_c, **params):
     conv = params['conv']
@@ -86,6 +89,7 @@ class ModelPyTorch():
     logger = get_logger(__name__, params['model_config_name'] + '.log')
     self.model = Net(params['layers'])
     if not is_predict:
+      self.allIters = params['runAllIters']
       self.log_step = log_config['pytorch']
       self.criterion = nn.MSELoss()
       self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
@@ -110,7 +114,7 @@ class ModelPyTorch():
       y_pred_val = self.model(val_x)
       loss_val = self.criterion(y_pred_val, val_y)
 
-      if (loss_val.item() - self.prev_loss) > Configurator.pytorch_train_eps:
+      if not self.allIters and (loss_val.item() - self.prev_loss) > Configurator.pytorch_train_eps:
         logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
         break
       self.prev_loss = loss_val.item()
