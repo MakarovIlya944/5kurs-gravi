@@ -1,5 +1,5 @@
 {
-  "iters": 60,
+  "iters": 200,
   "lr": 0.01,
   "batch": 100,
   "type": "cnn",

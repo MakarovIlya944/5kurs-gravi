@@ -33,19 +33,43 @@ def main():
       dataset_index = None
       show_type = None
       show_3d = None
+      read_all = True
+      save_image = False
+      for s in sys.argv:
+        if s == 'save':
+          save_image = True
+      try:
+        sys.argv.remove('save')
+      except Exception:
+        pass
       if len(sys.argv) > 4:
         model_index = int(sys.argv[3])
         dataset_index = int(sys.argv[4])
+        read_all = False
         if len(sys.argv) > 5:
           show_type = sys.argv[5]
         else:
           show_type = 'calc'
         if len(sys.argv) > 6:
           show_3d = sys.argv[6]
-      predicted_data = predict(sys.argv[2], is_save=False)
-      show_predict(predicted_data, model_index, dataset_index, show_type, show_3d)
+      if read_all:
+        predicted_data, X, Y, C = predict(sys.argv[2], is_save=False)
+      else:
+        predicted_data, X, Y, C = predict(sys.argv[2], is_save=False, net_index=dataset_index, model_index=model_index)
+      show_predict(predicted_data, model_index, dataset_index, show_type, show_3d, X, Y, C, is_save=save_image)
     elif sys.argv[1] == 'test':
       test(sys.argv[2])
+    elif sys.argv[1] == 'solid':
+      save_image = False
+      for s in sys.argv:
+        if s == 'save':
+          save_image = True
+      try:
+        sys.argv.remove('save')
+      except Exception:
+        pass
+      Y = calc_stat(sys.argv[2],sys.argv[3])
+      paint_solidity(Y, is_save=save_image)
   except IndexError:
     print('Invalid args number')
     print('data <dataset name> <dataset size> [<net_config>]\t\tWill be save dataset to ./data/<dataset name>')

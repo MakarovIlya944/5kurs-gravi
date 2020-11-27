@@ -18,9 +18,23 @@
       "program": "${workspaceFolder}/main.py",
       "console": "integratedTerminal",
       "args": [
-        "learn",
+        "predict",
+        "thin",
+        "0",
+        "0",
+        "pred"
+      ]
+    },
+    {
+      "name": "Main: solidity",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "solid",
         "big_1000",
-        "cnn_1"
+        "avg"
       ]
     }
   ]

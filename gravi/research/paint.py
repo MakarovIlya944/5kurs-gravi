@@ -2,17 +2,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d, Axes3D
 import traceback
-import numpy.linalg as l
-from .data import DataReader
 
-def show_predict(predicted_data, model_index=None, dataset_index=None, paint_show=None, paint_3d=None):
+from numpy.core.records import array
+
+def show_predict(predicted_data, model_index=None, dataset_index=None, paint_show=None, paint_3d=None, x=None, y=None, c=None, is_save=False):
   data = predicted_data['data']
   if not (model_index is None or dataset_index is None or paint_show is None):
     try:
-      x,y,c = DataReader.read_folder('data/' + data[model_index]['dataset'])
-      true_y = y[dataset_index]
-      pred_y = data[model_index]['predicted'][dataset_index]
-      c = c[dataset_index]
+      index = 0
+      true_y = y[index]
+      pred_y = data[model_index]['predicted'][index]
+      c = c[index]
       vm = max(true_y)
 
       points, true, calc, pred = [], [], [], []
@@ -20,9 +20,14 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
         true_z = true_y[i*c[0]*c[1]:(i+1)*c[0]*c[1]]
         pred_z = pred_y[i*c[0]*c[1]:(i+1)*c[0]*c[1]]
         cacl_z = [abs(true_z[l] - pred_z[l]) for l in range(len(true_z))]
-        calc.append([cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
-        true.append([true_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
-        pred.append([pred_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
+        if c[1] == 1:
+          calc.append([[c] for c in cacl_z])
+          true.append([[c] for c in true_z])
+          pred.append([[c] for c in pred_z])
+        else:
+          calc.append([cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
+          true.append([true_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
+          pred.append([pred_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
       if not paint_3d is None:
         if paint_show == 'mix':
           pred = normalize(pred)
@@ -42,24 +47,42 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
 
         fig = plt.figure()
         ax = fig.gca(projection='3d')
-        ax.voxels(x, y, z, filled_2, facecolors=fcolors_2)
+        ax.voxels(x, -z, -y, filled_2, facecolors=fcolors_2)
       else:
-        n_plotsx, n_plotsy = 3, 4
-        fig, axs = plt.subplots(n_plotsx, n_plotsy)
-        for i in range(c[2]):
-          j = i // n_plotsy
-          k = i % n_plotsy
+        if c[1] == 1:
           if paint_show == 'calc':
-            m = calc[i]
+            m = calc
           elif paint_show == 'true':
-            m = true[i]
+            m = true
           elif paint_show == 'pred':
-            m = pred[i]
+            m = pred
           else:
             raise Exception(f"Wrong {paint_show} type of show")
-          axs[j, k].matshow(m,vmax=vm,vmin=0,cmap="Reds")
-          axs[j, k].set_title(f'z: {-i}')
-        plt.tight_layout()
+          m = [[float(el2[0]) for el2 in el] for el in m]
+          fig, ax = plt.subplots()
+          ax.imshow(m)
+          for i in range(len(m)):
+            for j in range(len(m[0])):
+                ax.text(j, i,"{0:.2f}".format(m[i][j]),
+                              ha="center", va="center", color="w")
+          fig.tight_layout()
+        else:
+          n_plotsx, n_plotsy = 3, 4
+          fig, axs = plt.subplots(n_plotsx, n_plotsy)
+          for i in range(c[2]):
+            j = i // n_plotsy
+            k = i % n_plotsy
+            if paint_show == 'calc':
+              m = calc[i]
+            elif paint_show == 'true':
+              m = true[i]
+            elif paint_show == 'pred':
+              m = pred[i]
+            else:
+              raise Exception(f"Wrong {paint_show} type of show")
+            axs[j, k].matshow(m,vmax=vm,vmin=0,cmap="Reds")
+            axs[j, k].set_title(f'z: {-i}')
+          plt.tight_layout()
     except IndexError as e:
       traceback.print_exc()
       raise e
@@ -68,7 +91,10 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
     y = [d['l2_diff'] for d in data]
     labels = [s['name'] for s in data]
     plt.bar(x,y,tick_label=labels)
-  plt.show()
+  if is_save:
+    plt.savefig(f'model_{model_index}_dataset_{dataset_index}_paint_{paint_show}_{"3d" if paint_3d else ""}')
+  else:
+    plt.show()
 
 def normalize(points, eps=1e-2):
   points = np.array(points)
@@ -117,3 +143,11 @@ def explode(data):
     data_e = np.zeros(size - 1, dtype=data.dtype)
     data_e[::2, ::2, ::2] = data
     return data_e
+
+def paint_solidity(Y, is_save=False):
+  s = Y.shape
+  if s[1] == 1:
+    Y = Y.reshape((s[0],s[2]))
+    vm = np.max(Y)
+    plt.matshow(Y,vmax=vm,vmin=0)
+    plt.show()

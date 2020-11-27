@@ -1,6 +1,6 @@
 {
-  "iters": 60,
-  "lr": 0.01,
+  "iters": 200,
+  "lr": 0.05,
   "batch": 100,
   "type": "cnn",
   "shape": {

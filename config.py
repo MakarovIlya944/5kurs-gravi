@@ -26,5 +26,6 @@ def get_logger(name, filename='x.log'):
 log_config = {
     'solver': 0.5,
     'data_creation': 0.1,
+    'data_read': 100,
     'pytorch': 0.1
 }

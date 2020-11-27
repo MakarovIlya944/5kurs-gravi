@@ -162,6 +162,45 @@ class DataReader():
 
 
   """
+  Read dataset from <path>.
+  Return:
+  X - input data: z-value of receptors ordered by y,x
+  Y - output data: solidity of net cells, ordered by y,x
+  C - net dimensions
+  """
+  def read_one(path, index, out_format='default', shape='default'):
+    DataReader.log_step = log_config['data_read']
+    filename = path + f'/{index}'
+    X, Y, C = [], [], []
+    with open(filename + '_in', 'r') as f:
+      ll = f.readlines()
+    X.append([float(l) for l in ll])
+    with open(filename + '_out', 'r') as f:
+      ll = f.readlines()
+    Y.append([float(l) for l in ll])
+    with open(filename + '_out_config', 'r') as f:
+      ll = f.readlines()[0].split(' ')
+    C.append([int(l) for l in ll])
+    DataReader.logger.debug(f"Read {index} data")
+    msg = f'X: {len(X)}x{len(X[0])} Y: {len(Y)}x{len(Y[0])} C: {len(C)}x{len(C[0])}'
+    if shape != 'default':
+      shape = tuple([len(C)] + shape)
+      shape_out = tuple([len(C), C[0][2], C[0][0], C[0][1]])
+      X = array(X).reshape(shape)
+      Y = array(Y).reshape(shape_out)
+      shape = 'x'.join([str(s) for s in shape])
+      shape_out = 'x'.join([str(s) for s in shape_out])
+      msg = f'X: {shape} Y: {shape_out} C: {len(C)}x{len(C[0])}'
+    DataReader.logger.info(msg)
+    if out_format == 'default':
+      return X, Y, C
+    elif out_format == 'tensor':
+      return Tensor(array(X)), Tensor(array(Y)), Tensor(array(C))
+    else:
+      DataReader.logger.error('Unexpected out format type')
+      raise KeyError('Unexpected out format type')
+
+  """
   Read dataset from <path> folder.
   Return:
   X - input data: z-value of receptors ordered by y,x
@@ -170,6 +209,7 @@ class DataReader():
   """
   def read_folder(path, out_format='default', shape='default'):
     i = 0
+    DataReader.log_step = log_config['data_read']
     filename = path + f'/{i}'
     X, Y, C = [], [], []
     while os.path.exists(filename + '_in'):
@@ -184,6 +224,8 @@ class DataReader():
       C.append([int(l) for l in ll])
       i += 1
       filename = path + f'/{i}'
+      if i % DataReader.log_step == DataReader.log_step - 1:
+        DataReader.logger.debug(f"Read {i} data")
     msg = f'X: {len(X)}x{len(X[0])} Y: {len(Y)}x{len(Y[0])} C: {len(C)}x{len(C[0])}'
     if shape != 'default':
       shape = tuple([len(C)] + shape)

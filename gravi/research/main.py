@@ -1,3 +1,5 @@
+from numpy.core.records import array
+from gravi.reverse import net
 from .data import DataCreator, DataReader, Configurator
 from datetime import datetime
 from .models.pytorch import ModelPyTorch
@@ -33,9 +35,14 @@ def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
   mp = ModelPyTorch(model_params)
   logger.info("ModelPyTorch model begin learn")
   X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor',shape=shape)
-  mp.learn(X, Y)
-  logger.info("ModelPyTorch model end learn")
-  mp.save(base_path + mp.name + date)
+  try:
+    mp.learn(X, Y)
+    logger.info("ModelPyTorch model end learn")
+  except KeyboardInterrupt:
+    logger.info("ModelPyTorch model learning interrupted")
+  finally:
+    mp.save(base_path + mp.name + date)
+    logger.info("ModelPyTorch model saved")
 
 def prepare_data(size, name, config_name, params=None):
   if not params:
@@ -52,26 +59,67 @@ def prepare_data(size, name, config_name, params=None):
   len_i, len_o = d.read_dataset(size)
   return len_i, len_o
 
-def predict(predict_name, is_save=False):
+def predict(predict_name, is_save=False, net_index=None, model_index=None):
   predict_params = Configurator.get_predict_config(predict_name)
   dataset_name = predict_params[0]['dataset']
   for d in predict_params:
     if d['dataset'] != dataset_name:
       raise AssertionError('Diffrent datasets not implemented')
-  X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor')
+  logger.debug("Begin to read")
+
+  shape = 'default'
+  model_params = Configurator.get_model_config(predict_params[0]['config'])
+  if model_params.get('type') and model_params['type'] == 'cnn':
+    shape = [1,model_params['shape']['w'],model_params['shape']['h']]
+    logger.debug("Change dataset shape")
+
+  if net_index is None:
+    X, Y, C = DataReader.read_folder('data/' + dataset_name, out_format='tensor', shape=shape)
+  else:
+    X, Y, C = DataReader.read_one('data/' + dataset_name, net_index, out_format='tensor', shape=shape)
+
   Y = Y.detach().numpy()
-  for d in predict_params:
-    model_params = Configurator.get_model_config(d['config'])
-    model_params['model_config_name'] = d['name']
-    mp = ModelPyTorch(model_params, True)
-    path = os.path.abspath('.') + '/models/pytorch/' + d['name']
-    mp.load(path)
-    logger.info(f"ModelPyTorch model {d['name']} begin predict")
-    _Y = mp.predict(X).detach().numpy()
-    d['l2_diff'] = l.norm(Y - _Y)
-    d['predicted'] = _Y
-    logger.info(f"ModelPyTorch model {d['name']} end predict")
+  shape = Y.shape[1:]
+  k = 1
+  for e in shape:
+    k *= e
+  shape = (Y.shape[0], k)
+
+  if model_index is None:
+    for d in predict_params:
+      predict_one(d,X,Y,shape)
+  else:
+    predict_one(predict_params[model_index],X,Y,shape)
+
   predicted = {'name':predict_name, 'data': predict_params }
   if is_save:
     DataCreator.save_predicted(predicted)
-  return predicted
+  if shape == 'default':
+    return predicted, X.detach().numpy(), Y, C.detach().numpy().astype(int)
+  else:
+    return predicted, X.detach().numpy(), Y.reshape(shape), C.detach().numpy().astype(int)
+
+def predict_one(d,X,Y,shape):
+  model_params = Configurator.get_model_config(d['config'])
+  model_params['model_config_name'] = d['name']
+  mp = ModelPyTorch(model_params, True)
+  path = os.path.abspath('.') + '/models/pytorch/' + d['name']
+  mp.load(path)
+  logger.info(f"ModelPyTorch model {d['name']} begin predict")
+  _Y = mp.predict(X).detach().numpy()
+  d['l2_diff'] = l.norm(Y - _Y)
+  _Y = _Y.reshape(shape)
+  d['predicted'] = _Y
+  logger.info(f"ModelPyTorch model {d['name']} end predict")
+
+def calc_stat(dataset_name, mode="avg"):
+  X, Y, C = DataReader.read_folder('data/' + dataset_name)
+  result = [0 for i in range(len(Y[0]))]
+  for y in Y:
+    for i in range(len(y)):
+      result[i] += y[i]
+  if mode == "avg":
+    for i in range(len(result)):
+      result[i] /= len(Y)
+  a = len(result)
+  return array(result).reshape((C[0][0],C[0][1]*C[0][2]))
