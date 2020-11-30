@@ -59,6 +59,8 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
           else:
             raise Exception(f"Wrong {paint_show} type of show")
           m = [[float(el2[0]) for el2 in el] for el in m]
+          
+
           fig, ax = plt.subplots()
           ax.imshow(m)
           for i in range(len(m)):
@@ -144,10 +146,27 @@ def explode(data):
     data_e[::2, ::2, ::2] = data
     return data_e
 
-def paint_solidity(Y, is_save=False):
-  s = Y.shape
+def paint_solidity(A, is_save=False):
+  s = A.shape
   if s[1] == 1:
-    Y = Y.reshape((s[0],s[2]))
-    vm = np.max(Y)
-    plt.matshow(Y,vmax=vm,vmin=0)
+    prepare_matrix_show(A.reshape((s[0],s[2])),vmin=0)
+  if is_save:
+    plt.savefig('solid.png')
+  else:
     plt.show()
+
+def prepare_matrix_show(A,text=False,vmax=None,vmin=None):
+  if vmax is None:
+    vmax = np.max(A)
+  if vmin is None:
+    vmin = np.min(A)
+  if text:
+    fig, ax = plt.subplots()
+    ax.imshow(A)
+    for i in range(len(A)):
+      for j in range(len(A[0])):
+          ax.text(j, i,"{0:.2f}".format(A[i][j]),
+                        ha="center", va="center", color="w",vmax=vmax,vmin=vmin)
+    fig.tight_layout()
+  else:
+    plt.matshow(A,vmax=vmax,vmin=vmin)

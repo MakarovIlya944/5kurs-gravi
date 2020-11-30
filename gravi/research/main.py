@@ -4,6 +4,7 @@ from .data import DataCreator, DataReader, Configurator
 from datetime import datetime
 from .models.pytorch import ModelPyTorch
 import numpy.linalg as l
+import numpy as np
 import os
 from config import get_logger
 
@@ -117,9 +118,18 @@ def calc_stat(dataset_name, mode="avg"):
   result = [0 for i in range(len(Y[0]))]
   for y in Y:
     for i in range(len(y)):
-      result[i] += y[i]
+      if y[i] != 0:
+        result[i] += 1
   if mode == "avg":
     for i in range(len(result)):
       result[i] /= len(Y)
-  a = len(result)
-  return array(result).reshape((C[0][0],C[0][1]*C[0][2]))
+  result = np.array_split(result,C[0][0])
+  result = [np.array_split(r,C[0][1]) for r in result]
+  t = []
+  for r in result:
+    t1 = []
+    for r1 in r:
+      t1.append(r1.tolist())
+    t.append(t1)
+  result = np.array(t)
+  return result

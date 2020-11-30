@@ -33,8 +33,23 @@
       "console": "integratedTerminal",
       "args": [
         "solid",
-        "big_1000",
+        "thin_small",
         "avg"
+      ]
+    },
+    {
+      "name": "Main: args",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "predict",
+        "-m",
+        "12312",
+        "-n",
+        "123",
+        "fasdf"
       ]
     }
   ]

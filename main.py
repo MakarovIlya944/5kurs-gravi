@@ -2,79 +2,71 @@ from gravi.research.main import *
 from gravi.research.paint import *
 from gravi.research.test import *
 import sys
-from config import get_logger
+from config import *
 
 logger = get_logger('main')
+parsers = get_args_parser()
 
 def test(name):
   # show_3d(name)
   show_loss(name)
 
 def main():
-  tmp = ' '.join(sys.argv)
-  logger.info('Start: ' + tmp)
-  try:
-    if sys.argv[1] == 'data':
-      config_name = sys.argv[2]
-      if len(sys.argv) > 4:
-        config_name = sys.argv[4]
-      prepare_data(int(sys.argv[3]), sys.argv[2], config_name)
-    elif sys.argv[1] == 'learn':
-      with open(f'data/{sys.argv[2]}/0_in', 'r') as f:
-        i = len(f.readlines())
-      with open(f'data/{sys.argv[2]}/0_out', 'r') as f:
-        o = len(f.readlines())
-      config_name = sys.argv[2]
-      if len(sys.argv) > 3:
-        config_name = sys.argv[3]
-      learn(i, o, sys.argv[2], config_name)
-    elif sys.argv[1] == 'predict':
-      model_index = None
-      dataset_index = None
-      show_type = None
-      show_3d = None
-      read_all = True
-      save_image = False
-      for s in sys.argv:
-        if s == 'save':
-          save_image = True
-      try:
-        sys.argv.remove('save')
-      except Exception:
-        pass
-      if len(sys.argv) > 4:
-        model_index = int(sys.argv[3])
-        dataset_index = int(sys.argv[4])
-        read_all = False
-        if len(sys.argv) > 5:
-          show_type = sys.argv[5]
-        else:
-          show_type = 'calc'
-        if len(sys.argv) > 6:
-          show_3d = sys.argv[6]
-      if read_all:
-        predicted_data, X, Y, C = predict(sys.argv[2], is_save=False)
-      else:
-        predicted_data, X, Y, C = predict(sys.argv[2], is_save=False, net_index=dataset_index, model_index=model_index)
-      show_predict(predicted_data, model_index, dataset_index, show_type, show_3d, X, Y, C, is_save=save_image)
-    elif sys.argv[1] == 'test':
-      test(sys.argv[2])
-    elif sys.argv[1] == 'solid':
-      save_image = False
-      for s in sys.argv:
-        if s == 'save':
-          save_image = True
-      try:
-        sys.argv.remove('save')
-      except Exception:
-        pass
-      Y = calc_stat(sys.argv[2],sys.argv[3])
-      paint_solidity(Y, is_save=save_image)
-  except IndexError:
-    print('Invalid args number')
-    print('data <dataset name> <dataset size> [<net_config>]\t\tWill be save dataset to ./data/<dataset name>')
-    print('learn <dataset name> [<model config name>]\t\tWill be save model to ./models/<model type>/<date>')
-    print('predict <predict config name> [<model index in predict config> <net index in dataset> [<abs or true or pred type of paint>]]\t\tPredict data from ./models/<dataset>, models from ./models/<model type>/<model>. Names for dataset and model get from configs/predict/<config name>')
+  logger.info('Start: ' + ' '.join(sys.argv[1:]))
+  command = sys.argv[1]
+  if command == 'data':
+    args = vars(parsers["data"].parse_args())
+    config_name = args['config']
+    dataset_name = config_name
+    if args.get('name'):
+      dataset_name = args.get('name')
+    prepare_data(args['n'], dataset_name, config_name)
+  elif command == 'learn':
+    args = vars(parsers["learn"].parse_args())
+    dataset_name = args['dataset']
+    with open(f'data/{dataset_name}/0_in', 'r') as f:
+      i = len(f.readlines())
+    with open(f'data/{dataset_name}/0_out', 'r') as f:
+      o = len(f.readlines())
+    config_name = args['config']
+    learn(i, o, dataset_name, config_name)
+  elif command == 'predict':
+    args = vars(parsers["predict"].parse_args())
+    save_image = args['save']
+    predict_config = args['config']
 
+    model_index = args.get('M')
+    dataset_index = args.get('N')
+    if (model_index and not dataset_index) or (model_index and not dataset_index):
+      logger.error('Need to set dataset and model index both')
+      exit(1)
+    read_all = True
+    if not model_index is None:
+      read_all = False
+    show_type = args.get('S')
+    show_3d = args.get('dim')
+    if read_all:
+      predicted_data, X, Y, C = predict(predict_config, is_save=False)
+    else:
+      predicted_data, X, Y, C = predict(predict_config, is_save=False, net_index=dataset_index, model_index=model_index)
+    show_predict(predicted_data, model_index, dataset_index, show_type, show_3d, X, Y, C, is_save=save_image)
+  elif command == 'test':
+    test(sys.argv[2])
+  elif command == 'inspect':
+    save_image = False
+    for s in sys.argv:
+      if s == 'save':
+        save_image = True
+    try:
+      sys.argv.remove('save')
+    except Exception:
+      pass
+    Y = calc_stat(sys.argv[2],sys.argv[3])
+    paint_solidity(Y, is_save=save_image)
+  else:
+    if command != '-h' or command != '--help':
+      logger.error('Invalid command ' + command)
+    parsers['base'].print_help()
+      
 if __name__ == '__main__':
   main()
