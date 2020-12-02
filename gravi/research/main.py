@@ -1,5 +1,5 @@
 from numpy.core.records import array
-from gravi.reverse import net
+from gravi.reverse import net,min
 from .data import DataCreator, DataReader, Configurator
 from datetime import datetime
 from .models.pytorch import ModelPyTorch
@@ -113,8 +113,29 @@ def predict_one(d,X,Y,shape):
   d['predicted'] = _Y
   logger.info(f"ModelPyTorch model {d['name']} end predict")
 
-def calc_stat(dataset_name, mode="avg"):
+def inspect(dataset_name, command, dataset_config=None, index=0):
   X, Y, C = DataReader.read_folder('data/' + dataset_name)
+  if command == 'stat':
+    return calc_stat(Y)
+  elif command == 'response' or command == 'reverse':
+    dataset_config = Configurator.get_dataset_config(dataset_config)
+    shape = dataset_config['net']['count']
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, shape=shape)
+    r_x = dataset_config['receptors']['x']
+    r_y = dataset_config['receptors']['y']
+    r_x = range(r_x['l'],r_x['r'],r_x['r'] / r_x['l'])
+    r_y = range(r_y['l'],r_y['r'],r_y['r'] / r_y['l'])
+    receptors = []
+    for y in r_y:
+      for x in r_x:
+        receptors.append(array([x,y,0]))
+    alpha=None
+    gamma=None
+    smile = Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma, dryrun=True)
+    if command == 'response':
+      return smile.solver.dGz
+
+def calc_stat(y, mode="avg"):
   result = [0 for i in range(len(Y[0]))]
   for y in Y:
     for i in range(len(y)):

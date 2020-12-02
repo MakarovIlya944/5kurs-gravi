@@ -20,10 +20,14 @@ class Minimizator():
     gamma = params.get('gamma')
     if gamma:
       self.gamma = complex_build(params=gamma)
-    self.net = complex_build(params=params.get('net'))
-    self.correct = complex_build(params=params.get('correct'))
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
+    if params.get('dryrun'):
+      self.correct = params['correct']
+      self.net = params['net']
+    else:
+      self.net = complex_build(params=params.get('net'))
+      self.correct = complex_build(params=params.get('correct'))
 
     self.solver = Solver(params.get('receptors'), self.correct, self.alpha, self.gamma)
 
