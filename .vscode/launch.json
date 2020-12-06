@@ -19,10 +19,10 @@
       "console": "integratedTerminal",
       "args": [
         "predict",
-        "thin",
-        "0",
-        "0",
-        "pred"
+        "cnn",
+        "-n","0",
+        "-m","0",
+        "-s","pred"
       ]
     },
     {
@@ -38,18 +38,32 @@
       ]
     },
     {
-      "name": "Main: args",
+      "name": "Main: predict",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/main.py",
       "console": "integratedTerminal",
       "args": [
         "predict",
-        "-m",
-        "12312",
-        "-n",
-        "123",
-        "fasdf"
+        "thin",
+        "-n","0",
+        "-m","0",
+        "-s","true"
+      ]
+    },
+    {
+      "name": "Main: inspect",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "inspect",
+        "response",
+        "thin",
+        "--dataset",
+        "thin",
+        "-n","0"
       ]
     }
   ]

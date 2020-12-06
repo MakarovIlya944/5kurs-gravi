@@ -35,16 +35,17 @@ def main():
     save_image = args['save']
     predict_config = args['config']
 
-    model_index = args.get('M')
-    dataset_index = args.get('N')
+    model_index = args.get('m')
+    dataset_index = args.get('n')
     if (model_index and not dataset_index) or (model_index and not dataset_index):
       logger.error('Need to set dataset and model index both')
       exit(1)
     read_all = True
     if not model_index is None:
       read_all = False
-    show_type = args.get('S')
+    show_type = args.get('s')
     show_3d = args.get('dim')
+    response = args.get('resp')
     if read_all:
       predicted_data, X, Y, C = predict(predict_config, is_save=False)
     else:
@@ -53,16 +54,17 @@ def main():
   elif command == 'test':
     test(sys.argv[2])
   elif command == 'inspect':
-    save_image = False
-    for s in sys.argv:
-      if s == 'save':
-        save_image = True
-    try:
-      sys.argv.remove('save')
-    except Exception:
-      pass
-    Y = calc_stat(sys.argv[2],sys.argv[3])
-    paint_solidity(Y, is_save=save_image)
+    args = vars(parsers["inspect"].parse_args())
+    save_image = args['save']
+    sub_command = args.get('sub')
+    dataset_config = args.get('config')
+    dataset = args.get('dataset')
+    dataset_index = args.get('n')
+    params, Y = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index)
+    if sub_command == 'response':
+      paint_response(Y, params, is_save=save_image)
+    elif sub_command == 'stat':
+      paint_solidity(Y, is_save=save_image)
   else:
     if command != '-h' or command != '--help':
       logger.error('Invalid command ' + command)

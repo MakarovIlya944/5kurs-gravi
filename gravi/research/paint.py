@@ -1,12 +1,15 @@
+from config import get_logger
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d, Axes3D
 import traceback
 
-from numpy.core.records import array
+from numpy.core.records import array, get_remaining_size
+logger = get_logger(__name__)
 
 def show_predict(predicted_data, model_index=None, dataset_index=None, paint_show=None, paint_3d=None, x=None, y=None, c=None, is_save=False):
   data = predicted_data['data']
+  logger.info(f'Paint: {paint_3d}')
   if not (model_index is None or dataset_index is None or paint_show is None):
     try:
       index = 0
@@ -28,7 +31,7 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
           calc.append([cacl_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
           true.append([true_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
           pred.append([pred_z[k*c[0]:(k+1)*c[0]] for k in range(c[1]-1)])
-      if not paint_3d is None:
+      if paint_3d:
         if paint_show == 'mix':
           pred = normalize(pred)
           true = normalize(true)
@@ -59,7 +62,6 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
           else:
             raise Exception(f"Wrong {paint_show} type of show")
           m = [[float(el2[0]) for el2 in el] for el in m]
-          
 
           fig, ax = plt.subplots()
           ax.imshow(m)
@@ -155,18 +157,38 @@ def paint_solidity(A, is_save=False):
   else:
     plt.show()
 
-def prepare_matrix_show(A,text=False,vmax=None,vmin=None):
+def paint_response(A, params, is_save=False):
+  prepare_matrix_show(A, x_arange=params['r_x'], y_arange=params['r_y'], vmin=0)
+  if is_save:
+    plt.savefig('response.png')
+  else:
+    plt.show()
+
+def prepare_matrix_show(A, x_arange=None, y_arange=None, text=False, vmax=None, vmin=None):
   if vmax is None:
     vmax = np.max(A)
   if vmin is None:
     vmin = np.min(A)
-  if text:
+  if text or not (x_arange is None) or not (y_arange is None):
     fig, ax = plt.subplots()
     ax.imshow(A)
-    for i in range(len(A)):
-      for j in range(len(A[0])):
-          ax.text(j, i,"{0:.2f}".format(A[i][j]),
-                        ha="center", va="center", color="w",vmax=vmax,vmin=vmin)
+    if not (x_arange is None):
+      k_step = 5
+      ax.set_xticks(range(0, len(x_arange), k_step))
+      x_arange = range(x_arange.start, x_arange.stop, x_arange.step * k_step)
+      ax.set_xticklabels(x_arange)
+      plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+         rotation_mode="anchor")
+    if not (y_arange is None):
+      k_step = 5
+      ax.set_yticks(range(0, len(y_arange), k_step))
+      y_arange = range(y_arange.start, y_arange.stop, y_arange.step * k_step)
+      ax.set_yticklabels(y_arange)
+    if text:
+      for i in range(len(A)):
+        for j in range(len(A[0])):
+            ax.text(j, i,"{0:.2f}".format(A[i][j]),
+                          ha="center", va="center", color="w")
     fig.tight_layout()
   else:
     plt.matshow(A,vmax=vmax,vmin=vmin)

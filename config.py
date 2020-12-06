@@ -47,12 +47,18 @@ def get_args_parser():
   predict_parser.add_argument('-n', type=int, required=False, help='net index in dataset')
   predict_parser.add_argument('-s', help='show type', choices=['mix','calc','pred','true'] ,default='calc')
   predict_parser.add_argument('--3d', action='store_true',dest='dim', help='preffer 3d show instead of 2d')
+  predict_parser.add_argument('--response', action='store_true',dest='resp', help='response predict')
   predict_parser.add_argument('--save', action='store_true',dest='save',
                       help='save generated image instead of showing')
 
   inspect_parser = subparsers.add_parser('inspect', help='Inspect dataset and logs')
   inspect_parser.add_argument('command', help='command')
-  inspect_parser.add_argument('config', help='predict config name')
+  inspect_parser.add_argument('sub', help='sub command')
+  inspect_parser.add_argument('config', help='dataset config name')
+  inspect_parser.add_argument('--dataset', dest="dataset", required=False, help='dataset name')
+  inspect_parser.add_argument('-n', type=int, required=False, help='net index in dataset')
+  inspect_parser.add_argument('--save', action='store_true',dest='save',
+                      help='save generated image instead of showing')
 
   return {
     "base": base_parser,

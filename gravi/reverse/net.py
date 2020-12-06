@@ -14,7 +14,8 @@ class Net():
   def __init__(self, count=(10,10,10), border=(1000,1000,1000), center=(0,0,0), v=0):
     self.n = count
     self.c = center
-    self.d = tuple([(border[i] - center[i])/count[i] for i in range(3)])
+    self.border = border
+    self.d = tuple([abs(border[i] - center[i])/count[i] for i in range(3)])
     self.cells = ndarray(count)
     for i in range(count[0]):
       for j in range(count[1]):

@@ -1,6 +1,7 @@
 from .solver import Solver
 from .builder import *
 from numpy.linalg import norm
+from .log import Logger
 
 from config import get_logger
 

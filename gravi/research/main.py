@@ -1,3 +1,4 @@
+from gravi.reverse.builder import complex_build
 from numpy.core.records import array
 from gravi.reverse import net,min
 from .data import DataCreator, DataReader, Configurator
@@ -6,6 +7,7 @@ from .models.pytorch import ModelPyTorch
 import numpy.linalg as l
 import numpy as np
 import os
+from copy import copy
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -114,28 +116,35 @@ def predict_one(d,X,Y,shape):
   logger.info(f"ModelPyTorch model {d['name']} end predict")
 
 def inspect(dataset_name, command, dataset_config=None, index=0):
-  X, Y, C = DataReader.read_folder('data/' + dataset_name)
   if command == 'stat':
-    return calc_stat(Y)
+    return {}, calc_stat(dataset_name)
   elif command == 'response' or command == 'reverse':
     dataset_config = Configurator.get_dataset_config(dataset_config)
-    shape = dataset_config['net']['count']
-    X,Y,C = DataReader.read_one('data/' + dataset_name, index, shape=shape)
+    s = dataset_config['net']['count']
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index)
+    correct = dataset_config['net']
+    correct['values'] = {}
+    for i,v in enumerate(Y[0]):
+      correct['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
+    correct = complex_build(params = correct)
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']
-    r_x = range(r_x['l'],r_x['r'],r_x['r'] / r_x['l'])
-    r_y = range(r_y['l'],r_y['r'],r_y['r'] / r_y['l'])
+    r = (dataset_config['receptors']['x']['n'], dataset_config['receptors']['y']['n'])
+    r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
+    r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
     receptors = []
     for y in r_y:
       for x in r_x:
-        receptors.append(array([x,y,0]))
-    alpha=None
+        receptors.append([float(x),float(y),0.0])
+    receptors = np.asarray(receptors)
+    alpha=[0]
     gamma=None
-    smile = Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma, dryrun=True)
+    smile = min.Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma, dryrun=True)
     if command == 'response':
-      return smile.solver.dGz
+      return {'r_x': r_x, 'r_y':r_y}, np.asarray(smile.solver.dGz).reshape(r)
 
-def calc_stat(y, mode="avg"):
+def calc_stat(dataset_name, mode="avg"):
+  X, Y, C = DataReader.read_folder('data/' + dataset_name)
   result = [0 for i in range(len(Y[0]))]
   for y in Y:
     for i in range(len(y)):
