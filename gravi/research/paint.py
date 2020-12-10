@@ -173,14 +173,14 @@ def prepare_matrix_show(A, x_arange=None, y_arange=None, text=False, vmax=None, 
     fig, ax = plt.subplots()
     ax.imshow(A)
     if not (x_arange is None):
-      k_step = 5
+      k_step = 1
       ax.set_xticks(range(0, len(x_arange), k_step))
       x_arange = range(x_arange.start, x_arange.stop, x_arange.step * k_step)
       ax.set_xticklabels(x_arange)
       plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
          rotation_mode="anchor")
     if not (y_arange is None):
-      k_step = 5
+      k_step = 1
       ax.set_yticks(range(0, len(y_arange), k_step))
       y_arange = range(y_arange.start, y_arange.stop, y_arange.step * k_step)
       ax.set_yticklabels(y_arange)

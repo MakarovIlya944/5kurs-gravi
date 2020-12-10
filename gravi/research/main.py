@@ -118,10 +118,11 @@ def predict_one(d,X,Y,shape):
 def inspect(dataset_name, command, dataset_config=None, index=0, model_name=False, model_config=False):
   if command == 'stat':
     return {}, calc_stat(dataset_name)
-  elif command == 'response' or command == 'reverse':
+  elif command == 'response' or command == 'reverse' or command == 'reverse-net':
     dataset_config = Configurator.get_dataset_config(dataset_config)
     s = dataset_config['net']['count']
-    correct = dataset_config['net']
+    def_net = dataset_config['net']
+    correct = copy(def_net)
     correct['values'] = {}
     if model_name:
       X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
@@ -137,6 +138,8 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
       for i,v in enumerate(Y[0]):
         correct['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
     correct = complex_build(params = correct)
+    def_net["default"] = 0.1
+    net = complex_build(params = def_net)
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']
     r = (dataset_config['receptors']['x']['n'], dataset_config['receptors']['y']['n'])
@@ -152,6 +155,19 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     smile = min.Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma, dryrun=True)
     if command == 'response':
       return {'r_x': r_x, 'r_y':r_y}, np.asarray(smile.solver.dGz).reshape(r)
+    net = smile.minimization()
+    dGz = smile.solver.profile(net)
+    if command == 'reverse':
+      return {'r_x': r_x, 'r_y':r_y}, np.asarray(dGz).reshape(r)
+    if command == 'reverse-net':
+      n = dataset_config['net']
+      if n['count'][1] != 1:
+        raise Exception('Net not thin')
+      r_x = range(n['left'][0],n['right'][0],(n['right'][0] - n['left'][0]) // n['count'][0])
+      r_y = range(n['left'][2],n['right'][2],(n['right'][2] - n['left'][2]) // n['count'][2])
+      logger.debug(f'Net shape by config: {s}')
+      logger.debug(f'Net shape by reverse: {net.n}')
+      return {'r_x': r_x, 'r_y':r_y}, net.asarray()
 
 def calc_stat(dataset_name, mode="avg"):
   X, Y, C = DataReader.read_folder('data/' + dataset_name)

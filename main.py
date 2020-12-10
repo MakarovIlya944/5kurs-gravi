@@ -66,7 +66,7 @@ def main():
     if model_name is None:
       model_name = False
     params, Y = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index,model_name=model_name,model_config=model_config)
-    if sub_command == 'response':
+    if sub_command == 'response' or sub_command == 'reverse' or sub_command == 'reverse-net':
       paint_response(Y, params, is_save=save_image)
     elif sub_command == 'stat':
       paint_solidity(Y, is_save=save_image)

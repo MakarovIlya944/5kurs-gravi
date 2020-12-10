@@ -1,4 +1,4 @@
-from numpy import ndarray
+from numpy import ndarray,asarray
 from config import get_logger
 
 logger = get_logger(__name__)
@@ -89,3 +89,6 @@ class Net():
       s += 'zi:' + str(i) + '\n'
       s += str(m) + '\n'
     return s
+
+  def asarray(self):
+    return asarray(self.cells)

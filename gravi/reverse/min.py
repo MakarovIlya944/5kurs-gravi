@@ -38,10 +38,9 @@ class Minimizator():
       calc.append(p)
     e = self.error(calc)
     i = 0
-    self.logger.n = maxSteps
     calc = self.solver.solve(self.net)
     e = self.error(calc)
-    self.logger.log(str(e))
+    logger.info('Error: ' + str(e))
     return self.net
 
   def error(self, calc):

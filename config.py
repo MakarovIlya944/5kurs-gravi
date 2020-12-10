@@ -54,9 +54,9 @@ def get_args_parser():
   inspect_parser = subparsers.add_parser('inspect', help='Inspect dataset and logs')
   inspect_parser.add_argument('command', help='command')
   inspect_parser.add_argument('sub', help='sub command')
-  inspect_parser.add_argument('config', help='dataset config name')
+  inspect_parser.add_argument('--dataset-config',dest='config', required=True, help='dataset config name')
   inspect_parser.add_argument('--dataset', dest="dataset", required=False, help='dataset name')
-  inspect_parser.add_argument('-n', type=int, required=False, help='net index in dataset')
+  inspect_parser.add_argument('-n', type=int, default=0, required=False, help='net index in dataset, default 0')
   inspect_parser.add_argument('--model', required=False, help='model name to calculate predicted response')
   inspect_parser.add_argument('--model-config', required=False, help='model config to calculate predicted response')
   inspect_parser.add_argument('--save', action='store_true',dest='save',
