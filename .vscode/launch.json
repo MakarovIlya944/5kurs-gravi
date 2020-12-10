@@ -12,17 +12,15 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Main",
+      "name": "Main: learn",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/main.py",
       "console": "integratedTerminal",
       "args": [
-        "predict",
-        "cnn",
-        "-n","0",
-        "-m","0",
-        "-s","pred"
+        "learn",
+        "cnn_flat",
+        "big_2_1000"
       ]
     },
     {
@@ -63,7 +61,8 @@
         "thin",
         "--dataset",
         "thin",
-        "-n","0"
+        "-n","10",
+        "--model","11-25-19-11_thin_4-thin","--model-config","thin_4"
       ]
     }
   ]

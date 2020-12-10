@@ -21,7 +21,7 @@ def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
   if not model_params:
     model_params = Configurator.get_model_config(model_config_name)
     if model_params.get('type') and model_params['type'] == "cnn":
-      shape = [1,model_params['shape']['w'],model_params['shape']['h']]
+      shape = [1,model_params['shape']['in']['w'],model_params['shape']['in']['h']]
     else:
       tmp = model_params['layers'][0]['w']
       if tmp != len_i:
@@ -115,17 +115,27 @@ def predict_one(d,X,Y,shape):
   d['predicted'] = _Y
   logger.info(f"ModelPyTorch model {d['name']} end predict")
 
-def inspect(dataset_name, command, dataset_config=None, index=0):
+def inspect(dataset_name, command, dataset_config=None, index=0, model_name=False, model_config=False):
   if command == 'stat':
     return {}, calc_stat(dataset_name)
   elif command == 'response' or command == 'reverse':
     dataset_config = Configurator.get_dataset_config(dataset_config)
     s = dataset_config['net']['count']
-    X,Y,C = DataReader.read_one('data/' + dataset_name, index)
     correct = dataset_config['net']
     correct['values'] = {}
-    for i,v in enumerate(Y[0]):
-      correct['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
+    if model_name:
+      X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
+      d = {'config':model_config, 'name':model_name}
+      predict_one(d,X,Y,s)
+      Y = d['predicted']
+      for i in range(len(Y)):
+        for j in range(len(Y[i])):
+          for k,v in enumerate(Y[i][j]):
+            correct['values'][(i,j,k)] = v
+    else:
+      X,Y,C = DataReader.read_one('data/' + dataset_name, index)
+      for i,v in enumerate(Y[0]):
+        correct['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
     correct = complex_build(params = correct)
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']

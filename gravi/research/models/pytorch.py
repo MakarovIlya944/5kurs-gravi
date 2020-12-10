@@ -45,6 +45,7 @@ class CNN_Net(nn.Module):
     self._layers = []
     self.relu = nn.ReLU()
     rng = range(len(layers)-1)
+    reshape = -1
     for i in rng:
       if layers[i].get('type') and layers[i].get('type') == "cnn":
         layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
@@ -55,16 +56,21 @@ class CNN_Net(nn.Module):
           w = layers[i].get('w')
           h = layers[i].get('h')
           d = layers[i].get('d')
-          layer = lambda x: torch.reshape(x, (w,h,d))
+          _layer = lambda x: torch.reshape(x, (w,h,d))
         else:
-          layer = lambda x: torch.reshape(x, (-1,))
+          _layer = lambda x: torch.reshape(x, (-1,))
+        reshape = {i: _layer}
       else:
         layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
-      self._layers.append(layer)
+      try:
+        self._layers.append(layer)
+      except Exception:
+        pass
     i = len(layers)-1
     if layers[i].get('type') and layers[i].get('type') == "cnn":
       layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
       self._layers.append(layer)
+    self.reshape = reshape
     self.layers = nn.ModuleList(self._layers)
 
   def _conv_layer_set(self, in_c, out_c, params):
@@ -78,9 +84,11 @@ class CNN_Net(nn.Module):
     return conv_layer
   
   def forward(self, x):
-    i = 0
     for i in range(len(self.layers)):
-      x = self.layers[i](x)
+      if i in self.reshape:
+        x = self.reshape[i](x)
+      else:
+        x = self.layers[i](x)
     return x
 
 class ModelPyTorch():

@@ -57,6 +57,8 @@ def get_args_parser():
   inspect_parser.add_argument('config', help='dataset config name')
   inspect_parser.add_argument('--dataset', dest="dataset", required=False, help='dataset name')
   inspect_parser.add_argument('-n', type=int, required=False, help='net index in dataset')
+  inspect_parser.add_argument('--model', required=False, help='model name to calculate predicted response')
+  inspect_parser.add_argument('--model-config', required=False, help='model config to calculate predicted response')
   inspect_parser.add_argument('--save', action='store_true',dest='save',
                       help='save generated image instead of showing')
 

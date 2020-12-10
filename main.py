@@ -1,3 +1,4 @@
+from matplotlib.pyplot import loglog
 from gravi.research.main import *
 from gravi.research.paint import *
 from gravi.research.test import *
@@ -60,7 +61,11 @@ def main():
     dataset_config = args.get('config')
     dataset = args.get('dataset')
     dataset_index = args.get('n')
-    params, Y = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index)
+    model_name = args.get('model')
+    model_config = args.get('model_config')
+    if model_name is None:
+      model_name = False
+    params, Y = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index,model_name=model_name,model_config=model_config)
     if sub_command == 'response':
       paint_response(Y, params, is_save=save_image)
     elif sub_command == 'stat':
