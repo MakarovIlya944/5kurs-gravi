@@ -43,7 +43,7 @@
       "console": "integratedTerminal",
       "args": [
         "predict",
-        "thin",
+        "cnn",
         "-n","0",
         "-m","0",
         "-s","true"
