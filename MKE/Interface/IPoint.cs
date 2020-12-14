@@ -5,7 +5,7 @@ namespace MKE.Interface
     public interface IPoint
     {
         int Dimension { get; }
-        List<double> GetCoords { get; }
+        List<double> Coords { get; }
         IPoint Add(IPoint x);
         IPoint Subtract(IPoint x);
         IPoint Normalize();

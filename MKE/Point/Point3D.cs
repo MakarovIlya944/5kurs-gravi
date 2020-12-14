@@ -10,7 +10,7 @@ namespace MKE.Point
         public double Y { get; set; }
         public double Z { get; set; }
         public int Dimension => 3;
-        public List<double> GetCoords => new List<double>(3) { X, Y, Z };
+        public List<double> Coords => new List<double>(3) { X, Y, Z };
 
         public Point3D()
         {

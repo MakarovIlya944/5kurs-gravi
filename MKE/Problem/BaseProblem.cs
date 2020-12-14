@@ -3,41 +3,54 @@ using System.Linq;
 using System.Threading.Tasks;
 using MKE.Extenstion;
 using MKE.Geometry;
+using MKE.Interface;
 using MKE.Matrix;
-using MKE.Point;
 using MKE.Solver;
 using MKE.Utils;
 
-namespace MKE.Problem {
-    public class BaseProblem
+namespace MKE.Problem
+{
+    public class BaseProblem : IProblem
     {
         public GeometryParallelepiped Geometry { get; set; }
+
         protected ILinearAlgebra<double> _la = LinearAlgebra.Get<double>();
 
         public int ProblemSize => Geometry.LastSequenceIndex;
-        public bool[] isDirichletCond { get; set; }
+
+        private bool[] isDirichletCond { get; set; }
+
         public double[] Solution { get; set; }
+
+        public BaseProblem(GeometryParallelepiped geometry)
+        {
+            Geometry = geometry;
+            PrepareProblem();
+        }
+
+        private void PrepareProblem()
+        {
+           // Console.WriteLine("ExtendsElementWeight");
+            Geometry.ExtendsElementWeight();
+         //   Console.WriteLine($"Problem size = {ProblemSize}");
+         //   Console.WriteLine("FillConditionsElement");
+            Geometry.FillConditionsElement();
+        }
 
         public void SolveProblem()
         {
-
-            Console.WriteLine("Start solve problem");
-            Console.WriteLine("ExtendsElementWeight");
-            Geometry.ExtendsElementWeight();
-            Console.WriteLine($"Problem size = {ProblemSize}");
-            Console.WriteLine("FillConditionsElement");
-            Geometry.FillConditionsElement();
-            Console.WriteLine("CalcDirichletCondition");
             var _direchletData = CalcDirichletCondition();
-            Console.WriteLine("CalcRightPart");
             var _rightPart = CalcRightPart();
             var portrait = new SparsePortrait();
+
             foreach (var element in Geometry.MapDomains.Values.SelectMany(domain => domain.Elements))
             {
                 portrait.Add(element.LocalToGlobalEnumeration.Values.ToList(), element.LocalToGlobalEnumeration.Values.ToList());
             }
+
             var matrix = new SparseMatrixReal(portrait.GetMappedLinks());
             var x = new double[matrix.Rows];
+
             void AddToMatrix(int i, int j, double value)
             {
                 if (isDirichletCond[i])
@@ -54,7 +67,6 @@ namespace MKE.Problem {
                     matrix.ThreadSafeAdd(i, j, value);
                 }
             }
-            Console.WriteLine("Create Matrix");
 
             foreach (var element in Geometry.MapDomains.Values.SelectMany(d => d.Elements))
             {
@@ -62,15 +74,15 @@ namespace MKE.Problem {
             }
 
             var solve = new CGSolver();
+
             for (var i = 0; i < _direchletData.Length; i++)
             {
                 if (isDirichletCond[i])
                     matrix[i, i] = 1;
             }
+
             solve.Initialization(30000, 1e-12, FactorizationType.LUsq);
-            Console.WriteLine("Start Solve Slae");
             Solution = solve.Solve(matrix, _rightPart, x);
-            Console.WriteLine("End Solve Slae");
 
             for (var i = 0; i < _direchletData.Length; i++)
             {
@@ -78,6 +90,7 @@ namespace MKE.Problem {
                 Solution[i] += d;
             }
         }
+
         protected double[] CalcRightPart()
         {
             var rightPart = new double[ProblemSize];
@@ -90,13 +103,10 @@ namespace MKE.Problem {
 
                     for (int i = 0; i < v.Count; i++)
                     {
-                        
-							 if (!isDirichletCond[v[i]])
+                        if (!isDirichletCond[v[i]])
                         {
-              rightPart.ThreadSafeAdd(v[i], elem.Integrate(i, domain.RightFunction));
-                        }// integral of psi_i*f 
-                         
-                        
+                            rightPart.ThreadSafeAdd(v[i], elem.Integrate(i, domain.RightFunction));
+                        } // integral of psi_i*f 
                     }
                 });
             }
@@ -115,7 +125,6 @@ namespace MKE.Problem {
                         }
                     }
                 });
-
             }
 
             return rightPart;
@@ -130,10 +139,23 @@ namespace MKE.Problem {
 
             throw new Exception();
         }
+
+        public double GetSolution(IPoint point)
+        {
+            var coords = point.Coords;
+
+            foreach (var element in Geometry.MapDomains.Values.SelectMany(d => d.Elements).Where(d => d.CheckElement(coords[0], coords[1], coords[2])))
+            {
+                return element.CalcOnElement(Solution, coords[0], coords[1], coords[2]);
+            }
+
+            throw new Exception();
+        }
+
         private double[] CalcDirichletCondition()
         {
-
             var portrait = new SparsePortrait();
+
             foreach (var elem in Geometry.DirichletConditions.SelectMany(x => x.Elements))
             {
                 portrait.Add(elem.LocalToGlobalEnumeration.Values, elem.LocalToGlobalEnumeration.Values);
@@ -142,6 +164,7 @@ namespace MKE.Problem {
             var matrix = new SymSparseMatrixReal(portrait.GetMappedLinks());
             var b = new double[matrix.Rows];
             var tempIndices = new int[matrix.Rows];
+
             foreach (var cond in Geometry.DirichletConditions)
             {
                 foreach (var elem in cond.Elements)
@@ -162,11 +185,13 @@ namespace MKE.Problem {
                     }
                 }
             }
+
             var solver = new CGSolver();
             solver.Initialization(30000, 1e-50, FactorizationType.LLt);
             var tempRightPart = solver.Solve(matrix, b, new double[matrix.Rows]).ToArray();
             var right = new double[ProblemSize];
             isDirichletCond = new bool[ProblemSize];
+
             for (var i = 0; i < tempRightPart.Length; i++)
             {
                 isDirichletCond[tempIndices[i]] = true;

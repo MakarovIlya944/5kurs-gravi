@@ -9,6 +9,13 @@
       "N": 2,
       "Q": 1.0,
       "InnerDerive": 0
+	  },
+	  "2": {
+      "Left": 0.0,
+      "Right": 2.0,
+      "N": 2,
+      "Q": 1.0,
+      "InnerDerive": 0
 	  }
   },
   "MapYAxisLines": {
@@ -40,12 +47,29 @@
       "Function": "-2.0+X*X",
       "LambdaFunction": "1",
       "GammaFunction": "1"
+    },
+	"2": {
+      "Order": 2,
+      "DomainIndex": 2,
+      "XAxisIndex": 2,
+      "YAxisIndex": 1,
+      "ZAxisIndex": 1,
+      "Function": "-20.0+10*X*X",
+      "LambdaFunction": "10",
+      "GammaFunction": "10"
     }
   },
   "DirichletConditions": [
     {
       "Surface": "Top",
       "XAxisIndex": 1,
+      "YAxisIndex": 1,
+      "ZAxisIndex": 1,
+      "Function": "X*X"
+    },
+	{
+      "Surface": "Top",
+      "XAxisIndex": 2,
       "YAxisIndex": 1,
       "ZAxisIndex": 1,
       "Function": "X*X"
@@ -57,6 +81,13 @@
       "ZAxisIndex": 1,
       "Function": "X*X"
     },
+	{
+      "Surface": "Bottom",
+      "XAxisIndex": 2,
+      "YAxisIndex": 1,
+      "ZAxisIndex": 1,
+      "Function": "X*X"
+    },
     {
       "Surface": "Back",
       "XAxisIndex": 1,
@@ -64,9 +95,23 @@
       "ZAxisIndex": 1,
       "Function": "X*X"
     },
+	{
+      "Surface": "Back",
+      "XAxisIndex": 2,
+      "YAxisIndex": 1,
+      "ZAxisIndex": 1,
+      "Function": "X*X"
+    },
     {
       "Surface": "Front",
       "XAxisIndex": 1,
+      "YAxisIndex": 1,
+      "ZAxisIndex": 1,
+      "Function": "X*X"
+    },
+	  {
+      "Surface": "Front",
+      "XAxisIndex": 2,
       "YAxisIndex": 1,
       "ZAxisIndex": 1,
       "Function": "X*X"
@@ -80,13 +125,13 @@
     }	,
     {
       "Surface": "Right",
-      "XAxisIndex": 1,
+      "XAxisIndex": 2,
       "YAxisIndex": 1,
       "ZAxisIndex": 1,
       "Function": "X*X"
     }
   ],
-  "StepsT": 2,
+  "StepsT": 5,
   "FunctionForSolutionX":"2.0*T",
   "FunctionForSolutionY":"2.0*T",
   "FunctionForSolutionZ":"2.0*T",

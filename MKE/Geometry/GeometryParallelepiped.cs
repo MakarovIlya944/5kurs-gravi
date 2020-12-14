@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Runtime.Serialization;
 using MKE.BasisFunction;
 using MKE.Condition;
 using MKE.Domain;
@@ -34,11 +35,17 @@ namespace MKE.Geometry
     public class GeometryParallelepiped
     {
         public string FunctionForSolutionX { get; set; }
+
         public string FunctionForSolutionY { get; set; }
+
         public string FunctionForSolutionZ { get; set; }
+
         public int StepsT { get; set; }
+
         [JsonIgnore] public Func<double, double> FuncTransformX { get; set; }
+
         [JsonIgnore] public Func<double, double> FuncTransformY { get; set; }
+
         [JsonIgnore] public Func<double, double> FuncTransformZ { get; set; }
 
         public Dictionary<int, AxisLines> MapXAxisLines { get; set; } = new Dictionary<int, AxisLines>();
@@ -49,13 +56,11 @@ namespace MKE.Geometry
 
         public HashSet<NumberedPoint3D> Points { get; set; } = new HashSet<NumberedPoint3D>(new ComparerPoint()); //в исходной нумерации
 
-
         public Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>> MapDomains { get; set; } = new Dictionary<int, HierarchicalDomain3D<ParallelepipedElement>>();
 
         public List<DirichletCondition> DirichletConditions { get; set; } = new List<DirichletCondition>();
 
         public List<NeumannCondition> NeumannConditions { get; set; } = new List<NeumannCondition>();
-
 
         private static IEnumerator<int> GetSequence()
         {
@@ -80,26 +85,33 @@ namespace MKE.Geometry
         private readonly IEnumerator<int> _sequence = GetSequence();
 
         public int LastSequenceIndex { get; set; }
-        public void InitAfterSerialize()
+
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
         {
             foreach (var (key, value) in MapXAxisLines)
             {
                 value.Initialize();
             }
+
             foreach (var (key, value) in MapYAxisLines)
             {
                 value.Initialize();
             }
+
             foreach (var (key, value) in MapZAxisLines)
             {
                 value.Initialize();
             }
+
             DirichletConditions.ForEach(x => x.InitFunction());
             NeumannConditions.ForEach(x => x.InitFunction());
+
             foreach (var (key, value) in MapDomains)
             {
                 value.InitializationFunction();
             }
+
             var parsedFx = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionX).Compile();
             FuncTransformX = (x) => parsedFx(new DummyT(x));
             var parsedFy = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionY).Compile();
@@ -107,6 +119,7 @@ namespace MKE.Geometry
             var parsedFz = DynamicExpressionParser.ParseLambda<DummyT, double>(ParsingConfig.Default, false, FunctionForSolutionZ).Compile();
             FuncTransformZ = (x) => parsedFz(new DummyT(x));
         }
+
         public void GeneratePoints()
         {
             var z = 0;
@@ -148,13 +161,13 @@ namespace MKE.Geometry
                         for (var k = 0; k < MapXAxisLines[value.XAxisIndex].Axises.Count - 1; k++)
                         {
                             value.Elements.Add(new ParallelepipedElement(value.Order, new HierarchicalBasisFunction(), new List<NumberedPoint3D>(8)
-                                               {
-                                                   tempPoints[(k, j, i)], tempPoints[(k + 1, j, i)],
-                                                   tempPoints[(k, j + 1, i)], tempPoints[(k + 1, j + 1, i)],
-                                                   tempPoints[(k, j, i + 1)], tempPoints[(k + 1, j, i + 1)],
-                                                   tempPoints[(k, j + 1, i + 1)], tempPoints[(k + 1, j + 1, i + 1)],
-                                               }, 6)
-                            { Lambda = value.Lambda, Gamma = value.Gamma }
+                                                   {
+                                                       tempPoints[(k, j, i)], tempPoints[(k + 1, j, i)],
+                                                       tempPoints[(k, j + 1, i)], tempPoints[(k + 1, j + 1, i)],
+                                                       tempPoints[(k, j, i + 1)], tempPoints[(k + 1, j, i + 1)],
+                                                       tempPoints[(k, j + 1, i + 1)], tempPoints[(k + 1, j + 1, i + 1)],
+                                                   }, 6)
+                                                   {Lambda = value.Lambda, Gamma = value.Gamma}
                                               );
                         }
                     }
@@ -163,8 +176,9 @@ namespace MKE.Geometry
                 Points.UnionWith(tempPoints.Values);
             }
 
-            Console.WriteLine($"Vertex Count = {Points.Count}\t Element Count = {MapDomains.Values.SelectMany(x => x.Elements).Count()}");
+           // Console.WriteLine($"Vertex Count = {Points.Count}\t Element Count = {MapDomains.Values.SelectMany(x => x.Elements).Count()}");
         }
+
         public void FillConditionsElement()
         {
             var tempPoints = Points.ToDictionary(x => x.Number, y => y);
@@ -183,19 +197,20 @@ namespace MKE.Geometry
                     var element = FillElementForCondition(surface, pointA, pointB, pointC, pointD, cond.Surface);
                     cond.Elements.Add(element);
                 }
+
                 foreach (var cond in NeumannConditions.Where(cond => cond.Check(pointO, this)))
                 {
                     var element = FillElementForCondition(surface, pointA, pointB, pointC, pointD, cond.Surface);
                     cond.Elements.Add(element);
                 }
             }
-            Console.WriteLine($"Boundary Element Count = {DirichletConditions.Sum(x => x.Elements.Count) + NeumannConditions.Sum(x => x.Elements.Count)}");
 
+            //Console.WriteLine($"Boundary Element Count = {DirichletConditions.Sum(x => x.Elements.Count) + NeumannConditions.Sum(x => x.Elements.Count)}");
         }
 
         private IElement FillElementForCondition(SurfaceSquare surfaceSquare, NumberedPoint3D pointA, NumberedPoint3D pointB, NumberedPoint3D pointC, NumberedPoint3D pointD, Surface surface)
         {
-            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() { pointA, pointB, pointC, pointD }, 6, surface);
+            var element = new SquaredElement(surfaceSquare.MinOrder, new HierarchicalBasisFunction(), new List<NumberedPoint3D>() {pointA, pointB, pointC, pointD}, 6, surface);
 
             var fragments = element.TemplateElementInformation;
             var temporaryDictForEdge = new Dictionary<Edge, int>();
@@ -311,7 +326,8 @@ namespace MKE.Geometry
                             }
                             else
                             {
-                                if (Edges[tempEdge].Item2.Count <= temporaryDictForEdge[tempEdge]) //если в списке всех доп точек для данного ребра их меньше, чем в текущем ребре, тогда добавить новые точки
+                                if (Edges[tempEdge].Item2.Count <= temporaryDictForEdge[tempEdge]
+                                ) //если в списке всех доп точек для данного ребра их меньше, чем в текущем ребре, тогда добавить новые точки
                                 {
                                     //если порядок отличается, то все новые точки, должны помечаться как те , которые можно пропустить
                                     Edges[tempEdge].Item2.Add(tempEdge.MinOrder > Edges[tempEdge].Item1 ? (_sequence.Current, true) : (_sequence.Current, false));
@@ -357,8 +373,8 @@ namespace MKE.Geometry
                                 if (SurfaceSquares[tempSurface].Item2.Count <= temporaryDictForSurface[tempSurface])
                                 {
                                     SurfaceSquares[tempSurface].Item2.Add(tempSurface.MinOrder > SurfaceSquares[tempSurface].Item1
-                                                                        ? (_sequence.Current, true)
-                                                                        : (_sequence.Current, false));
+                                                                              ? (_sequence.Current, true)
+                                                                              : (_sequence.Current, false));
 
                                     element.LocalToGlobalEnumeration.Add(i, _sequence.Current);
                                     _sequence.MoveNext();
@@ -368,7 +384,8 @@ namespace MKE.Geometry
                                     element.LocalToGlobalEnumeration.Add(i, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1);
                                 }
 
-                                element.SkipPoint.Add(SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1, SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item2);
+                                element.SkipPoint.Add(SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item1,
+                                                      SurfaceSquares[tempSurface].Item2[temporaryDictForSurface[tempSurface]].Item2);
                             }
                         }
                         else if (fragments.InnerIndexes.Contains(i))

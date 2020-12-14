@@ -24,5 +24,14 @@ namespace MKE.Domain {
             var gammaParsed = DynamicExpressionParser.ParseLambda<Point3D, double>(ParsingConfig.Default, false, GammaFunction).Compile();
             Gamma = (x, y, z) => gammaParsed(new Point3D(x, y, z));
         }
+
+        public void UpdateFunction()
+        {
+            Elements.ForEach(x =>
+            {
+                x.Lambda = Lambda;
+                x.Gamma = Gamma;
+            });
+        }
     }
 }

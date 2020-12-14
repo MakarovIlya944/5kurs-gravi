@@ -24,5 +24,8 @@ namespace MKE.Interface
         bool CheckElement(double x, double y, double z);
 
         double CalcOnElement(double[] solution, double x, double y, double z);
+        //Temporary need change
+        Func<double, double, double, double> Lambda { get; set; }
+        Func<double, double, double, double> Gamma { get; set; }
     }
 }

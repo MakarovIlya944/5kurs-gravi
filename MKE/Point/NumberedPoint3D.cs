@@ -26,4 +26,8 @@ namespace MKE.Point {
             Number = number;
         }
     }
+    public class ValuedPoint3D : Point3D
+    {
+        public double Value { get; set; }
+    }
 }

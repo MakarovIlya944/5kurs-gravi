@@ -108,5 +108,9 @@ namespace MKE.Element {
         {
             throw new NotImplementedException();
         }
+
+        public Func<double, double, double, double> Lambda { get; set; }
+
+        public Func<double, double, double, double> Gamma { get; set; }
     }
 }

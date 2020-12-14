@@ -1,0 +1,20 @@
+{
+  "Eps": 1e-10,
+  "MaxIteration": 100,
+  "ProblemPath": "problem.json",
+  "Regularization": 10.0,
+  "DomainConfiguration": {
+    "1": {
+      "FitGamma": true,
+      "FitLambda": true,
+      "GammaFittingConfiguration": {
+        "Step": 0.1,
+		"StartedValue":0.01
+      },
+      "LambdaFittingConfiguration": {
+        "Step": 0.1,
+		"StartedValue":0.01
+      }
+    }
+  }
+}

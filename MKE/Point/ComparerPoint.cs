@@ -11,8 +11,8 @@ namespace MKE.Point {
             if (ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
             if (x.Dimension != y.Dimension) return false;
-            var yCoords = y.GetCoords;
-            var xCoords = x.GetCoords;
+            var yCoords = y.Coords;
+            var xCoords = x.Coords;
             for (int i = 0; i < x.Dimension; i++)
             {
                 if (Math.Abs(xCoords[i] - yCoords[i]) > 1e-14)
@@ -26,7 +26,7 @@ namespace MKE.Point {
 
         public int GetHashCode(IPoint obj)
         {
-            return obj.GetCoords.Aggregate(0, HashCode.Combine);
+            return obj.Coords.Aggregate(0, HashCode.Combine);
         }
     }
 }
