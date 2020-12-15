@@ -3,6 +3,7 @@ from gravi.research.main import *
 from gravi.research.paint import *
 from gravi.research.test import *
 import sys
+from paint import *
 from config import *
 
 logger = get_logger('main')
@@ -65,11 +66,13 @@ def main():
     model_config = args.get('model_config')
     if model_name is None:
       model_name = False
-    params, Y = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index,model_name=model_name,model_config=model_config)
-    if sub_command == 'response' or sub_command == 'reverse' or sub_command == 'reverse-net':
-      paint_response(Y, params, is_save=save_image)
+    params, values = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index,model_name=model_name,model_config=model_config)
+    if sub_command == 'response':
+      heatmaps(params,values['trued'],values['predicted'],values['reversed'])
+    elif sub_command == 'net':
+      heatmaps(params,values['trued'],values['predicted'],values['reversed'])
     elif sub_command == 'stat':
-      paint_solidity(Y, is_save=save_image)
+      paint_solidity(values, params, is_save=save_image)
   else:
     if command != '-h' or command != '--help':
       logger.error('Invalid command ' + command)

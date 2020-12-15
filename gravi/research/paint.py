@@ -148,10 +148,10 @@ def explode(data):
     data_e[::2, ::2, ::2] = data
     return data_e
 
-def paint_solidity(A, is_save=False):
+def paint_solidity(A, params, is_save=False):
   s = A.shape
   if s[1] == 1:
-    prepare_matrix_show(A.reshape((s[0],s[2])),vmin=0)
+    prepare_matrix_show(A.reshape((s[0],s[2])), x_arange=params['r_x'], y_arange=params['r_y'],vmin=0)
   if is_save:
     plt.savefig('solid.png')
   else:

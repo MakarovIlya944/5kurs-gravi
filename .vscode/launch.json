@@ -57,12 +57,13 @@
       "console": "integratedTerminal",
       "args": [
         "inspect",
-        "response",
-        "thin",
+        "net",
+        "--dataset-config",
+        "clean",
         "--dataset",
-        "thin",
-        "-n","10",
-        "--model","11-25-19-11_thin_4-thin","--model-config","thin_4"
+        "points",
+        // "-n","10",
+        "--model","12-15-22-33_clean_1-points","--model-config","clean_1"
       ]
     }
   ]

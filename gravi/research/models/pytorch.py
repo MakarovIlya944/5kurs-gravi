@@ -84,10 +84,15 @@ class CNN_Net(nn.Module):
     return conv_layer
   
   def forward(self, x):
-    for i in range(len(self.layers)):
-      if i in self.reshape:
-        x = self.reshape[i](x)
-      else:
+    if len(self.reshape) != 0:
+      n = list(self.reshape)[0]
+      for i in range(n):
+        x = self.layers[i](x)
+      x = self.reshape[n](x)
+      for i in range(n+1,len(self.layers)):
+        x = self.layers[i](x)
+    else:
+      for i in range(len(self.layers)):
         x = self.layers[i](x)
     return x
 

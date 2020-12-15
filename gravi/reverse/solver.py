@@ -40,6 +40,7 @@ class Solver():
     logger.debug('calculating receptors dGz')
     L = len(receptors)
     l = int(L * log_config['solver']['dgz'])
+    self.dGz = []
     for i, r in enumerate(receptors):
       self.dGz.append(0)
       if not i % l:

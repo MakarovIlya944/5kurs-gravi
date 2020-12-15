@@ -71,7 +71,7 @@ def get_args_parser():
   }
 
 log_config = {
-    'solver': {'dgz': 0.5, 'solve': 0.01},
+    'solver': {'dgz': 0.5, 'solve': 0.3},
     'data_creation': 0.1,
     'data_read': 100,
     'pytorch': 0.1

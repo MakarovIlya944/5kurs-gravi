@@ -1,3 +1,4 @@
+from gravi import reverse
 from gravi.reverse.builder import complex_build
 from numpy.core.records import array
 from gravi.reverse import net,min
@@ -116,58 +117,85 @@ def predict_one(d,X,Y,shape):
   logger.info(f"ModelPyTorch model {d['name']} end predict")
 
 def inspect(dataset_name, command, dataset_config=None, index=0, model_name=False, model_config=False):
+  dataset_config = Configurator.get_dataset_config(dataset_config)
+  r_x = dataset_config['receptors']['x']
+  r_y = dataset_config['receptors']['y']
+  r = (dataset_config['receptors']['x']['n'], dataset_config['receptors']['y']['n'])
+  r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
+  r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
+  receptors = []
+  for y in r_y:
+    for x in r_x:
+      receptors.append([float(x),float(y),0.0])
+  receptors = np.asarray(receptors)
+  s = dataset_config['net']['count']
+
   if command == 'stat':
-    return {}, calc_stat(dataset_name)
-  elif command == 'response' or command == 'reverse' or command == 'reverse-net':
-    dataset_config = Configurator.get_dataset_config(dataset_config)
-    s = dataset_config['net']['count']
+    return {'r_x': r_x, 'r_y':r_y}, calc_stat(dataset_name)
+  elif command == 'net':
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
+    d = {'config':model_config, 'name':model_name}
+    predict_one(d,X,Y,s)
+    Y_pred = d['predicted']
+
     def_net = dataset_config['net']
+    def_net["default"] = 0.1
     correct = copy(def_net)
     correct['values'] = {}
-    if model_name:
-      X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
-      d = {'config':model_config, 'name':model_name}
-      predict_one(d,X,Y,s)
-      Y = d['predicted']
-      for i in range(len(Y)):
-        for j in range(len(Y[i])):
-          for k,v in enumerate(Y[i][j]):
-            correct['values'][(i,j,k)] = v
-    else:
-      X,Y,C = DataReader.read_one('data/' + dataset_name, index)
-      for i,v in enumerate(Y[0]):
-        correct['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
-    correct = complex_build(params = correct)
+    Y = Y.detach().numpy().reshape(s)
+    for i in range(len(Y)):
+      for j in range(len(Y[i])):
+        for k,v in enumerate(Y[i][j]):
+          correct['values'][(i,j,k)] = v
+
+    alpha=[1]
+    gamma=None
+    smile = min.Minimizator(net=def_net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
+    net = smile.minimization().asarray()
+
+    r_x = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
+    r_y = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
+
+    predicted = Y_pred.reshape((s[0],s[2]))
+    trued = Y.reshape((s[0],s[2]))
+    reversed = net.reshape((s[0],s[2]))
+    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
+
+  elif command == 'response':
+    def_net = dataset_config['net']
+    predicted = copy(def_net)
+    trued = copy(def_net)
+    alpha=[0.1]
+    gamma=None
     def_net["default"] = 0.1
     net = complex_build(params = def_net)
-    r_x = dataset_config['receptors']['x']
-    r_y = dataset_config['receptors']['y']
-    r = (dataset_config['receptors']['x']['n'], dataset_config['receptors']['y']['n'])
-    r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
-    r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
-    receptors = []
-    for y in r_y:
-      for x in r_x:
-        receptors.append([float(x),float(y),0.0])
-    receptors = np.asarray(receptors)
-    alpha=[0]
-    gamma=None
-    smile = min.Minimizator(net=net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma, dryrun=True)
-    if command == 'response':
-      return {'r_x': r_x, 'r_y':r_y}, np.asarray(smile.solver.dGz).reshape(r)
+
+    predicted['values'] = {}
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
+    d = {'config':model_config, 'name':model_name}
+    predict_one(d,X,Y,s)
+    Y = d['predicted']
+    for i in range(len(Y)):
+      for j in range(len(Y[i])):
+        for k,v in enumerate(Y[i][j]):
+          predicted['values'][(i,j,k)] = v
+    predicted = complex_build(params = predicted)
+    smile = min.Minimizator(net=net, receptors=receptors, correct=predicted, alpha=alpha, gamma=gamma, dryrun=True)
+    predicted = np.asarray(smile.solver.dGz).reshape(r)
+
+    trued['values'] = {}
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index)
+    for i,v in enumerate(Y[0]):
+      trued['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
+    trued = complex_build(params = trued)
+    
+    smile = min.Minimizator(net=net, receptors=receptors, correct=trued, alpha=alpha, gamma=gamma, dryrun=True)
+    reversed = np.asarray(smile.solver.dGz).reshape(r)
     net = smile.minimization()
     dGz = smile.solver.profile(net)
-    if command == 'reverse':
-      return {'r_x': r_x, 'r_y':r_y}, np.asarray(dGz).reshape(r)
-    if command == 'reverse-net':
-      n = dataset_config['net']
-      if n['count'][1] != 1:
-        raise Exception('Net not thin')
-      r_x = range(n['left'][0],n['right'][0],(n['right'][0] - n['left'][0]) // n['count'][0])
-      r_y = range(n['left'][2],n['right'][2],(n['right'][2] - n['left'][2]) // n['count'][2])
-      logger.debug(f'Net shape by config: {s}')
-      logger.debug(f'Net shape by reverse: {net.n}')
-      return {'r_x': r_x, 'r_y':r_y}, net.asarray()
+    trued = np.asarray(dGz).reshape(r)
+
+    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 2}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
 
 def calc_stat(dataset_name, mode="avg"):
   X, Y, C = DataReader.read_folder('data/' + dataset_name)
