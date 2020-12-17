@@ -1,0 +1,4 @@
+[submodule "5kurs-neural-net"]
+	path = 5kurs-neural-net
+	url = https://github.com/MakarovIlya944/5kurs-neural-net.git
+	branch = gravi

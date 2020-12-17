@@ -1,0 +1,17 @@
+[
+  {
+    "name": "11-25-19-45_cnn_1-big_1000",
+    "config": "cnn_1",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-25-20-47_cnn_2-big_1000",
+    "config": "cnn_2",
+    "dataset": "big_1000"
+  },
+  {
+    "name": "11-25-21-51_cnn_3-big_1000",
+    "config": "cnn_3",
+    "dataset": "big_1000"
+  }
+]

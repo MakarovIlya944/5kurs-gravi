@@ -1,13 +1,30 @@
-from min import Minimizator
+from .min import Minimizator
+from .paint import *
 from numpy import array,ndarray
-from paint import *
 from copy import copy
 import matplotlib.pyplot as plt
 
 # mobilenet, vg16, inseption v3 (CNN)
-# 1 profile, RNN
-# RvNN
-# normalize
+# resNet
+# LSTM - experemental 
+# сетки для NLP 
+# использовать связь рядом стоящих рецепторов
+# возвращает в глубину
+# двунаправленая!
+
+# повышение качества
+# для предсказания
+# разные данные приводишь по разному к входными
+# прогоняешь
+# берешь среднее
+
+# посчитать для каждой ячейки уверенность
+# и на тех прогонах где было больше истинности
+# добавить в датасет и дообучить
+# те которые были правильные так и поставить
+# а те которые ошиблись ставить другие
+
+# делать пока есть изменения т.е. пока есть уверенные точки
 
 def main():
   print('Let\'s go!')
@@ -19,12 +36,12 @@ def main():
   # values точечные замены значений, задается как индекс ячейки: значение
   defNet = {
     'count': (5,1,5),
-    'border': (3000,50,-1500),
-    'center': (1000,0,-500)
+    'right': (3000,50,-1500),
+    'left': (1000,0,-500)
   }
   # начальная сетка
   net = copy(defNet)
-  # net['v'] = 0.1
+  # net["default"] = 0.1
   # правильная сетка
   correct = copy(defNet)
   correct['values'] = {

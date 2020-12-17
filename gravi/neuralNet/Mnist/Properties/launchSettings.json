@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Mnist": {
+      "commandName": "Project",
+      "commandLineArgs": "learn test_3 test_3"
+    }
+  }
+}

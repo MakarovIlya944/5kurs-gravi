@@ -1,8 +1,11 @@
-from solver import Solver
-from builder import Build
+from .solver import Solver
+from .builder import *
 from numpy.linalg import norm
-from numpy.polynomial.legendre import leggauss
-from log import Logger
+from .log import Logger
+
+from config import get_logger
+
+logger = get_logger(__name__)
 
 class Minimizator():
 
@@ -17,11 +20,15 @@ class Minimizator():
   def __init__(self, **params):
     gamma = params.get('gamma')
     if gamma:
-      self.gamma = Build.build(params=gamma)
-    self.net = Build.build(params=params.get('net'))
-    self.correct = Build.build(params=params.get('correct'))
+      self.gamma = complex_build(params=gamma)
     a = params.get('alpha')[0]
     self.alpha = a if a else 0
+    if params.get('dryrun'):
+      self.correct = params['correct']
+      self.net = params['net']
+    else:
+      self.net = complex_build(params=params.get('net'))
+      self.correct = complex_build(params=params.get('correct'))
 
     self.solver = Solver(params.get('receptors'), self.correct, self.alpha, self.gamma)
 
@@ -31,10 +38,9 @@ class Minimizator():
       calc.append(p)
     e = self.error(calc)
     i = 0
-    self.logger.n = maxSteps
     calc = self.solver.solve(self.net)
     e = self.error(calc)
-    self.logger.log(str(e))
+    logger.info('Error: ' + str(e))
     return self.net
 
   def error(self, calc):

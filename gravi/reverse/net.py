@@ -1,4 +1,8 @@
-from numpy import ndarray
+from numpy import ndarray,asarray
+from config import get_logger
+
+logger = get_logger(__name__)
+
 class Net():
   cells = ""
   border = (1000,1000,1000)
@@ -10,7 +14,8 @@ class Net():
   def __init__(self, count=(10,10,10), border=(1000,1000,1000), center=(0,0,0), v=0):
     self.n = count
     self.c = center
-    self.d = tuple([(border[i] - center[i])/count[i] for i in range(3)])
+    self.border = border
+    self.d = tuple([abs(border[i] - center[i])/count[i] for i in range(3)])
     self.cells = ndarray(count)
     for i in range(count[0]):
       for j in range(count[1]):
@@ -72,9 +77,18 @@ class Net():
 
     return (self.i, self.cells[self.i[0]][self.i[1]][self.i[2]])
 
+  def __len__(self):
+    l = 1
+    for i in self.n:
+      l *= i
+    return l
+
   def __str__(self):
     s = ''
     for i, m in enumerate(self.cells):
       s += 'zi:' + str(i) + '\n'
       s += str(m) + '\n'
     return s
+
+  def asarray(self):
+    return asarray(self.cells)

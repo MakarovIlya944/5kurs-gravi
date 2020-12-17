@@ -1,0 +1,22 @@
+[
+  {
+    "name": "11-25-16-10_thin_1-thin",
+    "config": "thin_1",
+    "dataset": "thin_small"
+  },
+  {
+    "name": "11-25-16-39_thin_2-thin",
+    "config": "thin_2",
+    "dataset": "thin_small"
+  },
+  {
+    "name": "11-25-17-55_thin_3-thin",
+    "config": "thin_3",
+    "dataset": "thin_small"
+  },
+  {
+    "name": "11-25-19-11_thin_4-thin",
+    "config": "thin_4",
+    "dataset": "thin_small"
+  }
+]

@@ -1,8 +1,11 @@
-from net import Net
-from numpy import pi, array, prod, reshape
+from .net import Net
+from numpy import pi, array, prod, reshape, save
 from numpy.linalg import norm, solve
 from numpy.polynomial.legendre import leggauss
 import copy
+from config import get_logger, log_config
+
+logger = get_logger(__name__)
 
 class Solver():
   receptors = []
@@ -34,8 +37,14 @@ class Solver():
       mesh *= i
     mesh /= 4 * pi
     self.mesh = mesh
+    logger.debug('calculating receptors dGz')
+    L = len(receptors)
+    l = int(L * log_config['solver']['dgz'])
+    self.dGz = []
     for i, r in enumerate(receptors):
       self.dGz.append(0)
+      if not i % l:
+        logger.debug(f'#{i}/{L} dGz {i/float(L)*100:.1f}%')
       for j, p in net:
         self.dGz[i] += self._dGz(r, j) * p
 
@@ -76,6 +85,9 @@ class Solver():
     A = []
     B = []
     jnet = copy.deepcopy(net)
+    l = int(K * K * log_config['solver']['solve'])
+    ll = 0
+    logger.debug(f'A: {K}x{K} b: {K}')
     for i, pi in net:
       for j, pj in jnet:
         a = sum([self._dGz(s,i,net) * self._dGz(s,j,jnet) for s in self.receptors])
@@ -88,12 +100,22 @@ class Solver():
         elif self.isGamma:
           a -= (self.gamma[i]+self.gamma[j])
         A.append(a)
-        # print(str(pi) + str(i) + str(pj) + str(j))
+        if ll % l == l - 1:
+          logger.debug(f'Combine matrix A {ll/float(K*K)*100:.1f}%')
+        ll += 1
       B.append(sum([ self._dGz(s,i,net)*self.dGz[k] for k,s in enumerate(self.receptors)]))
     A = array(A)
     A = A.reshape(int(K),int(K))
     B = array(B)
-    res = solve(A,B)
+    logger.debug(f'Begin solving SLAE')
+    try:
+      res = solve(A,B)
+    except Exception as ex:
+      with open('matrix.npy', 'wb') as f:
+        save(f, A)
+      with open('right.npy', 'wb') as f:
+        save(f, B)
+      raise ex
     for i, (I, p) in enumerate(net):
       net[I] = res[i]
     return res
