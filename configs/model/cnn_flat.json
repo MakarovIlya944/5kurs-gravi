@@ -5,12 +5,12 @@
   "type": "cnn",
   "shape": {
     "in": {
-      "w": 20,
-      "h": 20
+      "w": 50,
+      "h": 10
     },
     "out": {
-      "w": 20,
-      "h": 20
+      "w": 4,
+      "h": 4
     }
   },
   "trainDatasetPart": 0.9,

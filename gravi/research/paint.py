@@ -171,7 +171,7 @@ def prepare_matrix_show(A, x_arange=None, y_arange=None, text=False, vmax=None, 
     vmin = np.min(A)
   if text or not (x_arange is None) or not (y_arange is None):
     fig, ax = plt.subplots()
-    ax.imshow(A)
+    im = ax.imshow(A)
     if not (x_arange is None):
       k_step = 1
       ax.set_xticks(range(0, len(x_arange), k_step))
@@ -188,7 +188,10 @@ def prepare_matrix_show(A, x_arange=None, y_arange=None, text=False, vmax=None, 
       for i in range(len(A)):
         for j in range(len(A[0])):
             ax.text(j, i,"{0:.2f}".format(A[i][j]),
-                          ha="center", va="center", color="w")
+                          ha="center", va="center", color="w")  
+    # Create colorbar
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.ax.set_ylabel("solidity", rotation=-90, va="bottom")
     fig.tight_layout()
   else:
     plt.matshow(A,vmax=vmax,vmin=vmin)

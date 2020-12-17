@@ -120,7 +120,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
   dataset_config = Configurator.get_dataset_config(dataset_config)
   r_x = dataset_config['receptors']['x']
   r_y = dataset_config['receptors']['y']
-  r = (dataset_config['receptors']['x']['n'], dataset_config['receptors']['y']['n'])
+  r = (dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n'])
   r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
   r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
   receptors = []
@@ -129,8 +129,11 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
       receptors.append([float(x),float(y),0.0])
   receptors = np.asarray(receptors)
   s = dataset_config['net']['count']
+  def_net = dataset_config['net']
 
   if command == 'stat':
+    r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
+    r_x = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
     return {'r_x': r_x, 'r_y':r_y}, calc_stat(dataset_name)
   elif command == 'net':
     X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
@@ -138,7 +141,6 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     predict_one(d,X,Y,s)
     Y_pred = d['predicted']
 
-    def_net = dataset_config['net']
     def_net["default"] = 0.1
     correct = copy(def_net)
     correct['values'] = {}
@@ -148,7 +150,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
         for k,v in enumerate(Y[i][j]):
           correct['values'][(i,j,k)] = v
 
-    alpha=[1]
+    alpha=[0.1]
     gamma=None
     smile = min.Minimizator(net=def_net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
     net = smile.minimization().asarray()
@@ -195,7 +197,10 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     dGz = smile.solver.profile(net)
     trued = np.asarray(dGz).reshape(r)
 
-    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 2}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
+    trued = np.transpose(trued)
+    reversed = np.transpose(reversed)
+    predicted = np.transpose(predicted)
+    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
 
 def calc_stat(dataset_name, mode="avg"):
   X, Y, C = DataReader.read_folder('data/' + dataset_name)

@@ -169,4 +169,5 @@ def heatmaps(coords, true, pred, reverse, label='value'):
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
 
   fig.tight_layout()
+  # plt.savefig('solid.png')
   plt.show()
