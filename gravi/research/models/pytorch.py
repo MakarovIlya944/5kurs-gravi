@@ -1,3 +1,4 @@
+from numpy.core import shape_base
 from gravi.research.data import Configurator
 import torch
 import torch.nn as nn
@@ -23,6 +24,9 @@ class Net(nn.Module):
       x = self.relu(x)
     return x
 
+def reshape_final(x, shape):
+  return x.view(tuple([x.size()[0]] + list(shape)))
+
 class CNN_Net(nn.Module):
   """
   w = (w - k + 2p) / s + 1
@@ -39,39 +43,47 @@ class CNN_Net(nn.Module):
     }
   }
 
-  def __init__(self, layers):
+  def __init__(self, layers, shape_out=None):
     super(CNN_Net, self).__init__()
 
     self._layers = []
-    self.relu = nn.ReLU()
     rng = range(len(layers)-1)
     reshape = -1
     for i in rng:
-      if layers[i].get('type') and layers[i].get('type') == "cnn":
+      if not layers[i].get('type'):
+        continue
+      if layers[i].get('type') == "cnn":
         layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
-      elif layers[i].get('type') and layers[i].get('type') == "drop":
-        layer = nn.Dropout()
-      elif layers[i].get('type') and layers[i].get('type') == "reshape":
-        if layers[i].get('w') and layers[i].get('h'):
-          w = layers[i].get('w')
-          h = layers[i].get('h')
-          d = layers[i].get('d')
-          _layer = lambda x: torch.reshape(x, (w,h,d))
+      elif layers[i].get('type') == "drop":
+        layer = nn.Dropout(p=0.3)
+      elif layers[i].get('type') == "reshape":
+        if layers[i].get('x') and layers[i].get('y') and layers[i].get('z'):
+          _x = layers[i].get('x')
+          y = layers[i].get('y')
+          z = layers[i].get('z')
+          _layer = lambda x: x.view((_x,y,z))
         else:
-          _layer = lambda x: torch.reshape(x, (-1,))
+          _layer = lambda x: x.view(-1, self.num_flat_features(x))
         reshape = {i: _layer}
+        layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
       else:
         layer = nn.Linear(layers[i]['w'], layers[i+1]['w'])
-      try:
-        self._layers.append(layer)
-      except Exception:
-        pass
+      self._layers.append(layer)
     i = len(layers)-1
     if layers[i].get('type') and layers[i].get('type') == "cnn":
       layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
       self._layers.append(layer)
+    if shape_out:
+      reshape[len(layers)] = lambda x: reshape_final(x, shape_out)
     self.reshape = reshape
     self.layers = nn.ModuleList(self._layers)
+
+  def num_flat_features(self, x):
+      size = x.size()[1:]  # all dimensions except the batch dimension
+      num_features = 1
+      for s in size:
+          num_features *= s
+      return num_features
 
   def _conv_layer_set(self, in_c, out_c, params):
     conv = params['conv']
@@ -84,16 +96,17 @@ class CNN_Net(nn.Module):
     return conv_layer
   
   def forward(self, x):
-    if len(self.reshape) != 0:
-      n = list(self.reshape)[0]
-      for i in range(n):
-        x = self.layers[i](x)
-      x = self.reshape[n](x)
-      for i in range(n+1,len(self.layers)):
-        x = self.layers[i](x)
-    else:
-      for i in range(len(self.layers)):
-        x = self.layers[i](x)
+    rng = len(self.reshape) + len(self.layers)
+    rng = range(rng)
+    offset = 0
+    # logger.debug(f'data init shape: {x.shape}')
+    for i in rng:
+      if i in self.reshape:
+        x = self.reshape[i](x)
+        offset += 1
+      else:
+        x = self.layers[i - offset](x)
+      # logger.debug(f'data shape: {x.shape}')
     return x
 
 class ModelPyTorch():
@@ -105,7 +118,8 @@ class ModelPyTorch():
     global logger
     logger = get_logger(__name__, params['model_config_name'] + '.log')
     if params.get('type') and params['type'] == "cnn":
-      self.model = CNN_Net(params['layers'])
+      shape_out = (params['shape']['out']['z'],params['shape']['out']['x'],params['shape']['out']['y'])
+      self.model = CNN_Net(params['layers'], shape_out=shape_out)
     else:
       self.model = Net(params['layers'])
     if not is_predict:
@@ -115,7 +129,10 @@ class ModelPyTorch():
         self.allIters = True
       self.log_step = log_config['pytorch']
       self.criterion = nn.MSELoss()
-      self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
+      if type(params['lr']) == type(1.1):
+        self.optimizer = optim.SGD(self.model.parameters(), lr=params['lr'])
+      elif type(params['lr']) == type({}):
+        self.lr = params['lr']
       self.iteraions = params['iters']
       self.trainDatsetPart = params['trainDatasetPart']
 
@@ -130,6 +147,11 @@ class ModelPyTorch():
     l = torch.split(y, divideDataset)
     train_y = l[0]
     val_y = l[1]
+    if self.lr:
+      lr = self.lr['default']
+      dlr = self.lr['decrease']
+      nlr = self.lr['detente']
+      ilr = 0
     for t in range(self.iteraions):
       y_pred_train = self.model(train_x)
       loss_train = self.criterion(y_pred_train, train_y)
@@ -147,6 +169,13 @@ class ModelPyTorch():
         logger.debug(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
 
       # Zero gradients, perform a backward pass, and update the weights.
+      if self.lr:
+        self.optimizer = optim.SGD(self.model.parameters(), lr=lr)
+        lr *= dlr
+        ilr += 1
+        if ilr > nlr:
+          ilr = 0
+          lr = self.lr['default']
       self.optimizer.zero_grad()
       loss_train.backward()
       self.optimizer.step()

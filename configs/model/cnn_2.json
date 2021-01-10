@@ -4,8 +4,8 @@
   "batch": 100,
   "type": "cnn",
   "shape": {
-    "w": 20,
-    "h": 20
+    "x": 20,
+    "y": 20
   },
   "trainDatasetPart": 0.9,
   "layers": [

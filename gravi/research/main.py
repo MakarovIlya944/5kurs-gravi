@@ -22,7 +22,7 @@ def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
   if not model_params:
     model_params = Configurator.get_model_config(model_config_name)
     if model_params.get('type') and model_params['type'] == "cnn":
-      shape = [1,model_params['shape']['in']['w'],model_params['shape']['in']['h']]
+      shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
     else:
       tmp = model_params['layers'][0]['w']
       if tmp != len_i:
@@ -74,7 +74,7 @@ def predict(predict_name, is_save=False, net_index=None, model_index=None):
   shape = 'default'
   model_params = Configurator.get_model_config(predict_params[0]['config'])
   if model_params.get('type') and model_params['type'] == 'cnn':
-    shape = [1,model_params['shape']['w'],model_params['shape']['h']]
+    shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
     logger.debug("Change dataset shape")
 
   if net_index is None:
@@ -130,13 +130,18 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
   receptors = np.asarray(receptors)
   s = dataset_config['net']['count']
   def_net = dataset_config['net']
+  shape = 'default'
+  model_params = Configurator.get_model_config(model_config)
+  if model_params.get('type') and model_params['type'] == 'cnn':
+    shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
+    logger.debug("Change dataset shape")
 
   if command == 'stat':
     r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
     r_x = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
     return {'r_x': r_x, 'r_y':r_y}, calc_stat(dataset_name)
   elif command == 'net':
-    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape=shape)
     d = {'config':model_config, 'name':model_name}
     predict_one(d,X,Y,s)
     Y_pred = d['predicted']
@@ -173,7 +178,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     net = complex_build(params = def_net)
 
     predicted['values'] = {}
-    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor')
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor', shape=shape)
     d = {'config':model_config, 'name':model_name}
     predict_one(d,X,Y,s)
     Y = d['predicted']

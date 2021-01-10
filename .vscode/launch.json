@@ -20,7 +20,7 @@
       "args": [
         "learn",
         "cnn_flat",
-        "big_2_1000"
+        "cnn_2"
       ]
     },
     {
@@ -57,13 +57,13 @@
       "console": "integratedTerminal",
       "args": [
         "inspect",
-        "net",
+        "response",
         "--dataset-config",
-        "clean",
+        "cnn_2",
         "--dataset",
-        "points",
+        "cnn_2",
         // "-n","10",
-        "--model","12-15-22-33_clean_1-points","--model-config","clean_1"
+        "--model","01-10-21-22_cnn_flat-cnn_2","--model-config","cnn_flat"
       ]
     }
   ]
