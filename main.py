@@ -1,17 +1,13 @@
 from matplotlib.pyplot import loglog
 from gravi.research.main import *
 from gravi.research.paint import *
-from gravi.research.test import *
+from gravi.research.validate import *
 import sys
 from paint import *
 from config import *
 
 logger = get_logger('main')
 parsers = get_args_parser()
-
-def test(name):
-  # show_3d(name)
-  show_loss(name)
 
 def main():
   logger.info('Start: ' + ' '.join(sys.argv[1:]))
@@ -53,8 +49,8 @@ def main():
     else:
       predicted_data, X, Y, C = predict(predict_config, is_save=False, net_index=dataset_index, model_index=model_index)
     show_predict(predicted_data, model_index, dataset_index, show_type, show_3d, X, Y, C, is_save=save_image)
-  elif command == 'test':
-    test(sys.argv[2])
+  elif command == 'loss':
+    show_loss(sys.argv[2])
   elif command == 'inspect':
     args = vars(parsers["inspect"].parse_args())
     save_image = args['save']

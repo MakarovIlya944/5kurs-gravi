@@ -1,9 +1,9 @@
 {
-  "iters": 100,
+  "iters": 200,
   "lr": { 
-    "default" :0.1,
-    "detente": 50,
-    "decrease": 0.8
+    "default" :0.5,
+    "detente": 10,
+    "decrease": 0.9
   },
   "batch": 100,
   "type": "cnn",
