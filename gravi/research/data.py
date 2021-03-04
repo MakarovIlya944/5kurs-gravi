@@ -145,7 +145,7 @@ class DataCreator():
     for i in range(n):
       recs, x, y = self.create_receptors()
       data = self.create_data(recs, x, y)
-      for j, x, y, r, net in enumerate(data):
+      for j, (x, y, r, net) in enumerate(data):
         filename= os.path.abspath('.') + f'/data/{self.name}/{i}'
         if is_interpolated:
           z = interpolate(r, observe_x, observe_y)
