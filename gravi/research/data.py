@@ -1,3 +1,4 @@
+from copy import copy
 from os import name
 from ..reverse.builder import *
 from ..reverse.solver import Solver 
@@ -23,9 +24,15 @@ class DataCreator():
     self.net_random_params = params['net']
     self.receptors_random_params = params['receptors']
     self.observe_points = params.get('points')
+    self.create_mode = params.get('create_mode')
 
-  def create_pure_data(self, receptors):
-    net = center_build(self.randomize())
+  def create_pure_data(self, receptors, build_params=None):
+    if not build_params:
+      build_params = self.randomize()
+    if self.create_mode == "fill":
+      net = line_build(build_params)
+    else:
+      net = center_build(build_params)
     s = Solver(receptors=receptors)
     return s.profile(net), net
 
@@ -73,13 +80,57 @@ class DataCreator():
         receptors.append([_x,_y,0])
     return receptors, x, y
 
-  def create_data(self):
-    recs, x, y = self.create_receptors()
-    dGz, net = self.create_pure_data(recs)
-    for i, z in enumerate(dGz):
-      recs[i][2] = z
-    return x, y, recs,net
-    
+  def create_fill_params(self):
+    params = dict(self.net_random_params)
+
+    n = params['count']
+    bodies_per_line = params.get('bodies_per_line')
+    if not bodies_per_line:
+      raise KeyError(f"Config havent bodies_per_line config: {str(params)}")
+    if n[1] != 1:
+      raise KeyError(f"Net not flat: {str(n)}")
+
+    nets = []
+    # TODO fix 3d nets (not flat)
+    for i in range(n[2]):
+      tmp = [n[0]]
+      for j in range(bodies_per_line):
+        m = max(tmp)
+        d = randint(1, tmp.pop(tmp.index(m))-1)
+        tmp.append(d)
+        tmp.append(m - d)
+      DataCreator.logger.debug(tmp)
+      nets.append(tmp)
+
+    result = []
+    params['c_value'] = random() * params['c_value']
+    for i, raw in enumerate(nets):
+      offset = 0
+      for line in raw:
+        setting = copy(params)
+        setting['line_begin'] = [offset, 0, i]
+        setting['length'] = line
+        offset += line
+        result.append(setting)
+
+    return result
+
+  def create_data(self, recs, x, y):
+    result = []
+    if self.create_mode == "fill":
+      params = self.create_fill_params()
+      for p in params:
+        dGz, net = self.create_pure_data(recs, build_params=p)
+        for i, z in enumerate(dGz):
+          recs[i][2] = z
+        result.append((x, y, recs, net))
+    else:
+      dGz, net = self.create_pure_data(recs)
+      for i, z in enumerate(dGz):
+        recs[i][2] = z
+      result.append((x, y, recs, net))
+    return result
+
   def read_dataset(self, n):
     if self.observe_points:
       is_interpolated = True
@@ -92,26 +143,28 @@ class DataCreator():
     log_step = int(n * log_config['data_creation'])
     
     for i in range(n):
-      
-      filename= os.path.abspath('.') + f'/data/{self.name}/{i}'
-      x, y, r,net = self.create_data()
-      if is_interpolated:
-        z = interpolate(r, observe_x, observe_y)
-      else:
-        z = [el[2] for el in r]
-      with open(filename+'_in', 'w') as f:
-        j = 0
-        for _y in y:
-          for _x in x:
-            f.write(str(z[j]) + '\n')
-            j += 1
-      with open(filename + '_out', 'w') as f:
-        for p in net:
-          f.write(str(p[1]) + '\n')
-      with open(filename + '_out_config', 'w') as f:        
-        f.write(' '.join([str(k) for k in net.n]))
-      if not n % log_step:
-        self.logger.info(f'set #{i} created')
+      recs, x, y = self.create_receptors()
+      data = self.create_data(recs, x, y)
+      for j, x, y, r, net in enumerate(data):
+        filename= os.path.abspath('.') + f'/data/{self.name}/{i}'
+        if is_interpolated:
+          z = interpolate(r, observe_x, observe_y)
+        else:
+          z = [el[2] for el in r]
+        with open(filename+'_in', 'w') as f:
+          j = 0
+          for _y in y:
+            for _x in x:
+              f.write(str(z[j]) + '\n')
+              j += 1
+        with open(filename + '_out', 'w') as f:
+          for p in net:
+            f.write(str(p[1]) + '\n')
+        with open(filename + '_out_config', 'w') as f:
+          f.write(' '.join([str(k) for k in net.n]))
+        if not n % log_step:
+          self.logger.info(f'set #{i} created')
+      i += j
     return len(z), len(net)
 
   def save_predicted(predicted_data):

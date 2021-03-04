@@ -1,7 +1,8 @@
 import logging
 import argparse
 
-_log_format = f"%(asctime)s|%(levelname)s|%(name)s/%(filename)s/%(funcName)s|%(message)s"
+BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
+_log_format = f"\033[1;14m%(asctime)s|%(levelname)s|%(name)s/%(filename)s/%(funcName)s|%(message)s"
 
 def get_file_handler(name):
   file_handler = logging.FileHandler(name)
@@ -32,6 +33,8 @@ def get_args_parser():
   data_parser.add_argument('command', help='command')
   data_parser.add_argument('config', help='config name')
   data_parser.add_argument('n', help='dataset size', type=int)
+  data_parser.add_argument('--fill', dest="fill", action='store_true', required=False,
+                      help='generate dataset with smoothly distribution of bodies. By default solidity not smoothly')
   data_parser.add_argument('--name', dest="name", required=False,
                       help='optional dataset name. By default equal config name')
 

@@ -15,10 +15,11 @@ def main():
   if command == 'data':
     args = vars(parsers["data"].parse_args())
     config_name = args['config']
+    is_fill = args['fill']
     dataset_name = config_name
     if args.get('name'):
       dataset_name = args.get('name')
-    prepare_data(args['n'], dataset_name, config_name)
+    prepare_data(args['n'], dataset_name, config_name, is_fill=is_fill)
   elif command == 'learn':
     args = vars(parsers["learn"].parse_args())
     dataset_name = args['dataset']

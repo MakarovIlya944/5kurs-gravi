@@ -12,6 +12,21 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Main: data",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "data",
+        "--fill",
+        "--name",
+        "even",
+        "fill",
+        "10"
+      ]
+    },
+    {
       "name": "Main: learn",
       "type": "python",
       "request": "launch",
