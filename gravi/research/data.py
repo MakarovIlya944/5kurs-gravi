@@ -152,18 +152,16 @@ class DataCreator():
         else:
           z = [el[2] for el in r]
         with open(filename+'_in', 'w') as f:
-          j = 0
           for _y in y:
             for _x in x:
               f.write(str(z[j]) + '\n')
-              j += 1
         with open(filename + '_out', 'w') as f:
           for p in net:
             f.write(str(p[1]) + '\n')
         with open(filename + '_out_config', 'w') as f:
           f.write(' '.join([str(k) for k in net.n]))
         if not n % log_step:
-          self.logger.info(f'set #{i} created')
+          self.logger.info(f'set #{i+j} created')
       i += j
     return len(z), len(net)
 
