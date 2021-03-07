@@ -1,6 +1,7 @@
 from matplotlib.pyplot import loglog
 from gravi.research.main import *
 from gravi.research.paint import *
+from gravi.research.show import *
 from gravi.research.validate import *
 import sys
 from paint import *
@@ -52,6 +53,18 @@ def main():
     show_predict(predicted_data, model_index, dataset_index, show_type, show_3d, X, Y, C, is_save=save_image)
   elif command == 'loss':
     show_loss(sys.argv[2])
+  elif command == 'show':
+    args = vars(parsers["show"].parse_args())
+    save_image = args['save']
+    sub_command = args.get('sub')
+    index = args.get('n') or 0
+    dataset = args.get('dataset')
+    dataset_config = args.get('config')
+    filename = args.get('file')
+    if sub_command == 'net':
+      show_net(dataset_config,dataset,index,save_image)
+    elif sub_command == 'loss':
+      show_loss(filename)
   elif command == 'inspect':
     args = vars(parsers["inspect"].parse_args())
     save_image = args['save']

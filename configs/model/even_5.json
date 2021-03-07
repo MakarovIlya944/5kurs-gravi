@@ -1,0 +1,32 @@
+{
+  "iters": 500,
+  "lr":  { 
+    "default" :1.0,
+    "detente": 50,
+    "decrease": 0.5
+  },
+  "batch": 100,
+  "trainDatasetPart": 0.90,
+  "runAllIters": true,
+  "layers": [
+    {
+      "w": 500
+    },
+    {
+      "type": "lrelu",
+      "w": 500
+    },
+    {
+      "type": "sigmoid"
+    },
+    {
+      "type": "lrelu"
+    },
+    {
+      "w": 500
+    },
+    {
+      "w": 50
+    }
+  ]
+}

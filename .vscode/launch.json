@@ -51,6 +51,20 @@
       ]
     },
     {
+      "name": "Main: show",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "console": "integratedTerminal",
+      "args": [
+        "show",
+        "net",
+        "-n","0",
+        "--dataset","even",
+        "--dataset-config","fill"
+      ]
+    },
+    {
       "name": "Main: predict",
       "type": "python",
       "request": "launch",
@@ -72,13 +86,13 @@
       "console": "integratedTerminal",
       "args": [
         "inspect",
-        "response",
+        "stat",
         "--dataset-config",
-        "cnn_2",
+        "fill",
         "--dataset",
-        "cnn_2",
+        "even"
         // "-n","10",
-        "--model","01-10-21-22_cnn_flat-cnn_2","--model-config","cnn_flat"
+        // "--model","01-10-21-22_cnn_flat-cnn_2","--model-config","cnn_flat"
       ]
     }
   ]

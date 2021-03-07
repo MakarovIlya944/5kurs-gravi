@@ -2,7 +2,7 @@ import logging
 import argparse
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
-_log_format = f"\033[1;14m%(asctime)s|%(levelname)s|%(name)s/%(filename)s/%(funcName)s|%(message)s"
+_log_format = f"%(asctime)s|%(levelname)s|%(name)s/%(filename)s/%(funcName)s|%(message)s"
 
 def get_file_handler(name):
   file_handler = logging.FileHandler(name)
@@ -65,17 +65,30 @@ def get_args_parser():
   inspect_parser.add_argument('--save', action='store_true',dest='save',
                       help='save generated image instead of showing')
 
+  show_parser = subparsers.add_parser('show', help='Show some elements')
+  show_parser.add_argument('command', help='command')
+  show_parser.add_argument('sub', help='sub command')
+  show_parser.add_argument('--dataset-config',dest='config', required=False, help='dataset config name')
+  show_parser.add_argument('--dataset', dest="dataset", required=False, help='dataset name')
+  show_parser.add_argument('--file', dest="file", required=False, help='file name with learning loss info')
+  show_parser.add_argument('-n', type=int, default=0, required=False, help='net index in dataset, default 0')
+  # show_parser.add_argument('--model', required=False, help='model name to calculate predicted response')
+  # show_parser.add_argument('--model-config', required=False, help='model config to calculate predicted response')
+  show_parser.add_argument('--save', action='store_true',dest='save',
+                      help='save generated image instead of showing')
+
   return {
     "base": base_parser,
     "data":data_parser,
     "learn":learn_parser,
     "predict":predict_parser,
     "inspect":inspect_parser,
+    "show":show_parser,
   }
 
 log_config = {
     'solver': {'dgz': 0.5, 'solve': 0.3},
-    'data_creation': 0.05,
+    'data_creation': 0.1,
     'data_read': 100,
     'pytorch': 0.1
 }

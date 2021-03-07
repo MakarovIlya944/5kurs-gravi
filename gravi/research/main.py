@@ -121,24 +121,26 @@ def predict_one(d,X,Y,shape):
   logger.info(f"ModelPyTorch model {d['name']} end predict")
 
 def inspect(dataset_name, command, dataset_config=None, index=0, model_name=False, model_config=False):
-  dataset_config = Configurator.get_dataset_config(dataset_config)
-  r_x = dataset_config['receptors']['x']
-  r_y = dataset_config['receptors']['y']
-  r = (dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n'])
-  r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
-  r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
-  receptors = []
-  for y in r_y:
-    for x in r_x:
-      receptors.append([float(x),float(y),0.0])
-  receptors = np.asarray(receptors)
-  s = dataset_config['net']['count']
-  def_net = dataset_config['net']
-  shape = 'default'
-  model_params = Configurator.get_model_config(model_config)
-  if model_params.get('type') and model_params['type'] == 'cnn':
-    shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
-    logger.debug("Change dataset shape")
+  if dataset_config:
+    dataset_config = Configurator.get_dataset_config(dataset_config)
+    r_x = dataset_config['receptors']['x']
+    r_y = dataset_config['receptors']['y']
+    r = (dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n'])
+    r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
+    r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
+    receptors = []
+    for y in r_y:
+      for x in r_x:
+        receptors.append([float(x),float(y),0.0])
+    receptors = np.asarray(receptors)
+    s = dataset_config['net']['count']
+    def_net = dataset_config['net']
+    shape = 'default'
+  if dataset_config and model_config:
+    model_params = Configurator.get_model_config(model_config)
+    if model_params.get('type') and model_params['type'] == 'cnn':
+      shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
+      logger.debug("Change dataset shape")
 
   if command == 'stat':
     r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])

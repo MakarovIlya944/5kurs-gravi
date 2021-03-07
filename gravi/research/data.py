@@ -142,27 +142,30 @@ class DataCreator():
     self.logger.info(('creating interpolated dataset' if is_interpolated else 'creating dataset') + name)
     log_step = int(n * log_config['data_creation'])
     
-    for i in range(n):
+    i = 0
+    while i < n:
       recs, x, y = self.create_receptors()
       data = self.create_data(recs, x, y)
       for j, (x, y, r, net) in enumerate(data):
-        filename= os.path.abspath('.') + f'/data/{self.name}/{i}'
+        filename= os.path.abspath('.') + f'/data/{self.name}/'
         if is_interpolated:
           z = interpolate(r, observe_x, observe_y)
         else:
           z = [el[2] for el in r]
-        with open(filename+'_in', 'w') as f:
+        with open(filename+f'{i}_in', 'w') as f:
+          l = 0
           for _y in y:
             for _x in x:
-              f.write(str(z[j]) + '\n')
-        with open(filename + '_out', 'w') as f:
+              f.write(str(z[l]) + '\n')
+              l += 1
+        with open(filename + f'{i}_out', 'w') as f:
           for p in net:
             f.write(str(p[1]) + '\n')
-        with open(filename + '_out_config', 'w') as f:
+        with open(filename + f'{i}_out_config', 'w') as f:
           f.write(' '.join([str(k) for k in net.n]))
         if not n % log_step:
-          self.logger.info(f'set #{i+j} created')
-      i += j
+          self.logger.info(f'set #{i} created')
+        i += 1
     return len(z), len(net)
 
   def save_predicted(predicted_data):

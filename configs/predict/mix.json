@@ -1,0 +1,27 @@
+[
+  {
+    "name": "even_1",
+    "config": "even_1",
+    "dataset": "even"
+  },
+  {
+    "name": "even_2",
+    "config": "even_2",
+    "dataset": "even"
+  },
+  {
+    "name": "even_3",
+    "config": "even_3",
+    "dataset": "even"
+  },
+  {
+    "name": "even_4",
+    "config": "even_4",
+    "dataset": "even"
+  },
+  {
+    "name": "even_5",
+    "config": "even_5",
+    "dataset": "even"
+  }
+]

@@ -90,7 +90,7 @@ def center_build(params):
 
 def line_build(params):
   count = params.get('count') or (10,10,10)
-  center = array(params.get('line_begin'))
+  line_begin = array(params.get('line_begin'))
   length = array(params.get('length'))
   c_value = params.get('c_value')
   border = params.get('right') or (1000,1000,1000)
@@ -98,8 +98,8 @@ def line_build(params):
   v = params.get("default") or 0
 
   values = {}
-  for x in range(center[0], length):
-    values[(x,center[1],center[2])] = c_value
+  for x in range(line_begin[0], length + line_begin[0]):
+    values[(x,line_begin[1],line_begin[2])] = c_value
 
   n = Net(count=count,border=border,center=center,v=v)
   if values:

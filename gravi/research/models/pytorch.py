@@ -1,6 +1,7 @@
 from numpy.core import shape_base
 from gravi.research.data import Configurator
 import torch
+from json import dumps
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
@@ -12,16 +13,28 @@ class Net(nn.Module):
   def __init__(self, layers):
     super(Net, self).__init__()
     self._layers = []
-    self.relu = nn.ReLU()
     rng = range(len(layers)-1)
     for i in rng:
-      self._layers.append(nn.Linear(layers[i]['w'], layers[i+1]['w']))
+      try:
+        if layers[i].get('type') == "relu":
+          self._layers.append(nn.ReLU())
+        elif layers[i].get('type') == "tanh":
+          self._layers.append(nn.Tanh())
+        elif layers[i].get('type') == "sigmoid":
+          self._layers.append(nn.Sigmoid())
+        elif layers[i].get('type') == "lrelu":
+          self._layers.append(nn.LeakyReLU())
+        else:
+          self._layers.append(nn.Linear(layers[i]['w'], layers[i+1]['w']))
+      except KeyError as ex:
+        logger.error(f'i: {i} {dumps(layers[i])}')
+        logger.error(f'i+1: {i+1} {dumps(layers[i+1])}')
+        raise ex
     self.layers = nn.ModuleList(self._layers)
 
   def forward(self, x):
     for l in self.layers:
       x = l(x)
-      x = self.relu(x)
     return x
 
 def reshape_final(x, shape):
@@ -112,6 +125,7 @@ class CNN_Net(nn.Module):
 class ModelPyTorch():
   name = "pytorch"
   prev_loss = 1e+100
+  lr = None
 
   def __init__(self, params, is_predict=False):
     super().__init__()

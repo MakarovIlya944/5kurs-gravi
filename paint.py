@@ -124,8 +124,21 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 def func(x, pos):
     return "{:.2f}".format(x).replace("0.", ".").replace("1.00", "")
 
-def heatmaps(coords, true, pred, reverse, label='value'):
-  fig, ((ax),(ax2),(ax3)) = plt.subplots(1, 3)
+def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
+  num = (1 if not true is None else 0) + (1 if not pred is None else 0) + (1 if not reverse is None else 0)
+  ax_all = []
+  if num == 1:
+    fig, ax = plt.subplots()
+    ax_all.append(ax)
+  elif num == 2:
+    fig, ((ax),(ax2)) = plt.subplots(1, 2)
+    ax_all.append(ax)
+    ax_all.append(ax2)
+  elif num == 3:
+    fig, ((ax),(ax2),(ax3)) = plt.subplots(1, 3)
+    ax_all.append(ax)
+    ax_all.append(ax2)
+    ax_all.append(ax3)
   vmax = -1E-10
   vmin = 1E+10
   kx, ky = coords['kx'], coords['ky']
@@ -146,28 +159,33 @@ def heatmaps(coords, true, pred, reverse, label='value'):
   vmax = min(vmax)
   vmin = max(vmin)
 
+  ax_index = 0
   if not true is None:
     vmax = np.max(true)
     vmin = np.min(true)
-    im, _ = heatmap(true, coords['x'], coords['y'], ax=ax,
+    im, _ = heatmap(true, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="true " + label)
+    ax_index += 1
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
   if not pred is None:
     vmax = np.max(pred)
     vmin = np.min(pred)
-    im, _ = heatmap(pred, coords['x'], coords['y'], ax=ax2,
+    im, _ = heatmap(pred, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="pred " + label)
+    ax_index += 1
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
   if not reverse is None:
     vmax = np.max(reverse)
     vmin = np.min(reverse)
-    im, _ = heatmap(reverse, coords['x'], coords['y'], ax=ax3,
+    im, _ = heatmap(reverse, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="reverse " + label)
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
 
   fig.tight_layout()
-  # plt.savefig('solid.png')
-  plt.show()
+  if save_filename:
+    plt.savefig(save_filename)
+  else:
+    plt.show()

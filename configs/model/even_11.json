@@ -1,0 +1,47 @@
+{
+  "iters": 280,
+  "lr": { 
+    "default" :0.5,
+    "detente": 10,
+    "decrease": 0.9
+  },
+  "batch": 100,
+  "trainDatasetPart": 0.90,
+  "runAllIters": true,
+  "layers": [
+    {
+      "w": 500
+    },
+    {
+      "type": "lrelu",
+      "w": 1024
+    },
+    {
+      "w": 1024
+    },
+    {
+      "type": "lrelu",
+      "w": 512
+    },
+    {
+      "w": 512
+    },
+    {
+      "type": "lrelu",
+      "w": 256
+    },
+    {
+      "w": 256
+    },
+    {
+      "type": "lrelu",
+      "w": 128
+    },
+    {
+      "w": 128
+    },
+    {
+      "w": 50
+    }
+  ]
+}
