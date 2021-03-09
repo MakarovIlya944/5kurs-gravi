@@ -33,7 +33,7 @@ class DataCreator():
       net = line_build(build_params)
     else:
       net = center_build(build_params)
-    s = Solver(receptors=receptors)
+    s = Solver(receptors=receptors,net=net)
     return s.profile(net), net
 
   def randomize(self):
@@ -115,20 +115,21 @@ class DataCreator():
 
     return result
 
-  def create_data(self, recs, x, y):
+  def create_data(self, receptors, x, y):
     result = []
     if self.create_mode == "fill":
       params = self.create_fill_params()
       for p in params:
+        recs = [copy(r) for r in receptors]
         dGz, net = self.create_pure_data(recs, build_params=p)
         for i, z in enumerate(dGz):
           recs[i][2] = z
         result.append((x, y, recs, net))
     else:
-      dGz, net = self.create_pure_data(recs)
+      dGz, net = self.create_pure_data(receptors)
       for i, z in enumerate(dGz):
-        recs[i][2] = z
-      result.append((x, y, recs, net))
+        receptors[i][2] = z
+      result.append((x, y, receptors, net))
     return result
 
   def read_dataset(self, n):
@@ -145,7 +146,7 @@ class DataCreator():
     i = 0
     while i < n:
       recs, x, y = self.create_receptors()
-      data = self.create_data(recs, x, y)
+      data = self.create_data(copy(recs), x, y)
       for j, (x, y, r, net) in enumerate(data):
         filename= os.path.abspath('.') + f'/data/{self.name}/'
         if is_interpolated:

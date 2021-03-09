@@ -1,10 +1,6 @@
 {
-  "iters": 280,
-  "lr": { 
-    "default" :0.5,
-    "detente": 10,
-    "decrease": 0.9
-  },
+  "iters": 2000,
+  "lr": 0.5,
   "batch": 100,
   "trainDatasetPart": 0.90,
   "runAllIters": true,
@@ -14,17 +10,17 @@
     },
     {
       "type": "lrelu",
-      "w": 2048
+      "w": 1024
     },
     {
-      "w": 2048
+      "w": 1024
     },
     {
       "type": "lrelu",
-      "w": 1024
+      "w": 512
     },
     {
-      "w": 1024
+      "w": 512
     },
     {
       "type": "lrelu",
@@ -39,6 +35,13 @@
     },
     {
       "w": 128
+    },
+    {
+      "type": "sigmoid",
+      "w": 64
+    },
+    {
+      "w": 64
     },
     {
       "w": 50

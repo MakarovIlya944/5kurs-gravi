@@ -90,5 +90,10 @@ class Net():
       s += str(m) + '\n'
     return s
 
+  # TODO fix bad hash
+  def __hash__(self) -> int:
+    portrait = self.cells.reshape(-1)
+    return int(''.join(['1' if abs(p) > 1e-4 else '0' for p in portrait]))
+
   def asarray(self):
     return asarray(self.cells)

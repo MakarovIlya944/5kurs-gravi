@@ -34,7 +34,8 @@ def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
         raise AssertionError(f'output dim in config {tmp} not equal {len_o}')
   model_params['model_config_name'] = model_config_name
   base_path = os.path.abspath('.') +  f'/models/'
-  date = '/' + datetime.now().strftime('%m-%d-%H-%M') + '_' + model_config_name + '-' + dataset_name
+  date = '/' + model_config_name + '-' + dataset_name
+  # date = '/' + datetime.now().strftime('%m-%d-%H-%M') + '_' + model_config_name + '-' + dataset_name
 
   mp = ModelPyTorch(model_params)
   logger.info("ModelPyTorch model begin learn")
@@ -107,13 +108,15 @@ def predict(predict_name, is_save=False, net_index=None, model_index=None):
   else:
     return predicted, X.detach().numpy(), Y.reshape(shape), C.detach().numpy().astype(int)
 
-def predict_one(d,X,Y,shape):
+def predict_one(d,X,Y,shape,shape_x=None):
   model_params = Configurator.get_model_config(d['config'])
   model_params['model_config_name'] = d['name']
   mp = ModelPyTorch(model_params, True)
   path = os.path.abspath('.') + '/models/pytorch/' + d['name']
   mp.load(path)
   logger.info(f"ModelPyTorch model {d['name']} begin predict")
+  if shape_x:
+    X = array(X).reshape(shape_x)
   _Y = mp.predict(X).detach().numpy()
   d['l2_diff'] = l.norm(Y - _Y)
   _Y = _Y.reshape(shape)
@@ -142,11 +145,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
       shape = [1,model_params['shape']['in']['x'],model_params['shape']['in']['y']]
       logger.debug("Change dataset shape")
 
-  if command == 'stat':
-    r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
-    r_x = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
-    return {'r_x': r_x, 'r_y':r_y}, calc_stat(dataset_name)
-  elif command == 'net':
+  if command == 'net':
     X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape=shape)
     d = {'config':model_config, 'name':model_name}
     predict_one(d,X,Y,s)
@@ -212,24 +211,3 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     reversed = np.transpose(reversed)
     predicted = np.transpose(predicted)
     return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
-
-def calc_stat(dataset_name, mode="avg"):
-  X, Y, C = DataReader.read_folder('data/' + dataset_name)
-  result = [0 for i in range(len(Y[0]))]
-  for y in Y:
-    for i in range(len(y)):
-      if y[i] != 0:
-        result[i] += 1
-  if mode == "avg":
-    for i in range(len(result)):
-      result[i] /= len(Y)
-  result = np.array_split(result,C[0][0])
-  result = [np.array_split(r,C[0][1]) for r in result]
-  t = []
-  for r in result:
-    t1 = []
-    for r1 in r:
-      t1.append(r1.tolist())
-    t.append(t1)
-  result = np.array(t)
-  return result

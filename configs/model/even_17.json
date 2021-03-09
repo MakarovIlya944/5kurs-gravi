@@ -1,0 +1,15 @@
+{
+  "iters": 700,
+  "lr": 0.1,
+  "batch": 100,
+  "trainDatasetPart": 0.90,
+  "runAllIters": true,
+  "layers": [
+    {
+      "w": 500
+    },
+    {
+      "w": 50
+    }
+  ]
+}

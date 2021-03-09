@@ -23,7 +23,7 @@
         "--name",
         "even",
         "fill",
-        "10"
+        "20"
       ]
     },
     {
@@ -34,8 +34,8 @@
       "console": "integratedTerminal",
       "args": [
         "learn",
-        "cnn_flat",
-        "cnn_2"
+        "cnn_flat_6",
+        "even"
       ]
     },
     {
@@ -58,10 +58,11 @@
       "console": "integratedTerminal",
       "args": [
         "show",
-        "net",
-        "-n","0",
-        "--dataset","even",
-        "--dataset-config","fill"
+        "response",
+        "--dataset","even_big",
+        "--dataset-config","fill",
+        "--model","03-09-14-21_even_17-even_big",
+        "--model-config","even_17"
       ]
     },
     {
@@ -72,10 +73,11 @@
       "console": "integratedTerminal",
       "args": [
         "predict",
-        "cnn",
-        "-n","0",
-        "-m","0",
-        "-s","true"
+        "even"
+        // ,
+        // "-n","0",
+        // "-m","0",
+        // "-s","true"
       ]
     },
     {

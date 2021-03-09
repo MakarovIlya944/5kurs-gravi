@@ -60,11 +60,22 @@ def main():
     index = args.get('n') or 0
     dataset = args.get('dataset')
     dataset_config = args.get('config')
+    model = args.get('model')
+    model_config = args.get('modelconfig')
+    mode = args.get('mode')
     filename = args.get('file')
     if sub_command == 'net':
       show_net(dataset_config,dataset,index,save_image)
+    elif sub_command == 'pred':
+      show_predict_net(model_config,model,dataset_config,dataset,index,save_image)
     elif sub_command == 'loss':
-      show_loss(filename)
+      show_loss(filename, save_image)
+    elif sub_command == 'variation':
+      show_variation(dataset, save_image)
+    elif sub_command == 'stat':
+      show_stat(dataset_config,dataset,mode,save_image)
+    elif sub_command == 'response':
+      show_response(dataset_config,dataset,index,save_image)
   elif command == 'inspect':
     args = vars(parsers["inspect"].parse_args())
     save_image = args['save']

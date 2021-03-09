@@ -69,6 +69,14 @@ class CNN_Net(nn.Module):
         layer = self._conv_layer_set(layers[i]['in'], layers[i]['out'], layers[i])
       elif layers[i].get('type') == "drop":
         layer = nn.Dropout(p=0.3)
+      elif layers[i].get('type') == "relu":
+        layer = nn.ReLU()
+      elif layers[i].get('type') == "tanh":
+        layer = nn.Tanh()
+      elif layers[i].get('type') == "sigmoid":
+        layer = nn.Sigmoid()
+      elif layers[i].get('type') == "lrelu":
+        layer = nn.LeakyReLU()
       elif layers[i].get('type') == "reshape":
         if layers[i].get('x') and layers[i].get('y') and layers[i].get('z'):
           _x = layers[i].get('x')
@@ -119,7 +127,7 @@ class CNN_Net(nn.Module):
         offset += 1
       else:
         x = self.layers[i - offset](x)
-      # logger.debug(f'data shape: {x.shape}')
+      # logger.debug(f'#{i} data shape: {x.shape}')
     return x
 
 class ModelPyTorch():

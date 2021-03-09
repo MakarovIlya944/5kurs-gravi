@@ -1,7 +1,7 @@
 {
-  "iters": 280,
+  "iters": 300,
   "lr": { 
-    "default" :0.5,
+    "default" :0.9,
     "detente": 10,
     "decrease": 0.9
   },
@@ -14,17 +14,10 @@
     },
     {
       "type": "lrelu",
-      "w": 2048
+      "w": 512
     },
     {
-      "w": 2048
-    },
-    {
-      "type": "lrelu",
-      "w": 1024
-    },
-    {
-      "w": 1024
+      "w": 512
     },
     {
       "type": "lrelu",
