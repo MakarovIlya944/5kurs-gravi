@@ -1,0 +1,101 @@
+{
+  "iters": 500,
+  "lr": { 
+    "default" :0.5,
+    "detente": 20,
+    "decrease": 0.9
+  },
+  "batch": 100,
+  "type": "cnn",
+  "shape": {
+    "in": {
+      "x": 10,
+      "y": 50
+    },
+    "out": {
+      "x": 10,
+      "y": 1,
+      "z": 5
+    }
+  },
+  "trainDatasetPart": 0.9,
+  "layers": [
+    {
+      "type": "cnn",
+      "in": 1,
+      "out": 16,
+      "conv": {
+        "k": [3,4],
+        "s": [1,2],
+        "p": [0,0]
+      },
+      "pool": {
+        "k": 3,
+        "s": 1,
+        "p": 1
+      }
+    },
+    {
+      "type": "cnn",
+      "in": 16,
+      "out": 32,
+      "conv": {
+        "k": 3,
+        "s": 1,
+        "p": 1
+      },
+      "pool": {
+        "k": [2,6],
+        "s": [2,2],
+        "p": [0,0]
+      }
+    },
+    {
+      "type": "cnn",
+      "in": 32,
+      "out": 64,
+      "conv": {
+        "k": [1,1],
+        "s": [3,3],
+        "p": [0,0]
+      },
+      "pool": {
+        "k": 3,
+        "s": 1,
+        "p": 1
+      }
+    },
+    {
+      "type": "reshape",
+      "w": 512
+    },
+    {
+      "type": "lrelu",
+      "w": 256
+    },
+    {
+      "type": "linear",
+      "w": 256
+    },
+    {
+      "type": "sigmoid",
+      "w": 128
+    },
+    {
+      "type": "linear",
+      "w": 128
+    },
+    {
+      "type": "tanh",
+      "w": 64
+    },
+    {
+      "type": "linear",
+      "w": 64
+    },
+    {
+      "type": "linear",
+      "w": 50
+    }
+  ]
+}

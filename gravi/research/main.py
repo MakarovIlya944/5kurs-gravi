@@ -207,7 +207,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     dGz = smile.solver.profile(net)
     trued = np.asarray(dGz).reshape(r)
 
-    trued = np.transpose(trued)
-    reversed = np.transpose(reversed)
-    predicted = np.transpose(predicted)
-    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
+    # trued = np.transpose(trued)
+    # reversed = np.transpose(reversed)
+    # predicted = np.transpose(predicted)
+    return {'x': r_y, 'y':r_x, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }

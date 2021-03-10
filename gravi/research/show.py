@@ -140,7 +140,7 @@ def show_loss(name:str, save_image):
             ncol=2, mode="expand", borderaxespad=0.)
     if save_image:
         name = name.replace('.log','.png')
-        plt.savefig(f'loss_{name}')
+        plt.savefig(f'loss_{name}',dpi=300)
     else:
         plt.show()
 
@@ -162,6 +162,6 @@ def show_variation(dataset, save_image):
     if save_image:
         filename = f'{dataset}_variation.png'
     if filename:
-        plt.savefig(filename)
+        plt.savefig(filename,dpi=300)
     else:
         plt.show()

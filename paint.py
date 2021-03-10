@@ -186,6 +186,6 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
 
   fig.tight_layout()
   if save_filename:
-    plt.savefig(save_filename)
+    plt.savefig(save_filename,dpi=300)
   else:
     plt.show()

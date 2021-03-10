@@ -1,12 +1,17 @@
 [
   {
-      "name": "cnn_flat_4-even",
-      "config": "cnn_flat_4",
+      "name": "cnn_flat_6-even",
+      "config": "cnn_flat_6",
       "dataset": "even"
   },
   {
-      "name": "cnn_flat_4-even",
-      "config": "cnn_flat_4",
+      "name": "cnn_flat_7-even",
+      "config": "cnn_flat_7",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_8-even",
+      "config": "cnn_flat_8",
       "dataset": "even"
   }
 ]

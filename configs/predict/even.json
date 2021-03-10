@@ -5,13 +5,13 @@
         "dataset": "even"
     },
     {
-        "name": "even_25-even",
-        "config": "even_25",
+        "name": "even_24-even",
+        "config": "even_24",
         "dataset": "even"
     },
     {
-        "name": "even_24-even",
-        "config": "even_24",
+        "name": "even_25-even",
+        "config": "even_25",
         "dataset": "even"
     },
     {
@@ -27,6 +27,11 @@
     {
         "name": "even_28-even",
         "config": "even_28",
+        "dataset": "even"
+    },
+    {
+        "name": "even_30-even",
+        "config": "even_30",
         "dataset": "even"
     }
 ]
