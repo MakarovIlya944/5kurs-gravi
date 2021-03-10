@@ -13,5 +13,45 @@
       "name": "cnn_flat_8-even",
       "config": "cnn_flat_8",
       "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_9-even",
+      "config": "cnn_flat_9",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_10-even",
+      "config": "cnn_flat_10",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_11-even",
+      "config": "cnn_flat_11",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_12-even",
+      "config": "cnn_flat_12",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_13-even",
+      "config": "cnn_flat_13",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_13-even",
+      "config": "cnn_flat_13",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_14-even",
+      "config": "cnn_flat_14",
+      "dataset": "even"
+  },
+  {
+      "name": "cnn_flat_15-even",
+      "config": "cnn_flat_15",
+      "dataset": "even"
   }
 ]

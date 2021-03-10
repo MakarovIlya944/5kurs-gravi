@@ -1,3 +1,4 @@
+from copy import copy
 from gravi.reverse.builder import complex_build
 from gravi.research.main import predict_one
 from .data import  DataReader, Configurator
@@ -82,6 +83,49 @@ def show_response(dataset_config, dataset_name, index=0, save_image=False):
     if save_image:
         filename = label + '.png'
     heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1},trued,None,None,label=label,save_filename=filename)
+
+def show_reverse_net(dataset_config, dataset_name, index=0, save_image=False, alpha=0.1):
+    label = f'reverse_{dataset_name}_{dataset_config}_{index}'
+    dataset_config = Configurator.get_dataset_config(dataset_config)
+    r_x = dataset_config['receptors']['x']
+    r_y = dataset_config['receptors']['y']
+    r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
+    r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
+
+    alpha=[alpha]
+    gamma=None
+
+    receptors = []
+    for y in r_y:
+      for x in r_x:
+        receptors.append([float(x),float(y),0.0])
+    receptors = np.asarray(receptors)
+
+    def_net = dataset_config['net']
+
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape='default')
+    s = dataset_config['net']['count']
+    
+    def_net["default"] = 0
+    correct = copy(def_net)
+    correct['values'] = {}
+    Y = Y.detach().numpy().reshape(s)
+    for i in range(len(Y)):
+      for j in range(len(Y[i])):
+        for k,v in enumerate(Y[i][j]):
+          correct['values'][(i,j,k)] = v
+
+    smile = min.Minimizator(net=def_net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
+    net = smile.minimization().asarray()
+    reversed = net.reshape((s[0],s[2]))
+
+    r_x = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
+    r_y = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
+
+    filename = None
+    if save_image:
+        filename = label + '.png'
+    heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1},None,None,reversed,label=label,save_filename=filename)
 
 def show_nets(name, params):
     x,y,c = DataReader.read_folder('data/' + name)

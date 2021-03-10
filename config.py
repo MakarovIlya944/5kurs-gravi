@@ -67,16 +67,16 @@ def get_args_parser():
 
   show_parser = subparsers.add_parser('show', help='Show some elements')
   show_parser.add_argument('command', help='command')
-  show_parser.add_argument('sub', choices=['loss', 'net', 'pred', 'response', 'stat', 'variation'], help='sub command')
+  show_parser.add_argument('sub', choices=['loss', 'net', 'response', 'stat', 'variation'], help='sub command')
+  show_parser.add_argument('--mode', dest="mode", default='count', required=False, help='mode type: avg or count. default count')
+  show_parser.add_argument('--type', dest="viewType", choices=['reverse', 'predicted'], required=False, help='type of view net or response')
+  show_parser.add_argument('--file', dest="file", required=False, help='file name with learning loss info')
+  show_parser.add_argument('--alpha',type=float, dest="alpha", required=False, help='alpha coefficiet for reverse calculus')
   show_parser.add_argument('--model-config',dest='modelconfig', required=False, help='model config name')
   show_parser.add_argument('--model',dest='model', required=False, help='model name')
   show_parser.add_argument('--dataset-config',dest='config', required=False, help='dataset config name')
   show_parser.add_argument('--dataset', dest="dataset", required=False, help='dataset name')
-  show_parser.add_argument('--mode', dest="mode", default='count', required=False, help='mode type: avg or count. default count')
-  show_parser.add_argument('--file', dest="file", required=False, help='file name with learning loss info')
   show_parser.add_argument('-n', type=int, default=0, required=False, help='net index in dataset, default 0')
-  # show_parser.add_argument('--model', required=False, help='model name to calculate predicted response')
-  # show_parser.add_argument('--model-config', required=False, help='model config to calculate predicted response')
   show_parser.add_argument('--save', action='store_true',dest='save',
                       help='save generated image instead of showing')
 

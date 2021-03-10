@@ -57,17 +57,22 @@ def main():
     args = vars(parsers["show"].parse_args())
     save_image = args['save']
     sub_command = args.get('sub')
-    index = args.get('n') or 0
+    index = args.get('n')
     dataset = args.get('dataset')
+    alpha = args.get('alpha') or 0.1
+    viewType = args.get('viewType')
     dataset_config = args.get('config')
     model = args.get('model')
     model_config = args.get('modelconfig')
     mode = args.get('mode')
     filename = args.get('file')
     if sub_command == 'net':
-      show_net(dataset_config,dataset,index,save_image)
-    elif sub_command == 'pred':
-      show_predict_net(model_config,model,dataset_config,dataset,index,save_image)
+      if viewType == 'predicted':
+        show_predict_net(model_config,model,dataset_config,dataset,index,save_image)
+      elif viewType == 'reverse':
+        show_reverse_net(dataset_config,dataset,index,save_image,alpha=alpha)
+      else:
+        show_net(dataset_config,dataset,index,save_image)
     elif sub_command == 'loss':
       show_loss(filename, save_image)
     elif sub_command == 'variation':
