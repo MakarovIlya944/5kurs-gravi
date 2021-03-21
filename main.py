@@ -81,7 +81,10 @@ def main():
     elif sub_command == 'stat':
       show_stat(dataset_config,dataset,mode,save_image)
     elif sub_command == 'response':
-      show_response(dataset_config,dataset,index,save_image)
+      if viewType == 'profile':
+        show_profile(dataset_config, dataset, index, save_image)
+      else:
+        show_response(dataset_config,dataset,index,save_image)
   elif command == 'inspect':
     args = vars(parsers["inspect"].parse_args())
     save_image = args['save']
