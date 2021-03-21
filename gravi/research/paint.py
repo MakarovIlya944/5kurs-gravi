@@ -1,8 +1,10 @@
 from config import get_logger
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 import numpy as np
 from mpl_toolkits.mplot3d import axes3d, Axes3D
 import traceback
+rcParams.update({'font.size': 20})
 
 from numpy.core.records import array, get_remaining_size
 logger = get_logger(__name__)
@@ -96,7 +98,9 @@ def show_predict(predicted_data, model_index=None, dataset_index=None, paint_sho
     labels = [s['name'] for s in data]
     plt.bar(x,y,tick_label=labels)
   if is_save:
-    plt.savefig(f'model_{model_index}_dataset_{dataset_index}_paint_{paint_show}_{"3d" if paint_3d else ""}')
+    filename = f'model_{model_index}_dataset_{dataset_index}_paint_{paint_show}_{"3d" if paint_3d else ""}'
+    logger.info('Saving prediction '+ filename)
+    plt.savefig(filename)
   else:
     plt.show()
 

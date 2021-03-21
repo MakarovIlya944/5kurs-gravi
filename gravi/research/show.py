@@ -223,8 +223,8 @@ def show_loss(name:str, save_image):
             y_v.append(float(l[1][i+4:]))
             x.append(j)
             j+=1
-    plot(x,y_t, label='train_loss')
-    plot(x,y_v, label='val_loss')
+    plot(x,y_t, label='train_loss',linewidth = 12)
+    plot(x,y_v, label='val_loss',linewidth = 6)
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left',
             ncol=2, mode="expand", borderaxespad=0.)
     if save_image:
