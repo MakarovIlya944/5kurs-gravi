@@ -31,6 +31,8 @@ class DataCreator():
       build_params = self.randomize()
     if self.create_mode == "fill":
       net = line_build(build_params)
+    elif self.create_mode == 'circle':
+      net = circle_build(build_params)
     else:
       net = center_build(build_params)
     s = Solver(receptors=receptors,net=net)
@@ -142,6 +144,8 @@ class DataCreator():
   
     self.logger.info(('creating interpolated dataset' if is_interpolated else 'creating dataset') + name)
     log_step = int(n * log_config['data_creation'])
+    if log_step == 0:
+      log_step = 1
     
     i = 0
     while i < n:

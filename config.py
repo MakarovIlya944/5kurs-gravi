@@ -35,6 +35,8 @@ def get_args_parser():
   data_parser.add_argument('n', help='dataset size', type=int)
   data_parser.add_argument('--fill', dest="fill", action='store_true', required=False,
                       help='generate dataset with smoothly distribution of bodies. By default solidity not smoothly')
+  data_parser.add_argument('--circle', dest="circle", action='store_true', required=False,
+                      help='generate dataset with random circle center bodies')
   data_parser.add_argument('--name', dest="name", required=False,
                       help='optional dataset name. By default equal config name')
 
@@ -69,7 +71,7 @@ def get_args_parser():
   show_parser.add_argument('command', help='command')
   show_parser.add_argument('sub', choices=['loss', 'net', 'response', 'stat', 'variation'], help='sub command')
   show_parser.add_argument('--mode', dest="mode", default='count', required=False, help='mode type: avg or count. default count')
-  show_parser.add_argument('--type', dest="viewType", choices=['reverse', 'predicted'], required=False, help='type of view net or response')
+  show_parser.add_argument('--type', dest="viewType", choices=['reverse', 'predicted', 'profile'], required=False, help='type of view net or response')
   show_parser.add_argument('--file', dest="file", required=False, help='file name with learning loss info')
   show_parser.add_argument('--alpha',type=float, dest="alpha", required=False, help='alpha coefficiet for reverse calculus')
   show_parser.add_argument('--model-config',dest='modelconfig', required=False, help='model config name')

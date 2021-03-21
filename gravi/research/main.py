@@ -49,11 +49,13 @@ def learn(len_i, len_o, dataset_name, model_config_name, model_params=None):
     mp.save(base_path + mp.name + date)
     logger.info("ModelPyTorch model saved")
 
-def prepare_data(size, name, config_name, params=None, is_fill=None):
+def prepare_data(size, name, config_name, params=None, is_fill=None, is_circle=None):
   if not params:
     params = Configurator.get_dataset_config(config_name)
   if is_fill:
     params['create_mode'] = 'fill'
+  elif is_circle:
+    params['create_mode'] = 'circle'
   else:
     params['create_mode'] = 'center'
   params['name'] = name

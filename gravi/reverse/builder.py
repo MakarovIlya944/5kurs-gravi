@@ -1,3 +1,4 @@
+from numpy.linalg.linalg import norm
 from .net import Net
 from numpy import array
 
@@ -105,4 +106,24 @@ def line_build(params):
   if values:
     for k in values:
       n[k] = values[k]
+  return n
+
+def circle_build(params):
+  count = array(params.get('count') or (10,1,10))
+  center = count/2
+  radius = params.get('radius') or 2
+  if count[1] != 1:
+    raise IndexError("Circle build only flat(y=1) nets")
+  c_value = params.get('c_value')
+  right = params.get('right') or (1000,1000,1000)
+  left = params.get('left') or (0,0,0)
+  v = params.get("default") or 0
+
+  n = Net(count=count,border=right,center=left,v=v)
+
+  for x in range(count[0]):
+    for z in range(count[2]):
+      if norm(array([x,0.5,z])-center) <= radius:
+        n[(x,0,z)] = c_value
+
   return n

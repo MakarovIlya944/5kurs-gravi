@@ -124,6 +124,15 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 def func(x, pos):
     return "{:.2f}".format(x).replace("0.", ".").replace("1.00", "")
 
+def profile(x, y, label='value', save_filename=None):
+  plt.plasma()
+  plt.plot(x, y, label=label)
+  plt.legend()
+  if save_filename:
+    plt.savefig(save_filename)
+  else:
+    plt.show()
+
 def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   num = (1 if not true is None else 0) + (1 if not pred is None else 0) + (1 if not reverse is None else 0)
   ax_all = []

@@ -17,10 +17,11 @@ def main():
     args = vars(parsers["data"].parse_args())
     config_name = args['config']
     is_fill = args['fill']
+    is_circle = args['circle']
     dataset_name = config_name
     if args.get('name'):
       dataset_name = args.get('name')
-    prepare_data(args['n'], dataset_name, config_name, is_fill=is_fill)
+    prepare_data(args['n'], dataset_name, config_name, is_fill=is_fill, is_circle=is_circle)
   elif command == 'learn':
     args = vars(parsers["learn"].parse_args())
     dataset_name = args['dataset']

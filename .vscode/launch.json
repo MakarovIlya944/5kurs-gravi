@@ -19,11 +19,11 @@
       "console": "integratedTerminal",
       "args": [
         "data",
-        "--fill",
+        "--circle",
         "--name",
-        "even",
-        "fill",
-        "20"
+        "circle",
+        "circle",
+        "5"
       ]
     },
     {
@@ -59,10 +59,10 @@
       "args": [
         "show",
         "response",
-        "--dataset","even_big",
-        "--dataset-config","fill",
-        "--model","03-09-14-21_even_17-even_big",
-        "--model-config","even_17"
+        "--dataset","circle",
+        "--dataset-config","circle",
+        "-n","0",
+        "--type","profile"
       ]
     },
     {
