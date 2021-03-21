@@ -58,11 +58,12 @@
       "console": "integratedTerminal",
       "args": [
         "show",
-        "response",
+        "net",
         "--dataset","circle",
         "--dataset-config","circle",
-        "-n","0",
-        "--type","profile"
+        "-n","0"
+        // ,
+        // "--type","profile"
       ]
     },
     {

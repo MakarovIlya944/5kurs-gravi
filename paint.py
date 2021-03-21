@@ -172,7 +172,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   if not true is None:
     vmax = np.max(true)
     vmin = np.min(true)
-    im, _ = heatmap(true, coords['x'], coords['y'], ax=ax_all[ax_index],
+    im, _ = heatmap(true, coords['y'], coords['x'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="true " + label)
     ax_index += 1
@@ -180,7 +180,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   if not pred is None:
     vmax = np.max(pred)
     vmin = np.min(pred)
-    im, _ = heatmap(pred, coords['x'], coords['y'], ax=ax_all[ax_index],
+    im, _ = heatmap(pred, coords['y'], coords['x'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="pred " + label)
     ax_index += 1
@@ -188,7 +188,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   if not reverse is None:
     vmax = np.max(reverse)
     vmin = np.min(reverse)
-    im, _ = heatmap(reverse, coords['x'], coords['y'], ax=ax_all[ax_index],
+    im, _ = heatmap(reverse, coords['y'], coords['x'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=vmin, vmax=vmax,
                   cbarlabel="reverse " + label)
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)

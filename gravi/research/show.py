@@ -16,9 +16,9 @@ def show_net(dataset_config, dataset_name, index=0, save_image=False):
     dataset_config = Configurator.get_dataset_config(dataset_config)
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']
-    r = (dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n'])
-    r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
-    r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
+
+    r_x = range(dataset_config['net']['left'][0],dataset_config['net']['right'][0],(dataset_config['net']['right'][0] - dataset_config['net']['left'][0]) // dataset_config['net']['count'][0])
+    r_y = range(dataset_config['net']['left'][2],dataset_config['net']['right'][2],(dataset_config['net']['right'][2] - dataset_config['net']['left'][2]) // dataset_config['net']['count'][2])
 
     X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape='default')
     s = dataset_config['net']['count']
@@ -27,7 +27,7 @@ def show_net(dataset_config, dataset_name, index=0, save_image=False):
     filename = None
     if save_image:
         filename = label + '.png'
-    heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 10},Y,None,None,label=label,save_filename=filename)
+    heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1},Y,None,None,label=label,save_filename=filename)
 
 def show_predict_net(model_config, model_name, dataset_config, dataset_name, index=0, save_image=False):
     label = f'predict_{dataset_name}_{dataset_config}_{index}'
@@ -53,12 +53,12 @@ def show_profile(dataset_config, dataset_name, index=0, save_image=False):
     dataset_config = Configurator.get_dataset_config(dataset_config)
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']
-    r = (dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n'])
+    receptors_shape = [dataset_config['receptors']['y']['n'],dataset_config['receptors']['x']['n']]
     r_x = range(r_x['l'],r_x['r'],(r_x['r'] - r_x['l']) // r_x['n'])
     r_y = range(r_y['l'],r_y['r'],(r_y['r'] - r_y['l']) // r_y['n'])
 
-    alpha=[0.1]
-    gamma=None
+    # alpha=[0.1]
+    # gamma=None
 
     receptors = []
     for y in r_y:
@@ -66,27 +66,27 @@ def show_profile(dataset_config, dataset_name, index=0, save_image=False):
         receptors.append([float(x),float(y),0.0])
     receptors = np.asarray(receptors)
 
-    trued = dataset_config['net']
-    trued['values'] = {}
+    # trued = dataset_config['net']
+    # trued['values'] = {}
 
-    X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape='default')
-    s = dataset_config['net']['count']
-    for i,v in enumerate(Y[0]):
-      trued['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
-    trued = complex_build(params = trued)
-    smile = min.Minimizator(net=trued, receptors=receptors, correct=trued, alpha=alpha, gamma=gamma, dryrun=True)
-    # net = smile.minimization()
-    dGz = smile.solver.profile(trued)
-    response = np.transpose(np.asarray(dGz).reshape(r))
+    X,Y,C = DataReader.read_one('data/' + dataset_name, index,shape=receptors_shape)
+    X = X[0]
+    # for i,v in enumerate(Y[0]):
+    #   trued['values'][(i%s[0],(i%(s[0]*s[1]))//s[0],i//(s[0]*s[1]))] = v
+    # trued = complex_build(params = trued)
+    # smile = min.Minimizator(net=trued, receptors=receptors, correct=trued, alpha=alpha, gamma=gamma, dryrun=True)
+    # # net = smile.minimization()
+    # dGz = smile.solver.profile(trued)
+    # response = np.transpose(np.asarray(dGz).reshape(r))
 
-    j_y, n_y = 0, trued.c[1]
+    j_y, n_y = 0, dataset_config['net']['left'][1]
     for j, y in enumerate(r_y):
         if y > n_y:
             j_y = j
             break
     else:
         raise IndexError("Receptors not cover net(y-axe)")
-    y = response[j_y, :]
+    y = X[j_y, :]
 
     filename = None
     if save_image:
