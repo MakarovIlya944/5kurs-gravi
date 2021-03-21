@@ -153,7 +153,7 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     predict_one(d,X,Y,s)
     Y_pred = d['predicted']
 
-    def_net["default"] = 0.1
+    def_net["default"] = 0.01
     correct = copy(def_net)
     correct['values'] = {}
     Y = Y.detach().numpy().reshape(s)
@@ -167,13 +167,13 @@ def inspect(dataset_name, command, dataset_config=None, index=0, model_name=Fals
     smile = min.Minimizator(net=def_net, receptors=receptors, correct=correct, alpha=alpha, gamma=gamma)
     net = smile.minimization().asarray()
 
-    r_x = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
-    r_y = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
+    r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
+    r_x = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
 
     predicted = Y_pred.reshape((s[0],s[2]))
     trued = Y.reshape((s[0],s[2]))
     reversed = net.reshape((s[0],s[2]))
-    return {'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
+    return {'x': r_x, 'y':r_y, 'kx': 0.5, 'ky': 2}, {'reversed':reversed, 'trued':trued, 'predicted':predicted }
 
   elif command == 'response':
     def_net = dataset_config['net']

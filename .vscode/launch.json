@@ -89,13 +89,13 @@
       "console": "integratedTerminal",
       "args": [
         "inspect",
-        "stat",
+        "net",
         "--dataset-config",
-        "fill",
+        "fill_2",
         "--dataset",
-        "even"
-        // "-n","10",
-        // "--model","01-10-21-22_cnn_flat-cnn_2","--model-config","cnn_flat"
+        "fill_2",
+        "-n","14",
+        "--model","even_24-fill_2","--model-config","even_24"
       ]
     }
   ]

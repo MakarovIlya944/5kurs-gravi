@@ -17,8 +17,8 @@ def show_net(dataset_config, dataset_name, index=0, save_image=False):
     r_x = dataset_config['receptors']['x']
     r_y = dataset_config['receptors']['y']
 
-    r_x = range(dataset_config['net']['left'][0],dataset_config['net']['right'][0],(dataset_config['net']['right'][0] - dataset_config['net']['left'][0]) // dataset_config['net']['count'][0])
-    r_y = range(dataset_config['net']['left'][2],dataset_config['net']['right'][2],(dataset_config['net']['right'][2] - dataset_config['net']['left'][2]) // dataset_config['net']['count'][2])
+    r_y = range(dataset_config['net']['left'][0],dataset_config['net']['right'][0],(dataset_config['net']['right'][0] - dataset_config['net']['left'][0]) // dataset_config['net']['count'][0])
+    r_x = range(dataset_config['net']['left'][2],dataset_config['net']['right'][2],(dataset_config['net']['right'][2] - dataset_config['net']['left'][2]) // dataset_config['net']['count'][2])
 
     X,Y,C = DataReader.read_one('data/' + dataset_name, index, out_format='tensor',shape='default')
     s = dataset_config['net']['count']
@@ -27,7 +27,7 @@ def show_net(dataset_config, dataset_name, index=0, save_image=False):
     filename = None
     if save_image:
         filename = label + '.png'
-    heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1},Y,None,None,label=label,save_filename=filename)
+    heatmaps({'x': r_x, 'y':r_y, 'kx': 0.5, 'ky': 2},Y,None,None,label=label,save_filename=filename)
 
 def show_predict_net(model_config, model_name, dataset_config, dataset_name, index=0, save_image=False):
     label = f'predict_{dataset_name}_{dataset_config}_{index}'
@@ -164,13 +164,13 @@ def show_reverse_net(dataset_config, dataset_name, index=0, save_image=False, al
     net = smile.minimization().asarray()
     reversed = net.reshape((s[0],s[2]))
 
-    r_x = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
-    r_y = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
+    r_y = range(def_net['left'][0],def_net['right'][0],(def_net['right'][0] - def_net['left'][0]) // def_net['count'][0])
+    r_x = range(def_net['left'][2],def_net['right'][2],(def_net['right'][2] - def_net['left'][2]) // def_net['count'][2])
 
     filename = None
     if save_image:
         filename = label + '.png'
-    heatmaps({'x': r_x, 'y':r_y, 'kx': 1, 'ky': 1},None,None,reversed,label=label,save_filename=filename)
+    heatmaps({'x': r_x, 'y':r_y, 'kx': 0.5, 'ky': 2},None,None,reversed,label=label,save_filename=filename)
 
 def show_nets(name, params):
     x,y,c = DataReader.read_folder('data/' + name)

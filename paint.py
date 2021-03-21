@@ -153,8 +153,8 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None, for
   vmax = -1E-10
   vmin = 1E+10
   kx, ky = coords['kx'], coords['ky']
-  coords['x'] = range(coords['x'].start,coords['x'].stop,coords['x'].step * kx)
-  coords['y'] = range(coords['y'].start,coords['y'].stop,coords['y'].step * ky)
+  coords['x'] = range(coords['x'].start,coords['x'].stop,int(coords['x'].step * kx))
+  coords['y'] = range(coords['y'].start,coords['y'].stop,int(coords['y'].step * ky))
 
   if format == 'text':
     if not true is None:
@@ -195,7 +195,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None, for
   if not true is None:
     vmax = np.max(true)
     vmin = np.min(true)
-    im, _ = heatmap(true, coords['y'], coords['x'], ax=ax_all[ax_index],
+    im, _ = heatmap(true, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="true " + label)
     ax_index += 1
@@ -203,7 +203,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None, for
   if not pred is None:
     vmax = np.max(pred)
     vmin = np.min(pred)
-    im, _ = heatmap(pred, coords['y'], coords['x'], ax=ax_all[ax_index],
+    im, _ = heatmap(pred, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="pred " + label)
     ax_index += 1
@@ -211,7 +211,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None, for
   if not reverse is None:
     vmax = np.max(reverse)
     vmin = np.min(reverse)
-    im, _ = heatmap(reverse, coords['y'], coords['x'], ax=ax_all[ax_index],
+    im, _ = heatmap(reverse, coords['x'], coords['y'], ax=ax_all[ax_index],
                   cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="reverse " + label)
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)

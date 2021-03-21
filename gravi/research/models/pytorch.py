@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from config import get_logger, log_config
+from numpy import isnan
 
 logger = ''
 
@@ -185,6 +186,8 @@ class ModelPyTorch():
         logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
         break
       self.prev_loss = loss_val.item()
+      if isnan(self.prev_loss):
+        raise InterruptedError()
       if t % self.log_step == self.log_step - 1:
         logger.info(f'#{t} loss train:{loss_train.item()} val:{loss_val.item()}')
       else:
