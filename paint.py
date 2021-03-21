@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import json
+matplotlib.rcParams.update({'font.size': 20})
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="", **kwargs):
@@ -133,7 +135,7 @@ def profile(x, y, label='value', save_filename=None):
   else:
     plt.show()
 
-def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
+def heatmaps(coords, true, pred, reverse, label='value', save_filename=None, format='graphics'):
   num = (1 if not true is None else 0) + (1 if not pred is None else 0) + (1 if not reverse is None else 0)
   ax_all = []
   if num == 1:
@@ -154,6 +156,27 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   coords['x'] = range(coords['x'].start,coords['x'].stop,coords['x'].step * kx)
   coords['y'] = range(coords['y'].start,coords['y'].stop,coords['y'].step * ky)
 
+  if format == 'text':
+    if not true is None:
+      with open('true_' + save_filename, 'w') as f:
+        coords['x'] = [x for x in coords['x']]
+        coords['y'] = [y for y in coords['y']]
+        coords['data'] = [[el for el in t] for t in true]
+        json.dump(coords, f)
+    if not pred is None:
+      with open('pred_' + save_filename, 'w') as f:
+        coords['x'] = [x for x in coords['x']]
+        coords['y'] = [y for y in coords['y']]
+        coords['data'] = [[el for el in t] for t in pred]
+        json.dump(coords, f)
+    if not reverse is None:
+      with open('reverse_' + save_filename, 'w') as f:
+        coords['x'] = [x for x in coords['x']]
+        coords['y'] = [y for y in coords['y']]
+        coords['data'] = [[el for el in t] for t in reverse]
+        json.dump(coords, f)
+    return
+
   vmax = [0,0,0]
   vmin = [0,0,0]
   if not true is None:
@@ -165,15 +188,15 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
   if not reverse is None:
     vmax[2] = np.max(reverse)
     vmin[2] = np.min(reverse)
-  vmax = min(vmax)
-  vmin = max(vmin)
+  val_max = max(vmax)
+  val_min = min(vmin)
 
   ax_index = 0
   if not true is None:
     vmax = np.max(true)
     vmin = np.min(true)
     im, _ = heatmap(true, coords['y'], coords['x'], ax=ax_all[ax_index],
-                  cmap="PuOr", vmin=vmin, vmax=vmax,
+                  cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="true " + label)
     ax_index += 1
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
@@ -181,7 +204,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
     vmax = np.max(pred)
     vmin = np.min(pred)
     im, _ = heatmap(pred, coords['y'], coords['x'], ax=ax_all[ax_index],
-                  cmap="PuOr", vmin=vmin, vmax=vmax,
+                  cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="pred " + label)
     ax_index += 1
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
@@ -189,7 +212,7 @@ def heatmaps(coords, true, pred, reverse, label='value', save_filename=None):
     vmax = np.max(reverse)
     vmin = np.min(reverse)
     im, _ = heatmap(reverse, coords['y'], coords['x'], ax=ax_all[ax_index],
-                  cmap="PuOr", vmin=vmin, vmax=vmax,
+                  cmap="PuOr", vmin=val_min, vmax=val_max,
                   cbarlabel="reverse " + label)
     # annotate_heatmap(im, valfmt=matplotlib.ticker.FuncFormatter(func), size=7)
 

@@ -99,7 +99,7 @@ def main():
     params, values = inspect(dataset, sub_command, dataset_config=dataset_config, index=dataset_index,model_name=model_name,model_config=model_config)
     if sub_command == 'response':
       heatmaps(params,values['trued'],values['predicted'],values['reversed'])
-    elif sub_command == 'net':
+    elif sub_command == 'net':#, save_filename=f'{model_config}_{dataset_config}.txt', format='text'
       heatmaps(params,values['trued'],values['predicted'],values['reversed'])
     elif sub_command == 'stat':
       paint_solidity(values, params, is_save=save_image)
